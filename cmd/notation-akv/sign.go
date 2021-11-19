@@ -30,7 +30,7 @@ func runSign(ctx *cli.Context) error {
 		return err
 	}
 
-	signer, err := sign.GetSigner(req.Key)
+	signer, err := sign.GetSigner(req.KMSProfile)
 	if err != nil {
 		return err
 	}

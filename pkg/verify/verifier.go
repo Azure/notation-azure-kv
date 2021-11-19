@@ -11,7 +11,7 @@ import (
 	"github.com/notaryproject/notation-go-lib/signature/jws"
 )
 
-func GetVerifier(k KMSKeySuite) (notation.Verifier, error) {
+func GetVerifier(k KMSProfileSuite) (notation.Verifier, error) {
 	// core process
 	cfg, err := config.Load()
 	if err != nil {

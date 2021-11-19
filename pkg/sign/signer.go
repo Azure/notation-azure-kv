@@ -14,7 +14,7 @@ import (
 )
 
 // GetSigner returns an Azure Key Vault signer
-func GetSigner(k KMSKeySuite) (notation.Signer, error) {
+func GetSigner(k KMSProfileSuite) (notation.Signer, error) {
 	// core process
 	cfg, err := config.Load()
 	if err != nil {

@@ -9,11 +9,11 @@ type SignRequest struct {
 	Version     string               `json:"version"`
 	Descriptor  notation.Descriptor  `json:"descriptor"`
 	SignOptions notation.SignOptions `json:"signOptions"`
-	Key         KMSKeySuite          `json:"key"`
+	KMSProfile  KMSProfileSuite      `json:"kmsProfile"`
 }
 
-// KMSKeySuite is a named kms key suite with key id and type.
-type KMSKeySuite struct {
+// KMSProfileSuite is a named kms key profile with key id and type.
+type KMSProfileSuite struct {
 	Name       string `json:"name"`
 	PluginName string `json:"pluginName"`
 	ID         string `json:"id"`

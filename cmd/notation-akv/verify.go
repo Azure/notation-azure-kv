@@ -30,7 +30,7 @@ func runVerify(ctx *cli.Context) error {
 		return err
 	}
 
-	verifier, err := verify.GetVerifier(req.Key)
+	verifier, err := verify.GetVerifier(req.KMSProfile)
 	if err != nil {
 		return err
 	}
