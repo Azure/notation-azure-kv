@@ -3,7 +3,7 @@ package cloud
 import (
 	"strings"
 
-	"github.com/Azure/notation-akv/pkg/config"
+	"github.com/Azure/notation-azure-kv/pkg/config"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault/keyvaultapi"

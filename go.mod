@@ -1,4 +1,4 @@
-module github.com/Azure/notation-akv
+module github.com/Azure/notation-azure-kv
 
 go 1.17
 

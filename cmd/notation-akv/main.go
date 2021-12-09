@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/Azure/notation-akv/internal/version"
+	"github.com/Azure/notation-azure-kv/internal/version"
 
 	"github.com/urfave/cli/v2"
 )
@@ -11,7 +11,7 @@ import (
 func main() {
 	app := &cli.App{
 		Name:  "notation-akv",
-		Usage: "Notation - Notary V2 AKV plugin",
+		Usage: "Notation - Notary V2 Azure KV plugin",
 		// TODO(aramase) add version package
 		Version: version.GetVersion(),
 		Commands: []*cli.Command{

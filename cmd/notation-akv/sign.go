@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/Azure/notation-akv/pkg/sign"
+	"github.com/Azure/notation-azure-kv/pkg/sign"
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"

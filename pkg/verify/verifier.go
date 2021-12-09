@@ -3,8 +3,8 @@ package verify
 import (
 	"crypto/x509"
 
-	"github.com/Azure/notation-akv/pkg/cloud"
-	"github.com/Azure/notation-akv/pkg/config"
+	"github.com/Azure/notation-azure-kv/pkg/cloud"
+	"github.com/Azure/notation-azure-kv/pkg/config"
 
 	jwtazure "github.com/AzureCR/go-jwt-azure"
 	"github.com/notaryproject/notation-go-lib"

@@ -1,5 +1,5 @@
 # referenced from https://github.com/notaryproject/notation/blob/main/Makefile
-MODULE         = github.com/Azure/notation-akv
+MODULE         = github.com/Azure/notation-azure-kv
 COMMANDS       = notation-akv
 GIT_TAG        = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 BUILD_METADATA =

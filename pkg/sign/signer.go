@@ -3,8 +3,8 @@ package sign
 import (
 	"crypto/x509"
 
-	"github.com/Azure/notation-akv/pkg/cloud"
-	"github.com/Azure/notation-akv/pkg/config"
+	"github.com/Azure/notation-azure-kv/pkg/cloud"
+	"github.com/Azure/notation-azure-kv/pkg/config"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	jwtazure "github.com/AzureCR/go-jwt-azure"
