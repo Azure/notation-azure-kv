@@ -13,11 +13,11 @@ import (
 
 func GetVerifier(k KMSProfileSuite) (notation.Verifier, error) {
 	// core process
-	cfg, err := config.Load()
+	cfg, err := config.ParseConfig()
 	if err != nil {
 		return nil, err
 	}
-	client, err := cloud.NewAzureClient(cfg.Credentials)
+	client, err := cloud.NewAzureClient(cfg)
 	if err != nil {
 		return nil, err
 	}

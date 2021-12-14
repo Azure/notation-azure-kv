@@ -1,55 +1,41 @@
 package config
 
 import (
-	"encoding/json"
-	"os"
-	"path/filepath"
+	"github.com/kelseyhightower/envconfig"
+	"github.com/pkg/errors"
 )
 
-const (
-	// ApplicationName is the name of the application
-	ApplicationName = "notation-akv"
-	// FileName is the name of config file
-	FileName = "config.json"
-)
-
-// File reflects the config file.
-type File struct {
-	Credentials Credentials `json:"credentials"`
+// Config holds configuration from the env variables
+type Config struct {
+	ClientID     string `envconfig:"AZURE_CLIENT_ID"`
+	ClientSecret string `envconfig:"AZURE_CLIENT_SECRET"`
+	TenantID     string `envconfig:"AZURE_TENANT_ID"`
 }
 
-// Credentials is the credentials for the AKV
-type Credentials struct {
-	ClientID     string `json:"clientId"`
-	ClientSecret string `json:"clientSecret"`
-	TenantID     string `json:"tenantId"`
+// ParseConfig parses the configuration from env variables
+func ParseConfig() (*Config, error) {
+	c := new(Config)
+	if err := envconfig.Process("config", c); err != nil {
+		return c, err
+	}
+
+	// validate parsed config
+	if err := validateConfig(c); err != nil {
+		return nil, err
+	}
+	return c, nil
 }
 
-// Load reads the config from file
-func Load() (*File, error) {
-	fp, err := getFilePath()
-	if err != nil {
-		return nil, err
+// validateConfig validates the configuration
+func validateConfig(c *Config) error {
+	if c.TenantID == "" {
+		return errors.New("tenant ID is required")
 	}
-
-	file, err := os.Open(fp)
-	if err != nil {
-		return nil, err
+	if c.ClientID == "" {
+		return errors.New("client ID is required")
 	}
-	defer file.Close()
-	var config *File
-	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		return nil, err
+	if c.ClientSecret == "" {
+		return errors.New("client secret is required")
 	}
-	return config, nil
-}
-
-func getFilePath() (string, error) {
-	// init home directories
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", err
-	}
-	configDir = filepath.Join(configDir, ApplicationName)
-	return filepath.Join(configDir, FileName), nil
+	return nil
 }

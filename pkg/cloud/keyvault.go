@@ -10,21 +10,17 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/adal"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/pkg/errors"
 )
 
 // NewAzureClient returns a new Azure Key Vault client
-func NewAzureClient(creds config.Credentials) (keyvaultapi.BaseClientAPI, error) {
-	if creds.ClientID == "" || creds.ClientSecret == "" || creds.TenantID == "" {
-		return nil, errors.New("missing credentials")
-	}
+func NewAzureClient(c *config.Config) (keyvaultapi.BaseClientAPI, error) {
 	// TODO: add support for other clouds
 	azureEnv := azure.PublicCloud
-	oauthConfig, err := adal.NewOAuthConfig(azureEnv.ActiveDirectoryEndpoint, creds.TenantID)
+	oauthConfig, err := adal.NewOAuthConfig(azureEnv.ActiveDirectoryEndpoint, c.TenantID)
 	if err != nil {
 		return nil, err
 	}
-	spt, err := adal.NewServicePrincipalToken(*oauthConfig, creds.ClientID, creds.ClientSecret, strings.TrimSuffix(azureEnv.KeyVaultEndpoint, "/"))
+	spt, err := adal.NewServicePrincipalToken(*oauthConfig, c.ClientID, c.ClientSecret, strings.TrimSuffix(azureEnv.KeyVaultEndpoint, "/"))
 	if err != nil {
 		return nil, err
 	}
