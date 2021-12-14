@@ -4,8 +4,8 @@ import (
 	"github.com/notaryproject/notation-go-lib"
 )
 
-// SignRequest is the request to sign artifacts
-type SignRequest struct {
+// Request is the request to sign artifacts
+type Request struct {
 	Version     string               `json:"version"`
 	Descriptor  notation.Descriptor  `json:"descriptor"`
 	SignOptions notation.SignOptions `json:"signOptions"`

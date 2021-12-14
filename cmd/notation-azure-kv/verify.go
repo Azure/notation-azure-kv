@@ -25,7 +25,7 @@ func runVerify(ctx *cli.Context) error {
 	}
 
 	// parse request
-	var req verify.VerifyRequest
+	var req verify.Request
 	if err := json.Unmarshal([]byte(args.Get(0)), &req); err != nil {
 		return err
 	}

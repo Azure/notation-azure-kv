@@ -25,7 +25,7 @@ func runSign(ctx *cli.Context) error {
 	}
 
 	// parse request
-	var req sign.SignRequest
+	var req sign.Request
 	if err := json.Unmarshal([]byte(args.Get(0)), &req); err != nil {
 		return err
 	}
