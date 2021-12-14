@@ -4,7 +4,7 @@ before:
     - go mod tidy
 builds:
   - id: notation-azure-kv
-    dir: cmd/notation-akv
+    dir: cmd/notation-azure-kv
     binary: notation-azure-kv
     env:
       - CGO_ENABLED=0
