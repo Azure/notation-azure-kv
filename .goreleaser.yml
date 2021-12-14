@@ -1,0 +1,43 @@
+# Check the documentation at https://goreleaser.com for more options
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: notation-azure-kv
+    dir: cmd/notation-akv
+    binary: notation-azure-kv
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w -X {{.ModulePath}}/internal/version.Version={{.Version}} -X {{.ModulePath}}/internal/version.BuildMetadata={{.FullCommit}}
+release:
+  prerelease: auto
+  draft: true
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: '{{ incpatch .Version }}-next'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
