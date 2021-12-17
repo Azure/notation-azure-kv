@@ -1,6 +1,6 @@
-# notation-akv
+# notation-azure-kv
 
-Azure Provider for Notation CLI
+Azure Key Vault Provider for Notation CLI
 
 ## Contributing
 

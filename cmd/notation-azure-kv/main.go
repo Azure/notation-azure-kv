@@ -10,7 +10,7 @@ import (
 
 func main() {
 	app := &cli.App{
-		Name:  "notation-akv",
+		Name:  "notation-azure-kv",
 		Usage: "Notation - Notary V2 Azure KV plugin",
 		// TODO(aramase) add version package
 		Version: version.GetVersion(),

@@ -7,6 +7,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.22
 	github.com/Azure/go-autorest/autorest/adal v0.9.17
 	github.com/AzureCR/go-jwt-azure v0.0.0-20210928134644-4f31f5fd7906
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/notaryproject/notation-go-lib v1.0.0-alpha-1
 	github.com/pkg/errors v0.9.1
 	github.com/urfave/cli/v2 v2.3.0

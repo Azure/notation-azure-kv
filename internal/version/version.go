@@ -1,7 +1,7 @@
 package version
 
 var (
-	// Version shows the current notation-akv version, optionally with pre-release.
+	// Version shows the current notation-azure-kv version, optionally with pre-release.
 	Version = "v0.1.0-alpha.1"
 
 	// BuildMetadata stores the build metadata.
