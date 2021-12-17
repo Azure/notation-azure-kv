@@ -1,6 +1,34 @@
 # notation-akv
 
-Azure Provider for Notation CLI
+Azure Provider for the Notary v2 [Notation CLI](https://github.com/notaryproject/notation)
+
+## Getting Started:
+The following summarizes the steps to configure the Azure Key Vault notation plugin, configure gatekeeper, sign and verify a container image to Azure Kubernetes Service
+
+```bash
+# Configure notation with the Azure Key Vault plugin
+notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
+
+# Add signing and verification keys to the notation configuration policy
+notation key add --name $KEY_NAME --plugin azure-kv --id $KEY_ID --kms
+notation cert add --name $KEY_NAME --plugin azure-kv --id $KEY_ID --kms
+
+# Install ratify, with the verification key
+helm install ratify ratify/charts/ratify \
+        --set registryCredsSecret=regcred \
+        --set ratifyTestCert=$PUBLIC_KEY
+kubectl apply -f ./ratify/charts/ratify-gatekeeper/templates/constraint.yaml
+
+# Remotely sign with Azure Key Vault
+notation sign --key $KEY_NAME $IMAGE 
+
+# Deploy the image, with Gatekeeper, Ratify and Notary v2 validation of the signed image
+kubectl run net-monitor --image=$IMAGE -n demo
+```
+
+See [documentation for details on remote signing with Azure Key Vault, validating a deployment to AKS with Notation and Ratify](docs/nv2-sign-verify-aks.md).
+
+
 
 ## Contributing
 
