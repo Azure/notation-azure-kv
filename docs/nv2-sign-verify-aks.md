@@ -1,6 +1,6 @@
 # Notary v2 - Remote Signing and Verification with Gatekeeper, Ratify and AKS
 
-## Install the notation cli and akv plugin
+## Install the notation cli and azure-kv plugin
 
 > NOTE: These are temporary steps for early development. Officially released binaries will be available as the latest changes are merged.
 
@@ -15,7 +15,7 @@
     cp ./bin/notation ~/bin
     ```
 
-2. Build the notation-akv plugin for remote signing and verification
+2. Build the notation-azure-kv plugin for remote signing and verification
 
     > NOTE: Binaries will be built for download from [releases](https://github.com/Azure/notation-azure-kv/releases)
  
@@ -58,7 +58,7 @@ To ease the execution of the commands to complete this article, provide values f
 
     # Name of the Azure Kubernetes Service instance
     AKS_NAME=myaks
-    AKS_RG=${AKS_NAME}--aks-rg
+    AKS_RG=${AKS_NAME}-aks-rg
     ```
 
 2. Configure container image resources
@@ -107,7 +107,7 @@ To ease the execution of the commands to complete this article, provide values f
 1. Add the Plugin
 
     ```bash
-    notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-akv
+    notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
     ```
 
 2. List the available plugins
@@ -186,7 +186,7 @@ If needed, create an Azure Kubernetes Cluster
 
 In this step, Gatekeeper will be configured, enabling deployment policies.
 
-1. install Gatekeeper
+1. Install Gatekeeper
 
     ```azurecli-interactive
     helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
@@ -209,18 +209,18 @@ We're starting with the following basic Azure service configurations
 We'll now demo:
 
 1. Creating a cert in Azure Key Vault, used for remote signing
-   > NOTE: The cert can be a CA issues, or self-signed cert. It's really up to the the user whether they need revocation for their controlled environment scenarios
+   > NOTE: The cert can be a CA issued, or self-signed cert. It's really up to the the user whether they need revocation for their controlled environment scenarios
 2. Secure a namespace with images with trusted signatures
 3. Build an image
 4. Remotely sign the image with Azure Key Vault
 5. Deploy the image to AKS - with a success
 6. Attempt to deploy an unsigned image, and watch it fail.
 
-### Deploy an image
+## Deploy an image
 
-1. Create a namespace in AKS
+1. Create a namespace in AKS cluster
 
-    ```azurecli-interactive
+    ```bash
     kubectl create ns freezone
     ```
 
@@ -233,7 +233,7 @@ We'll now demo:
 3. List the running pods
 
     ```bash
-    kubectl get pods -A
+    kubectl get pods -n freezone
     ```
 
 ## Store the signing certificate in Azure Key Vault
