@@ -2,8 +2,8 @@ package verify
 
 import "github.com/notaryproject/notation-go-lib"
 
-// VerifyRequest is the request to verify a signature.
-type VerifyRequest struct {
+// Request is the request to verify a signature.
+type Request struct {
 	Version       string                 `json:"version"`
 	Signature     []byte                 `json:"signature"`
 	VerifyOptions notation.VerifyOptions `json:"verifyOptions"`
