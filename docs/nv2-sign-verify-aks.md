@@ -4,31 +4,29 @@
 
 > NOTE: These are temporary steps for early development. Officially released binaries will be available as the latest changes are merged.
 
-1. Build a version of notation that supports extensibility
+1. Build a version of notation extensibility support
 
-    > Note: See [feat: add initial framework for notation extensibility #142](https://github.com/notaryproject/notation/pull/142#issuecomment-996356691) for this PR merging into [notation/tree/feat-kv-extensibility](https://github.com/notaryproject/notation/tree/feat-kv-extensibility)
     ```bash
-    git clone git@github.com:aramase/notation.git -b plugin
+    git clone git@github.com:notaryproject/notation.git -b feat-kv-extensibility
     cd notation
     make build
+    
     # Copy the notation cli to your bin directory
     cp ./bin/notation ~/bin
     ```
 
-2. Build the notation-azure-kv plugin for remote signing and verification
+2. Install the notation-azure-kv plugin for remote signing and verification
 
-    > NOTE: Binaries will be built for download from [releases](https://github.com/Azure/notation-azure-kv/releases)
- 
     ```bash
-    # Move back to the root directory
-    cd ../
-    git clone git@github.com:Azure/notation-azure-kv.git
-    cd notation-azure-kv
-    make build
-
-    # Copy the plugin to the notation plugin directory
+    # Create a directory for the plugin
     mkdir -p ~/.config/notation/plugins/azure-kv
-    cp ./bin/notation-azure-kv ~/.config/notation/plugins/azure-kv
+    
+    # Download the plugin
+    curl -Lo notation-azure-kv.tar.gz \
+        https://github.com/Azure/notation-azure-kv/releases/download/v0.1.0-alpha.1/notation-azure-kv_0.1.0-alpha.1_Linux_amd64.tar.gz
+    
+    # Extract to the plugin directory    
+    tar xvzf notation-azure-kv.tar.gz -C ~/.config/notation/plugins/azure-kv notation-azure-kv
      ```
 
 ## Configure Environment Variables
