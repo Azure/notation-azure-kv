@@ -39,15 +39,15 @@ To ease the execution of the commands to complete this article, provide values f
     # location resources will be created in. During Preview of ORAS Artifact support, SouthCentralUS is the only supported region.
     LOCATION=southcentralus
 
-    # Name of the registry example: myregistry.azurecr.io
-    ACR_NAME=myregistry
+    # Name of the registry example: myregistry.azurecr.io this needs to be an individual name not already registered with the acr service
+    ACR_NAME=<MY ACR'S INDIVIDUAL NAME>
     # Name of the ACR Resource Group
     ACR_RG=${ACR_NAME}-acr-rg
     # Full domain of the ACR
     REGISTRY=$ACR_NAME.azurecr.io
     
-    # Name of the Azure Key Vault used to store the signing keys
-    AKV_NAME=myakv
+    # Name of the Azure Key Vault used to store the signing keys. The akv name needs to be individual and not registered on the akv service
+    AKV_NAME=<MY AKV'S INDIVIDUAL NAME>
     # Key name used to sign and verify
     KEY_NAME=wabbit-networks-io
     KEY_SUBJECT_NAME=wabbit-networks.io
