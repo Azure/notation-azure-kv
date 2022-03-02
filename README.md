@@ -26,7 +26,7 @@ notation sign --key $KEY_NAME $IMAGE
 kubectl run net-monitor --image=$IMAGE -n demo
 ```
 
-See [documentation for details on remote signing with Azure Key Vault, validating a deployment to AKS with Notation and Ratify](docs/nv2-sign-verify-aks.md).
+See [documentation for details on remote signing with Azure Key Vault, validating a deployment to AKS with Notation and Ratify, using a simple setup script.](docs/nv2-bicep.md).
 
 
 
