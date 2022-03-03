@@ -58,8 +58,8 @@ function getNotationProject {
     # Choose a binary
     timestamp=20220121081115
     commit=17c7607
-
-    # Check if ~/bin is there, if not create it (from scott PR)
+    
+    # Check if ~/bin is there, if not create it 
     [ -d ~/bin ] || mkdir ~/bin
 
     # Download Notation from pre-release
