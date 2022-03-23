@@ -22,16 +22,18 @@ function getLatestK8s {
 export PATH=$PATH:~/bin
 
 # Required user input for keyName and keySubjectName
-while read -p "Enter the key name used to sign and verify. I.E. contoso-io: " keyName && [[ -z "$keyName" ]] ; do
+while [[ -z "$keyName" ]] ; do
     echo ''
     echo "A keyname is required."
     echo ''
+    read -p "Enter the key name used to sign and verify. I.E. contoso-io: " keyName
 done
 
-while read -p "Enter the key subject name. I.E. contoso.com: " keySubjectName && [[ -z "$keySubjectName" ]] ; do
+while [[ -z "$keySubjectName" ]] ; do
     echo ''
     echo "A key subject name is required."
     echo ''
+    read -p "Enter the key subject name. I.E. contoso.com: " keySubjectName
 done
 
 # Environment variables / positional parameters and defaults.
@@ -80,7 +82,7 @@ function installNotationKvPlugin {
     echo "Setting up the Notation Keyvault Plugin..."
 
     # Create a directory for the plugin
-    mkdir -p ~/.config/notation/plugins/azure-kv
+    [ -d ~/.config/notation/plugins/azure-kv ] || mkdir -p ~/.config/notation/plugins/azure-kv
 
     # Download the plugin
     curl -Lo notation-azure-kv.tar.gz \
@@ -90,7 +92,11 @@ function installNotationKvPlugin {
     tar xvzf notation-azure-kv.tar.gz -C ~/.config/notation/plugins/azure-kv notation-azure-kv > /dev/null 2>&1
 
     # Add Azure Keyvault plugin to notation
-    notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
+    notation plugin ls | grep azure-kv > /dev/null
+    if [[ $? -eq 1 ]]
+    then 
+        notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
+    fi
 
     # List Notation plugins
     notation plugin ls
@@ -224,7 +230,9 @@ EOF
     # Use notation to add the key id to the kms keys and certs
     echo ''
     echo "Using Notation to add the key ID to Key Management Service..."
+    notation key remove $keyName > /dev/null 2>&1 
     notation key add --name $keyName --plugin azure-kv --id $keyID --kms
+    notation cert remove $keyName > /dev/null 2>&1 
     notation cert add --name $keyName --plugin azure-kv --id $keyID --kms
 
     # Checks and balances
@@ -258,7 +266,7 @@ function secureAKSwithRatify {
 }
 
 # Build Image and Sign it
-function bulidImageandSign {
+function buildImageandSign {
     echo ''
     echo "Testing signing of image..."
     # params
@@ -342,7 +350,7 @@ function setup {
     installGatekeeper
     createSigningCertforKV
     secureAKSwithRatify
-    bulidImageandSign
+    buildImageandSign
 }
 
 # Call setup function
