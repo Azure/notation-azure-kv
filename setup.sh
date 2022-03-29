@@ -11,7 +11,7 @@
 
 # Get the latest version of Kubernetes available in specified location
 function getLatestK8s {
-   versions=$(az aks get-versions -l $location -o tsv --query="orchestrators[].orchestratorVersion")
+   versions=$(az aks get-versions --location $location --output tsv --query="orchestrators[].orchestratorVersion")
    latestVersion=$(printf '%s\n' "${versions[@]}" |
    awk '$1 > m || NR == 1 { m = $1 } END { print m }')
 
