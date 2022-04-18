@@ -121,7 +121,7 @@ To ease the execution of the commands to complete this article, provide values f
     az group create --name $ACR_NAME --location $LOCATION
 
     az acr create \
-      --resource-group $ACR_NAME \
+      --resource-group $ACR_RG \
       --name $ACR_NAME \
       --zone-redundancy enabled \
       --sku Premium \
