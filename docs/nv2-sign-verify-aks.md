@@ -312,7 +312,7 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
 
     helm install ratify ratify/charts/ratify \
         --set registryCredsSecret=regcred \
-        --set ratifyTestCert=$PUBLIC_KEY
+        --set ratifyTestCert="$PUBLIC_KEY"
 
     kubectl apply -f ./ratify/charts/ratify-gatekeeper/templates/constraint.yaml
 
