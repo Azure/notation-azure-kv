@@ -377,10 +377,10 @@ The following steps cleanup the resources, resetting to an AKS with gatekeeper s
     rm ~/.config/notation/config.json
     ```
 
-1. Add the Plugin
+1. Remove the Plugin
 
     ```bash
-    notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
+    notation plugin remove azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
     ```
 
     ```bash
