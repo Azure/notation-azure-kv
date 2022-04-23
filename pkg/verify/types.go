@@ -1,6 +1,6 @@
 package verify
 
-import "github.com/notaryproject/notation-go-lib"
+import "github.com/notaryproject/notation-go"
 
 // Request is the request to verify a signature.
 type Request struct {

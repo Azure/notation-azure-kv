@@ -7,8 +7,8 @@ import (
 	"github.com/Azure/notation-azure-kv/pkg/config"
 
 	jwtazure "github.com/AzureCR/go-jwt-azure"
-	"github.com/notaryproject/notation-go-lib"
-	"github.com/notaryproject/notation-go-lib/signature/jws"
+	"github.com/notaryproject/notation-go"
+	"github.com/notaryproject/notation-go/signature/jws"
 )
 
 func GetVerifier(k KMSProfileSuite) (notation.Verifier, error) {
