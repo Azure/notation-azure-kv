@@ -1,5 +1,6 @@
 # Notary v2 - Remote Signing and Verification with Gatekeeper, Ratify and AKS - Using Bicep
 
+
 ## Install the notation cli and azure-kv plugin
 
 Starting from the root of this repo, make sure you are logged into the Azure CLI. This is a pre-requisite.
@@ -19,6 +20,7 @@ Once you have done the above, you are ready to deploy the required infrastructur
 
 1. Key Name: **Required** Key name used to sign and verify.
 2. Key Subject Name: **Required** Key subject name used to sign and verify.
+
 
 The script also supports overriding the following arguments, in the following order:
 1. Resource Group Name: This will be the resource group created in Azure. If you do not provide a value `myakv-akv-rg` will be used.
