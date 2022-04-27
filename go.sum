@@ -36,8 +36,8 @@ github.com/golang-jwt/jwt/v4 v4.3.0 h1:kHL1vqdqWNfATmA0FNMdmZNMyZI1U6O31X4rlIPoB
 github.com/golang-jwt/jwt/v4 v4.3.0/go.mod h1:/xlHOz8bRuivTWchD4jCa+NbatV+wEUSzwAxVc6locg=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
-github.com/notaryproject/notation-go v0.7.0-alpha.1.0.20220422005131-96df588f2f6d h1:qIylQ35uMNA2ZSgppopKTAFGJj34UelBJj5iCH2PgTY=
-github.com/notaryproject/notation-go v0.7.0-alpha.1.0.20220422005131-96df588f2f6d/go.mod h1:B/JbgikwvLoD9gFeWYhFtxIEozRoFAs9q31mj3vz1i4=
+github.com/notaryproject/notation-go v0.8.0-alpha.1 h1:YbrmzZiEdK2/XSqwkT0/qvACiJGy7AXSaMbzbQc2RmI=
+github.com/notaryproject/notation-go v0.8.0-alpha.1/go.mod h1:B/JbgikwvLoD9gFeWYhFtxIEozRoFAs9q31mj3vz1i4=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

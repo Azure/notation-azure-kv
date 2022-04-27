@@ -8,7 +8,7 @@ require (
 	github.com/Azure/go-autorest/autorest/adal v0.9.17
 	github.com/AzureCR/go-jwt-azure v0.0.0-20210928134644-4f31f5fd7906
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/notaryproject/notation-go v0.7.0-alpha.1.0.20220422005131-96df588f2f6d
+	github.com/notaryproject/notation-go v0.8.0-alpha.1
 	github.com/pkg/errors v0.9.1
 	github.com/urfave/cli/v2 v2.3.0
 )
