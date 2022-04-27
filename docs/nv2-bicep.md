@@ -1,4 +1,5 @@
-# Notary v2 - Remote Signing and Verification with Gatekeeper, Ratify and AKS
+# Notary v2 - Remote Signing and Verification with Gatekeeper, Ratify and AKS - Using Bicep
+
 
 ## Install the notation cli and azure-kv plugin
 
@@ -18,13 +19,15 @@ Once you have done the above, you are ready to deploy the required infrastructur
 
 
 1. Key Name: **Required** Key name used to sign and verify.
-2. Key Subject Name: **Required** Key subejct name used to sign and verify.
+2. Key Subject Name: **Required** Key subject name used to sign and verify.
+
 
 The script also supports overriding the following arguments, in the following order:
 1. Resource Group Name: This will be the resource group created in Azure. If you do not provide a value `myakv-akv-rg` will be used.
 2. Kubernetes Version: This is the version of Kubernetes control plane. If you do not provide a value, the latest Kubernetes version available for the provided location will be used.
 
-The default location for this script is `southcentralus`. As of right now, this is the only region that supports premium ACR with zone redundancy. 
+The default location for this script is `southcentralus`. As of March 2022, this is the only region that supports [ORAS Artifact][oras-artifact] support, which enables storing signatures and other types of references.  
+See [ACR Support for ORAS Artifacts][acr-oras-support] for more details.
 
 Bash without overrides
 
@@ -64,3 +67,6 @@ Bash
 
 ### Future todo list
 1. Add support for pre-existing infrastructure (as of right now, this stands everything up from scratch in a brand new resource group)
+
+[oras-artifact]:    https://github.com/oras-project/artifacts-spec
+[acr-oras-support]: https://aka.ms/acr/oras-artifacts
