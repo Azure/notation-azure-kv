@@ -8,8 +8,8 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	jwtazure "github.com/AzureCR/go-jwt-azure"
-	"github.com/notaryproject/notation-go-lib"
-	"github.com/notaryproject/notation-go-lib/signature/jws"
+	"github.com/notaryproject/notation-go"
+	"github.com/notaryproject/notation-go/signature/jws"
 	"github.com/pkg/errors"
 )
 

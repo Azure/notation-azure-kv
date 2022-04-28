@@ -1,7 +1,7 @@
 package sign
 
 import (
-	"github.com/notaryproject/notation-go-lib"
+	"github.com/notaryproject/notation-go"
 )
 
 // Request is the request to sign artifacts
