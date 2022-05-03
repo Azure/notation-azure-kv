@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/version"
@@ -23,7 +24,8 @@ func main() {
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
-		if _, ok := err.(*plugin.RequestError); !ok {
+		var reer plugin.RequestError
+		if !errors.As(err, &reer) {
 			err = plugin.RequestError{
 				Code: plugin.ErrorCodeGeneric,
 				Err:  err,
