@@ -27,3 +27,5 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 )
+
+replace github.com/notaryproject/notation-go => github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220503121406-a3bdec68597e

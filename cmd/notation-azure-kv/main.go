@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/version"
 
+	"github.com/notaryproject/notation-go/plugin"
 	"github.com/urfave/cli/v2"
 )
 
@@ -15,11 +17,20 @@ func main() {
 		// TODO(aramase) add version package
 		Version: version.GetVersion(),
 		Commands: []*cli.Command{
+			metadataCommand,
 			signCommand,
-			verifyCommand,
+			describeKeyCommand,
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
-		os.Stderr.WriteString(err.Error())
+		if _, ok := err.(*plugin.RequestError); !ok {
+			err = plugin.RequestError{
+				Code: plugin.ErrorCodeGeneric,
+				Err:  err,
+			}
+		}
+		data, _ := json.Marshal(err)
+		os.Stderr.Write(data)
+		os.Exit(1)
 	}
 }
