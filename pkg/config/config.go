@@ -1,8 +1,9 @@
 package config
 
 import (
+	"errors"
+
 	"github.com/kelseyhightower/envconfig"
-	"github.com/pkg/errors"
 )
 
 // Config holds configuration from the env variables

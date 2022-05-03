@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,7 +10,6 @@ import (
 	"github.com/Azure/notation-azure-kv/pkg/jws"
 	"github.com/notaryproject/notation-go/plugin"
 
-	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
 

@@ -2,6 +2,8 @@ package jws
 
 import (
 	"encoding/base64"
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
@@ -10,7 +12,6 @@ import (
 
 	"github.com/notaryproject/notation-go/plugin"
 	"github.com/notaryproject/notation-go/signature/jws"
-	"github.com/pkg/errors"
 )
 
 func Sign(req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureResponse, error) {
@@ -31,12 +32,12 @@ func Sign(req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureRespon
 
 	method, err := jws.SigningMethodFromKey(cert.PublicKey)
 	if err != nil {
-		return nil, errors.Errorf("unrecognized signing method: %w", err)
+		return nil, fmt.Errorf("unrecognized signing method: %w", err)
 	}
 
 	alg := keyvault.JSONWebKeySignatureAlgorithm(method.Alg())
 	if _, ok := jwtazure.SigningMethods[alg]; !ok {
-		return nil, errors.Errorf("unrecognized azure signing method: %v", alg)
+		return nil, fmt.Errorf("unrecognized azure signing method: %v", alg)
 	}
 
 	payload, err := base64.RawStdEncoding.DecodeString(req.Payload)
