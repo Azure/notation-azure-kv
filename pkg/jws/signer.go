@@ -40,11 +40,7 @@ func Sign(req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureRespon
 		return nil, fmt.Errorf("unrecognized azure signing method: %v", alg)
 	}
 
-	payload, err := base64.RawStdEncoding.DecodeString(req.Payload)
-	if err != nil {
-		return nil, err
-	}
-	sig, err := key.Sign(alg, payload)
+	sig, err := key.Sign(alg, []byte(req.Payload))
 	if err != nil {
 		return nil, requestErr(err)
 	}
