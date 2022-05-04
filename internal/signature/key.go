@@ -1,11 +1,11 @@
-package jws
+package signature
 
 import (
 	"context"
 	"crypto/x509"
 	"errors"
 
-	"github.com/Azure/notation-azure-kv/pkg/cloud"
+	"github.com/Azure/notation-azure-kv/internal/cloud"
 	"github.com/notaryproject/notation-go/plugin"
 )
 

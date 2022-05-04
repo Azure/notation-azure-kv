@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/Azure/notation-azure-kv/pkg/jws"
+	"github.com/Azure/notation-azure-kv/internal/signature"
 	"github.com/notaryproject/notation-go/plugin"
 
 	"github.com/urfave/cli/v2"
@@ -47,7 +47,7 @@ func runDescribeKey(ctx *cli.Context) error {
 		}
 	}
 
-	resp, err := jws.Key(ctx.Context, &req)
+	resp, err := signature.Key(ctx.Context, &req)
 	if err != nil {
 		var rerr plugin.RequestError
 		if errors.As(err, &rerr) {
