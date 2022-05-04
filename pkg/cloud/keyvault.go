@@ -9,29 +9,28 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Azure/notation-azure-kv/pkg/config"
-
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/Azure/go-autorest/autorest/adal"
-	"github.com/Azure/go-autorest/autorest/azure"
 )
 
-// NewAzureClient returns a new Azure Key Vault client
-func NewAzureClient(c *config.Config) (*keyvault.BaseClient, error) {
-	// TODO: add support for other clouds
-	azureEnv := azure.PublicCloud
-	oauthConfig, err := adal.NewOAuthConfig(azureEnv.ActiveDirectoryEndpoint, c.TenantID)
+// NewAzureClient returns a new Azure Key Vault client authorized in the order:
+// 1. Client credentials
+// 2. Client certificate
+// 3. Username password
+// 4. MSI
+// 5. Azure CLI 2.0
+func NewAzureClient() (*keyvault.BaseClient, error) {
+	authorizer, err := auth.NewAuthorizerFromEnvironment()
 	if err != nil {
-		return nil, err
-	}
-	spt, err := adal.NewServicePrincipalToken(*oauthConfig, c.ClientID, c.ClientSecret, strings.TrimSuffix(azureEnv.KeyVaultEndpoint, "/"))
-	if err != nil {
-		return nil, err
+		authorizer, err = auth.NewAuthorizerFromCLI()
+		if err != nil {
+			return nil, errors.New("Unable to authenticate with the Azure API, ensure you have your credentials set as environment variables, " +
+				"or you have logged in using the 'az' command line tool")
+		}
 	}
 
 	client := keyvault.New()
-	client.Authorizer = autorest.NewBearerAuthorizer(spt)
+	client.Authorizer = authorizer
 	return &client, nil
 }
 

@@ -6,16 +6,11 @@ import (
 	"errors"
 
 	"github.com/Azure/notation-azure-kv/pkg/cloud"
-	"github.com/Azure/notation-azure-kv/pkg/config"
 	"github.com/notaryproject/notation-go/plugin"
 )
 
 func newKey(keyID string) (*cloud.Key, error) {
-	cfg, err := config.ParseConfig()
-	if err != nil {
-		return nil, err
-	}
-	client, err := cloud.NewAzureClient(cfg)
+	client, err := cloud.NewAzureClient()
 	if err != nil {
 		return nil, err
 	}
