@@ -3,13 +3,11 @@ package jws
 import (
 	"crypto/x509"
 	"errors"
-	"fmt"
 
 	"github.com/Azure/notation-azure-kv/pkg/cloud"
 	"github.com/Azure/notation-azure-kv/pkg/config"
 	jwtazure "github.com/AzureCR/go-jwt-azure"
 	"github.com/notaryproject/notation-go/plugin"
-	"github.com/notaryproject/notation-go/signature/jws"
 )
 
 func newKey(keyID string) (*jwtazure.Key, error) {
@@ -43,12 +41,25 @@ func Key(req *plugin.DescribeKeyRequest) (*plugin.DescribeKeyResponse, error) {
 	if err != nil {
 		return nil, requestErr(err)
 	}
-	method, err := jws.SigningMethodFromKey(cert.PublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("unrecognized key method: %w", err)
+	var keySpec string
+	switch cert.SignatureAlgorithm {
+	case x509.SHA256WithRSAPSS, x509.SHA256WithRSA:
+		keySpec = "RSA_2048"
+	case x509.SHA384WithRSAPSS, x509.SHA384WithRSA:
+		keySpec = "RSA_3072"
+	case x509.SHA512WithRSAPSS, x509.SHA512WithRSA:
+		keySpec = "RSA_4096"
+	case x509.ECDSAWithSHA256:
+		keySpec = "EC_256"
+	case x509.ECDSAWithSHA384:
+		keySpec = "EC_384"
+	case x509.ECDSAWithSHA512:
+		keySpec = "EC_512"
+	default:
+		return nil, errors.New("unrecognized key spec: " + cert.SignatureAlgorithm.String())
 	}
 	return &plugin.DescribeKeyResponse{
-		KeyID:     req.KeyID,
-		Algorithm: method.Alg(),
+		KeyID:   req.KeyID,
+		KeySpec: keySpec,
 	}, nil
 }
