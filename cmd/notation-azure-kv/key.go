@@ -47,7 +47,7 @@ func runDescribeKey(ctx *cli.Context) error {
 		}
 	}
 
-	resp, err := jws.Key(&req)
+	resp, err := jws.Key(ctx.Context, &req)
 	if err != nil {
 		var rerr plugin.RequestError
 		if errors.As(err, &rerr) {
