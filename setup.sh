@@ -129,7 +129,7 @@ function spCreate {
     # Create the service principal, capturing the password
     export AZURE_CLIENT_SECRET=$(az ad sp create-for-rbac --skip-assignment --name $SP_NAME --query "password" --only-show-errors --output tsv) && echo "Azure Client Secret: $AZURE_CLIENT_SECRET"
 
-    # Capture the service srincipal appId
+    # Capture the service principal appId
     export AZURE_CLIENT_ID=$(az ad sp list --display-name $SP_NAME --query "[].appId" --only-show-errors --output tsv) && echo "Azure Client ID: $AZURE_CLIENT_ID"
 
     # Capture the Azure Tenant ID
@@ -182,8 +182,14 @@ function installGatekeeper {
     echo ''
     echo "Configuring Gatekeeper on your AKS Cluster..."
 
-    # Add gatekeeper repo to Helm
-    helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+    # Add Gatekeeper repo if it doesn't exist
+    if helm repo ls | grep gatekeeper ;
+    then
+        echo ''
+        echo "Gatekeeper repo already exists, installing gatekeepr now..."
+    else
+        helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+    fi
 
     # Install Gatekeeper on AKS Cluster
     helm install gatekeeper/gatekeeper  \
@@ -277,12 +283,61 @@ function buildImageandSign {
 
     # Build and Push a new image using ACR Tasks
     az acr build --registry $acrName -t $IMAGE $IMAGE_SOURCE
+    echo "Your image has been succesfully built and can be found at this address: $acrName.azurecr.io/$IMAGE"
+    echo ''
 
     # Sign the container image once built
-    notation sign --key $keyName $acrName.azurecr.io/$IMAGE
+    notation sign --key $keyName $acrName.azurecr.io/$IMAGE && echo "Image successfullly signed using $keyname"
+    echo ''
 
     # Deploy the newly signed image
+    echo "Now deploying the newly signed $ACR_REPO image in the demo namespace..."
     kubectl run net-monitor --image=$acrName.azurecr.io/$IMAGE --namespace demo
+    sleep 5
+    kubectl get pods -n demo
+
+    echo ''
+    echo " --Notation Build, Validate, and Deploy Complete --"
+}
+
+function notes {
+    echo ''
+
+    cat <<EOF > ./notes.txt
+    # Notation, Gatekeeper, Ratify, and AKS Notes
+
+    You have now successfully used Azure Container Registry to build a container image and Notation to sign the container image. Your AKS cluster has been configured with Gatekeeper and Ratify, which will help prevent unsigned images from running on your cluster in the demo namespace. 
+    
+    If you would like to continue to test signed deployments you may use the following commands:
+
+    # Export local environment variables
+    export AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+    export AZURE_CLIENT_ID=$AZURE_CLIENT_ID
+    export AZURE_TENANT_ID=$AZURE_TENANT_ID
+
+    export NOTATION_USERNAME=$(az keyvault secret show --name notationUsername --vault-name $keyVaultName --query 'value' --only-show-errors --output tsv)
+    export NOTATION_PASSWORD=$(az keyvault secret show --name notationPassword --vault-name $keyVaultName --query 'value' --only-show-errors --output tsv)
+
+    # Build and Push a new image using ACR Tasks
+    # Be sure to update imagename with your image name and imagetag with your preferred image tag
+    # Be sure to update image_source_here with the context for where your Dockerfiles live
+    # For more information on how ACR Build Tasks work, checkout the docs here: https://docs.microsoft.com/en-us/cli/azure/acr?view=azure-cli-latest#az-acr-build
+
+    az acr build --registry $acrName -t <imagename:imagetag> <image_source_here>
+
+    # Sign the container image using notation
+    notation sign --key $keyName $acrName.azurecr.io/<imagename:imagetag>
+
+    # Deploy the newly signed image to the demo namespace
+    kubectl run <name-of-pod> --image=$acrName.azurecr.io/<imagename:imagetag> --namespace demo
+
+    # When you are done with the resources you created, there is an easy to use clean up script availabe. This script will clean up all resources in your Azure subscription, as well as the service principal created, and the notation keys and certs locally created on your system.
+
+    ./cleanup.sh
+
+    You can access these notes anytime by opening the ./notes.txt file.
+EOF
+    cat ./notes.txt        
 }
 
 # Get outputs of Azure Deployment
@@ -296,12 +351,12 @@ function deployInfra {
     objectId=$(az ad signed-in-user show --query objectId --only-show-errors --output tsv)
 
     echo ''
-    echo "Deploying the required infrastructure..."
+    echo "Deploying the required infrastructure with the following..."
     ## TODO Ensure Following variables aren't blank
-    echo "Client ID $AZURE_CLIENT_ID"
-    echo "Client Secret $AZURE_CLIENT_SECRET"
-    echo "Tenant ID $AZURE_TENANT_ID"
-    echo "SP Object ID $AZURE_OBJECT_ID"
+    echo "Azure Client ID: $AZURE_CLIENT_ID"
+    echo "Azure Client Secret: $AZURE_CLIENT_SECRET"
+    echo "Azure Tenant ID: $AZURE_TENANT_ID"
+    echo "Azure SP Object ID: $AZURE_OBJECT_ID"
 
     # Deploy the infrastructure
     az deployment sub create --name $rgName \
@@ -351,6 +406,7 @@ function setup {
     createSigningCertforKV
     secureAKSwithRatify
     buildImageandSign
+    notes
 }
 
 # Call setup function

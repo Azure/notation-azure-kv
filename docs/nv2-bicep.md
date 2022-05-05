@@ -63,7 +63,7 @@ Bash
 1. ~~Add installGatekeeper Function~~
 2. ~~Add createSigningCertforKv Function~~
 3. ~~Add buildImageandSign Function~~
-4. ACR and AKS connection in Bicep
+4. ~~ACR and AKS connection in Bicep~~
 
 ### Future todo list
 1. Add support for pre-existing infrastructure (as of right now, this stands everything up from scratch in a brand new resource group)
