@@ -39,7 +39,7 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	}
 
 	// Digest.
-	hashed, err := computeHash(keySpec.HashFunc(), []byte(req.Payload))
+	hashed, err := computeHash(req.Hash.HashFunc(), []byte(req.Payload))
 	if err != nil {
 		return nil, err
 	}

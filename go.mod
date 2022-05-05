@@ -28,4 +28,4 @@ require (
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 )
 
-replace github.com/notaryproject/notation-go => github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220504131955-34705570b9ff
+replace github.com/notaryproject/notation-go => github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220505092658-4d98f6d049e2

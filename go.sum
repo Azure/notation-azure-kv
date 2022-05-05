@@ -38,8 +38,8 @@ github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrk
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220504131955-34705570b9ff h1:fcHgP9JF//7kNv3eZsvqvFaauPL3ztHO2g7OCHj1Ahw=
-github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220504131955-34705570b9ff/go.mod h1:B/JbgikwvLoD9gFeWYhFtxIEozRoFAs9q31mj3vz1i4=
+github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220505092658-4d98f6d049e2 h1:PTcP1DyXvYpJNENnRZZbYqgkOiUUjuBJ/Lh+57Zu9gw=
+github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220505092658-4d98f6d049e2/go.mod h1:B/JbgikwvLoD9gFeWYhFtxIEozRoFAs9q31mj3vz1i4=
 github.com/russross/blackfriday/v2 v2.0.1 h1:lPqVAte+HuHNfhJ/0LC98ESWRz8afy9tM/0RK8m9o+Q=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/shurcooL/sanitized_anchor_name v1.0.0 h1:PdmoCO6wvbs+7yrJyMORt4/BmY5IYyJwS/kOiWx8mHo=
