@@ -40,6 +40,11 @@ Bash with overrides
   ./setup.sh my-akvrg-override 1.23.3
   ```
 
+## After Running the Setup.sh script
+The `setup.sh` script will deploy all necessary infrastructure to run signed container images on your AKS cluster. This script will also validate the cluster is configured appropriately by using [ACR Build Tasks](https://docs.microsoft.com/en-us/cli/azure/acr?view=azure-cli-latest#az-acr-build) to build a sample container image, and then use Notation to sign the image. After the image has been signed, the script will then use `kubectl` to run the newly created and signed image in the `demo` namespace.
+
+If you'd like to build, sign, and run your own images, you will see a `notes.txt` file in your local working directory after the `setup.sh` script completes. This file will contain the necessary environment variables and instructions for how you can continue to build, sign, and run images in your newly configured AKS cluster.
+
 ### Clean up
 To easily clean up the resources created from the setup script (I.E Resource Group, KeyVault, Azure Container Registry, Azure Kubernetes Service, and Service Principal), you may run the following script:
 
