@@ -25,9 +25,18 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 			Err:  errors.New("invalid request input"),
 		}
 	}
+	if req.SignatureEnvelopeType != signature.MediaTypeJWSEnvelope {
+		return nil, plugin.RequestError{
+			Code: plugin.ErrorCodeValidation,
+			Err:  errors.New("unsupported signature envelope"),
+		}
+	}
 	key, err := newKey(req.KeyID)
 	if err != nil {
-		return nil, err
+		return nil, plugin.RequestError{
+			Code: plugin.ErrorCodeValidation,
+			Err:  err,
+		}
 	}
 	cert, err := key.Certificate(ctx)
 	if err != nil {
