@@ -6,8 +6,8 @@ import (
 	"errors"
 
 	"github.com/Azure/notation-azure-kv/internal/cloud"
-	"github.com/notaryproject/notation-go/spec/v1/plugin"
-	"github.com/notaryproject/notation-go/spec/v1/signature"
+	"github.com/notaryproject/notation-go/spec/plugin"
+	"github.com/notaryproject/notation-go/spec/signature"
 )
 
 func newKey(keyID string) (*cloud.Key, error) {
@@ -43,20 +43,20 @@ func Key(ctx context.Context, req *plugin.DescribeKeyRequest) (*plugin.DescribeK
 	}, nil
 }
 
-func certToKeySpec(alg x509.SignatureAlgorithm) signature.Key {
+func certToKeySpec(alg x509.SignatureAlgorithm) signature.KeyType {
 	switch alg {
 	case x509.SHA256WithRSAPSS, x509.SHA256WithRSA:
-		return "RSA_2048"
+		return signature.RSA_2048
 	case x509.SHA384WithRSAPSS, x509.SHA384WithRSA:
-		return "RSA_3072"
+		return signature.RSA_3072
 	case x509.SHA512WithRSAPSS, x509.SHA512WithRSA:
-		return "RSA_4096"
+		return signature.RSA_4096
 	case x509.ECDSAWithSHA256:
-		return "EC_256"
+		return signature.EC_256
 	case x509.ECDSAWithSHA384:
-		return "EC_384"
+		return signature.EC_384
 	case x509.ECDSAWithSHA512:
-		return "EC_512"
+		return signature.EC_512
 	}
 	return ""
 }

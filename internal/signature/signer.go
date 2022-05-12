@@ -3,7 +3,6 @@ package signature
 import (
 	"context"
 	"crypto"
-	"encoding/base64"
 	"errors"
 	"net/http"
 
@@ -14,12 +13,12 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
 
-	"github.com/notaryproject/notation-go/spec/v1/plugin"
-	"github.com/notaryproject/notation-go/spec/v1/signature"
+	"github.com/notaryproject/notation-go/spec/plugin"
+	"github.com/notaryproject/notation-go/spec/signature"
 )
 
 func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureResponse, error) {
-	if req == nil || req.KeyID == "" {
+	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.SignatureEnvelopeType == "" || req.Hash == "" {
 		return nil, plugin.RequestError{
 			Code: plugin.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
@@ -43,9 +42,9 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 		return nil, requestErr(err)
 	}
 
-	keySpec := certToKeySpec(cert.SignatureAlgorithm)
-	if keySpec == "" {
-		return nil, errors.New("unrecognized key spec: " + cert.SignatureAlgorithm.String())
+	alg := keySpecToAlg(req.KeySpec)
+	if alg == "" {
+		return nil, errors.New("unrecognized key spec: " + string(req.KeySpec))
 	}
 
 	// Digest.
@@ -55,7 +54,6 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	}
 
 	// Sign.
-	alg := keySpecToAlg(keySpec)
 	sig, err := key.Sign(ctx, alg, hashed)
 	if err != nil {
 		return nil, requestErr(err)
@@ -63,11 +61,9 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 
 	return &plugin.GenerateSignatureResponse{
 		KeyID:            req.KeyID,
-		Signature:        base64.RawStdEncoding.EncodeToString(sig),
-		SigningAlgorithm: string(alg),
-		CertificateChain: []string{
-			base64.RawStdEncoding.EncodeToString(cert.Raw),
-		},
+		Signature:        sig,
+		SigningAlgorithm: req.KeySpec.SignatureAlgorithm(),
+		CertificateChain: [][]byte{cert.Raw},
 	}, nil
 }
 
@@ -104,7 +100,7 @@ func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-func keySpecToAlg(k signature.Key) keyvault.JSONWebKeySignatureAlgorithm {
+func keySpecToAlg(k signature.KeyType) keyvault.JSONWebKeySignatureAlgorithm {
 	switch k {
 	case signature.RSA_2048:
 		return keyvault.PS256

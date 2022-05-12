@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/signature"
-	"github.com/notaryproject/notation-go/spec/v1/plugin"
+	"github.com/notaryproject/notation-go/spec/plugin"
 
 	"github.com/urfave/cli/v2"
 )
@@ -17,6 +17,14 @@ var signCommand = &cli.Command{
 	Name:   string(plugin.CommandGenerateSignature),
 	Usage:  "Sign artifacts with keys in Azure Key Vault",
 	Action: runSign,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:      "file",
+			Usage:     "request json file",
+			TakesFile: true,
+			Hidden:    true,
+		},
+	},
 }
 
 func runSign(ctx *cli.Context) error {
