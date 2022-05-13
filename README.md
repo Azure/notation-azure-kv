@@ -6,6 +6,11 @@ Azure Provider for the Notary v2 [Notation CLI](https://github.com/notaryproject
 The following summarizes the steps to configure the Azure Key Vault notation plugin, configure gatekeeper, sign and verify a container image to Azure Kubernetes Service
 
 ```bash
+# Sign in with Azure CLI.
+# Other authorization methods are also available.
+# See https://docs.microsoft.com/en-us/azure/developer/go/azure-sdk-authorizatio
+az login
+
 # Add signing and verification keys to the notation configuration policy
 notation key add --name $KEY_NAME --plugin azure-kv --id $KEY_ID
 notation cert add --name $KEY_NAME $CERT_PATH
