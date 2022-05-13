@@ -18,16 +18,10 @@ import (
 )
 
 func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureResponse, error) {
-	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.SignatureEnvelopeType == "" || req.Hash == "" {
+	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.Hash == "" {
 		return nil, plugin.RequestError{
 			Code: plugin.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
-		}
-	}
-	if req.SignatureEnvelopeType != signature.MediaTypeJWSEnvelope {
-		return nil, plugin.RequestError{
-			Code: plugin.ErrorCodeValidation,
-			Err:  errors.New("unsupported signature envelope"),
 		}
 	}
 	key, err := newKey(req.KeyID)
@@ -48,7 +42,7 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	}
 
 	// Digest.
-	hashed, err := computeHash(req.Hash.HashFunc(), []byte(req.Payload))
+	hashed, err := computeHash(req.Hash.HashFunc(), req.Payload)
 	if err != nil {
 		return nil, err
 	}
