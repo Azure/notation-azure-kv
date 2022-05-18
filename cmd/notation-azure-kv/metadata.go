@@ -33,7 +33,7 @@ func init() {
 		Description:               "Sign artifacts with keys in Azure Key Vault",
 		Version:                   version.GetVersion(),
 		URL:                       "https://github.com/Azure/notation-azure-kv",
-		SupportedContractVersions: []string{"v0.8.0-alpha.2"},
+		SupportedContractVersions: []string{plugin.ContractVersion},
 		Capabilities:              []plugin.Capability{plugin.CapabilitySignatureGenerator},
 	})
 	if err != nil {
