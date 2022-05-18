@@ -7,7 +7,7 @@ import (
 
 	"github.com/Azure/notation-azure-kv/internal/version"
 
-	"github.com/notaryproject/notation-go/spec/plugin"
+	"github.com/notaryproject/notation-go/plugin"
 	"github.com/urfave/cli/v2"
 )
 

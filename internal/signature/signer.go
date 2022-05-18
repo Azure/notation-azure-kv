@@ -13,8 +13,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
 
-	"github.com/notaryproject/notation-go/spec/plugin"
-	"github.com/notaryproject/notation-go/spec/signature"
+	"github.com/notaryproject/notation-go"
+	"github.com/notaryproject/notation-go/plugin"
 )
 
 func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureResponse, error) {
@@ -94,19 +94,19 @@ func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-func keySpecToAlg(k signature.KeyType) keyvault.JSONWebKeySignatureAlgorithm {
+func keySpecToAlg(k notation.KeySpec) keyvault.JSONWebKeySignatureAlgorithm {
 	switch k {
-	case signature.RSA_2048:
+	case notation.RSA_2048:
 		return keyvault.PS256
-	case signature.RSA_3072:
+	case notation.RSA_3072:
 		return keyvault.PS384
-	case signature.RSA_4096:
+	case notation.RSA_4096:
 		return keyvault.PS512
-	case signature.EC_256:
+	case notation.EC_256:
 		return keyvault.ES256
-	case signature.EC_384:
+	case notation.EC_384:
 		return keyvault.ES384
-	case signature.EC_512:
+	case notation.EC_512:
 		return keyvault.ES512
 	}
 	return ""

@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/signature"
-	"github.com/notaryproject/notation-go/spec/plugin"
+	"github.com/notaryproject/notation-go/plugin"
 
 	"github.com/urfave/cli/v2"
 )
