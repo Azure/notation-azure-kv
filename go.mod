@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/Azure/azure-sdk-for-go v63.4.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.24
-	github.com/notaryproject/notation-go v0.8.0-alpha.1
+	github.com/notaryproject/notation-go v0.8.0-alpha.1.0.20220518191708-407537596ed5
 	github.com/urfave/cli/v2 v2.3.0
 )
 
@@ -28,5 +28,3 @@ require (
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 )
-
-replace github.com/notaryproject/notation-go => github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220518080859-07fe9b874982

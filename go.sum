@@ -35,12 +35,12 @@ github.com/golang-jwt/jwt/v4 v4.4.1 h1:pC5DB52sCeK48Wlb9oPcdhnjkz1TKt1D/P7WKJ0kU
 github.com/golang-jwt/jwt/v4 v4.4.1/go.mod h1:m21LjoU+eqJr34lmDMbreY2eSTRJ1cv77w39/MY0Ch0=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
+github.com/notaryproject/notation-go v0.8.0-alpha.1.0.20220518191708-407537596ed5 h1:gOayVV8HsSFN4BYLizWAMBtjoxSn944tjIxvwDgYmAY=
+github.com/notaryproject/notation-go v0.8.0-alpha.1.0.20220518191708-407537596ed5/go.mod h1:KtNtijh22iUsC3y7KTzllwPoDKV7mJANYz/RunvOhqs=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220518080859-07fe9b874982 h1:oow9r9GCNWhintF+M7UQP2x6SEsIGt2VoTEVaMnxFog=
-github.com/qmuntal/notation-go v0.7.0-alpha.1.0.20220518080859-07fe9b874982/go.mod h1:KtNtijh22iUsC3y7KTzllwPoDKV7mJANYz/RunvOhqs=
 github.com/russross/blackfriday/v2 v2.0.1 h1:lPqVAte+HuHNfhJ/0LC98ESWRz8afy9tM/0RK8m9o+Q=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/shurcooL/sanitized_anchor_name v1.0.0 h1:PdmoCO6wvbs+7yrJyMORt4/BmY5IYyJwS/kOiWx8mHo=
