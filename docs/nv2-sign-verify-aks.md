@@ -2,15 +2,20 @@
 
 ## Install the notation cli and azure-kv plugin
 
-> NOTE: These are temporary steps for early development. Officially released binaries will be available as the latest changes are merged.
+> NOTE: The walkthrough uses pre-released versions of notation, notation plugins and ratify.  
 
-1. Build a version of notation extensibility support
+1. Install notation with plugin support from <https://github.com/notaryproject/notation/releases/tag/feat-kv-extensibility>
 
     ```bash
-    git clone git@github.com:notaryproject/notation.git -b feat-kv-extensibility
-    cd notation
-    make build
-    
+    # Choose a binary
+    timestamp=20220121081115
+    commit=17c7607
+
+    # Download, extract and install
+    curl -Lo notation.tar.gz https://github.com/notaryproject/notation/releases/download/feat-kv-extensibility/notation-feat-kv-extensibility-$timestamp-$commit.tar.gz
+    tar xvzf notation.tar.gz
+    tar xvzf notation_0.0.0-SNAPSHOT-${commit}_linux_amd64.tar.gz -C ~/bin notation
+        
     # Copy the notation cli to your bin directory
     cp ./bin/notation ~/bin
     ```
@@ -27,7 +32,13 @@
     
     # Extract to the plugin directory    
     tar xvzf notation-azure-kv.tar.gz -C ~/.config/notation/plugins/azure-kv notation-azure-kv
-     ```
+    ```
+
+3. List the available plugins and verify that the plug in available
+
+    ```bash
+    notation plugin ls
+    ```
 
 ## Configure Environment Variables
 
@@ -51,6 +62,7 @@ To ease the execution of the commands to complete this article, provide values f
     # Key name used to sign and verify
     KEY_NAME=wabbit-networks-io
     KEY_SUBJECT_NAME=wabbit-networks.io
+    CERT_PATH=./${KEY_NAME}.pem
     # Name of the AKV Resource Group
     AKV_RG=${AKV_NAME}-akv-rg
 
@@ -60,6 +72,7 @@ To ease the execution of the commands to complete this article, provide values f
     ```
 
 2. Configure container image resources
+
     ```bash
     ACR_REPO=net-monitor
     IMAGE_SOURCE=https://github.com/wabbit-networks/net-monitor.git#main
@@ -100,33 +113,21 @@ To ease the execution of the commands to complete this article, provide values f
     az keyvault set-policy --name $AKV_NAME --certificate-permissions get --spn $AZURE_CLIENT_ID
     ```
 
-## Configure the notation Azure Key Vault plugin
-
-1. Add the Plugin
-
-    ```bash
-    notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
-    ```
-
-2. List the available plugins
-
-    ```bash
-    notation plugin ls
-    ```
-
 ## Configure an Azure container registry
 
 1. Create an Azure container registry, capable of storing signed container images.
+
     ```azurecli
     az group create --name $ACR_NAME --location $LOCATION
 
     az acr create \
-      --resource-group $ACR_NAME \
+      --resource-group $ACR_RG \
       --name $ACR_NAME \
       --zone-redundancy enabled \
       --sku Premium \
       --output jsonc
     ```
+
     In the command output, note the `zoneRedundancy` property for the registry. When enabled, the registry is zone redundant, and ORAS Artifact enabled:
 
     ```JSON
@@ -168,6 +169,7 @@ If needed, create an Azure Kubernetes Cluster
 
 5. Configure permissions for ratify
     > NOTE: these are temporary steps. Ratify should use the node secrets, using ACR
+
     ```bash
     kubectl create secret docker-registry regcred \
         --docker-server=$REGISTRY \
@@ -191,7 +193,7 @@ In this step, Gatekeeper will be configured, enabling deployment policies.
         --set enableExternalData=true \
         --set controllerManager.dnsPolicy=ClusterFirst,audit.dnsPolicy=ClusterFirst
     ````
- 
+
 ## Build, Validate, Deploy
 
 We're starting with the following basic Azure service configurations
@@ -257,6 +259,7 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
     ```
 
 2. Create the certificate
+
     ```azure-cli
     az keyvault certificate create -n $KEY_NAME --vault-name $AKV_NAME -p @my_policy.json
     ```
@@ -269,14 +272,20 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
                         --query "kid" -o tsv)
     ```
 
-4. Add the Key Id to the kms keys and certs
+4. Download public certificate
 
     ```bash
-    notation key add --name $KEY_NAME --plugin azure-kv --id $KEY_ID --kms
-    notation cert add --name $KEY_NAME --plugin azure-kv --id $KEY_ID --kms
+    az keyvault certificate download --file $CERT_PATH --vault-name $AKV_NAME --name $KEY_ID --encoding PEM
     ```
 
-5. List the keys and certs to confirm
+5. Add the Key Id to the keys and certs
+
+    ```bash
+    notation key add --name $KEY_NAME --plugin azure-kv --id $KEY_ID
+    notation cert add --name $KEY_NAME $CERT_PATH
+    ```
+
+6. List the keys and certs to confirm
 
     ```bash
     notation key ls
@@ -308,7 +317,7 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
 
     helm install ratify ratify/charts/ratify \
         --set registryCredsSecret=regcred \
-        --set ratifyTestCert=$PUBLIC_KEY
+        --set ratifyTestCert="$PUBLIC_KEY"
 
     kubectl apply -f ./ratify/charts/ratify-gatekeeper/templates/constraint.yaml
 
@@ -323,7 +332,7 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
       -n demo
     ```
 
-    > Note: due to [Ratify issue #92](https://github.com/deislabs/ratify/issues/92), this may pass validation. 
+    > Note: due to [Ratify issue #92](https://github.com/deislabs/ratify/issues/92), this may pass validation.
 
 5. List the running pods
 
@@ -351,13 +360,13 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
     kubectl run net-monitor --image=$IMAGE -n demo
     ```
 
-3. List the running pods
+4. List the running pods
 
     ```bash
     kubectl get pods -A
     ```
 
-4. Delete the pod
+5. Delete the pod
 
     ```bash
     kubectl delete pod net-monitor -n demo
@@ -373,18 +382,14 @@ The following steps cleanup the resources, resetting to an AKS with gatekeeper s
     rm ~/.config/notation/config.json
     ```
 
-1. Add the Plugin
-
-    ```bash
-    notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
-    ```
+1. Remove the Plugin
 
     ```bash
     az keyvault certificate delete -n $KEY_NAME --vault-name $AKV_NAME
     az keyvault certificate purge --vault-name $AKV_NAME --name $KEY_NAME
     ```
 
-1. Clear the ACR repo
+2. Clear the ACR repo
 
     ```bash
     az acr repository delete \
