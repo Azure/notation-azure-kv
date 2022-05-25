@@ -21,7 +21,7 @@ all: build
 FORCE:
 
 bin/%: cmd/% FORCE
-	/home/qmuntaldiaz/go/bin/go1.18.1 build $(GO_BUILD_FLAGS) -o $@ ./$<
+	go build $(GO_BUILD_FLAGS) -o $@ ./$<
 
 .PHONY: download
 download: ## download dependencies via go mod
