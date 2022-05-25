@@ -34,13 +34,7 @@
     tar xvzf notation-azure-kv.tar.gz -C ~/.config/notation/plugins/azure-kv notation-azure-kv
     ```
 
-3. Configure the Azure Key Vault plugin for notation
-
-    ```bash
-    notation plugin add azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
-    ```
-
-4. List the available plugins and verify that the plug in available
+3. List the available plugins and verify that the plug in available
 
     ```bash
     notation plugin ls
@@ -68,6 +62,7 @@ To ease the execution of the commands to complete this article, provide values f
     # Key name used to sign and verify
     KEY_NAME=wabbit-networks-io
     KEY_SUBJECT_NAME=wabbit-networks.io
+    CERT_PATH=./${KEY_NAME}.pem
     # Name of the AKV Resource Group
     AKV_RG=${AKV_NAME}-akv-rg
 
@@ -281,14 +276,20 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
                         --query "kid" -o tsv)
     ```
 
-4. Add the Key Id to the kms keys and certs
+4. Download public certificate
 
     ```bash
-    notation key add --name $KEY_NAME --plugin azure-kv --id $KEY_ID --kms
-    notation cert add --name $KEY_NAME --plugin azure-kv --id $KEY_ID --kms
+    az keyvault certificate download --file $CERT_PATH --vault-name $AKV_NAME --name $KEY_ID --encoding PEM
     ```
 
-5. List the keys and certs to confirm
+5. Add the Key Id to the keys and certs
+
+    ```bash
+    notation key add --name $KEY_NAME --plugin azure-kv --id $KEY_ID
+    notation cert add --name $KEY_NAME $CERT_PATH
+    ```
+
+6. List the keys and certs to confirm
 
     ```bash
     notation key ls
@@ -388,15 +389,11 @@ The following steps cleanup the resources, resetting to an AKS with gatekeeper s
 1. Remove the Plugin
 
     ```bash
-    notation plugin remove azure-kv ~/.config/notation/plugins/azure-kv/notation-azure-kv
-    ```
-
-    ```bash
     az keyvault certificate delete -n $KEY_NAME --vault-name $AKV_NAME
     az keyvault certificate purge --vault-name $AKV_NAME --name $KEY_NAME
     ```
 
-1. Clear the ACR repo
+2. Clear the ACR repo
 
     ```bash
     az acr repository delete \
@@ -404,7 +401,7 @@ The following steps cleanup the resources, resetting to an AKS with gatekeeper s
         --repository $ACR_REPO -y
     ```
 
-2. Clear up AKS resources, leaving AKS in place
+3. Clear up AKS resources, leaving AKS in place
 
     ```bash
     helm uninstall ratify

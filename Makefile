@@ -1,4 +1,3 @@
-# referenced from https://github.com/notaryproject/notation/blob/main/Makefile
 MODULE         = github.com/Azure/notation-azure-kv
 COMMANDS       = notation-azure-kv
 GIT_TAG        = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
@@ -10,17 +9,6 @@ ifeq ($(GIT_TAG),) # unreleased build
 endif
 LDFLAGS        = -X $(MODULE)/internal/version.BuildMetadata=$(BUILD_METADATA)
 GO_BUILD_FLAGS = --ldflags="$(LDFLAGS)"
-
-TOOLS_DIR := hack/tools
-TOOLS_BIN_DIR := $(abspath $(TOOLS_DIR)/bin)
-
-# Binaries
-GOLANGCI_LINT_VER := v1.41.1
-GOLANGCI_LINT_BIN := golangci-lint
-GOLANGCI_LINT := $(TOOLS_BIN_DIR)/$(GOLANGCI_LINT_BIN)-$(GOLANGCI_LINT_VER)
-
-# Scripts
-GO_INSTALL := ./hack/go-install.sh
 
 .PHONY: help
 help:
@@ -46,29 +34,11 @@ build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 clean:
 	git status --ignored --short | grep '^!! ' | sed 's/!! //' | xargs rm -rf
 
-## --------------------------------------
-## Tooling Binaries
-## --------------------------------------
-
-$(GOLANGCI_LINT):
-	GOBIN=$(TOOLS_BIN_DIR) $(GO_INSTALL) github.com/golangci/golangci-lint/cmd/golangci-lint $(GOLANGCI_LINT_BIN) $(GOLANGCI_LINT_VER)
-
-## --------------------------------------
-## Testing
-## --------------------------------------
-
 .PHONY: test
 test:
 	go test ./... -coverprofile cover.out
 
-## --------------------------------------
-## Linting
-## --------------------------------------
-
-.PHONY: lint
-lint: $(GOLANGCI_LINT)
-	$(GOLANGCI_LINT) run -v
-
-.PHONY: lint-full
-lint-full: $(GOLANGCI_LINT) ## Run slower linters to detect possible issues
-	$(GOLANGCI_LINT) run -v --fast=false
+.PHONY: install
+install: bin/notation-azure-kv ## installs the plugin
+	mkdir -p  ~/.config/notation/plugins/azure-kv/
+	cp bin/notation-azure-kv ~/.config/notation/plugins/azure-kv/

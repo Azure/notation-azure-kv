@@ -13,10 +13,10 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var signCommand = &cli.Command{
-	Name:   string(plugin.CommandGenerateSignature),
-	Usage:  "Sign artifacts with keys in Azure Key Vault",
-	Action: runSign,
+var describeKeyCommand = &cli.Command{
+	Name:   string(plugin.CommandDescribeKey),
+	Usage:  "Azure key description",
+	Action: runDescribeKey,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:      "file",
@@ -27,7 +27,7 @@ var signCommand = &cli.Command{
 	},
 }
 
-func runSign(ctx *cli.Context) error {
+func runDescribeKey(ctx *cli.Context) error {
 	var r io.Reader
 	if f := ctx.String("file"); f != "" {
 		var err error
@@ -38,7 +38,7 @@ func runSign(ctx *cli.Context) error {
 	} else {
 		r = os.Stdin
 	}
-	var req plugin.GenerateSignatureRequest
+	var req plugin.DescribeKeyRequest
 	err := json.NewDecoder(r).Decode(&req)
 	if err != nil {
 		return plugin.RequestError{
@@ -47,7 +47,7 @@ func runSign(ctx *cli.Context) error {
 		}
 	}
 
-	resp, err := signature.Sign(ctx.Context, &req)
+	resp, err := signature.Key(ctx.Context, &req)
 	if err != nil {
 		var rerr plugin.RequestError
 		if errors.As(err, &rerr) {
