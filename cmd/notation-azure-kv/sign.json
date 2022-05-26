@@ -1,0 +1,11 @@
+{
+    "contractVersion": "1",
+    "keyID": "wabbit-networks-io",
+    "keySpec": "RSA_2048",
+    "payload": "MTIz",
+    "hashAlgorithm": "SHA_256",
+    "pluginConfig": {
+        "vaultName": "q-akv",
+        "keyVersion": "a47e677a102d4a319d9aaf844fc71c8d"
+    }
+}

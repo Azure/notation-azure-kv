@@ -3,7 +3,7 @@ module github.com/Azure/notation-azure-kv
 go 1.17
 
 require (
-	github.com/Azure/azure-sdk-for-go v63.4.0+incompatible
+	github.com/Azure/azure-sdk-for-go v65.0.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.24
 	github.com/notaryproject/notation-go v0.8.0-alpha.1.0.20220518191708-407537596ed5
 	github.com/urfave/cli/v2 v2.3.0

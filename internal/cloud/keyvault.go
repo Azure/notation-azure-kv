@@ -7,10 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
+	"github.com/Azure/go-autorest/autorest/azure"
 )
 
 // NewAzureClient returns a new Azure Key Vault client authorized in the order:
@@ -38,14 +40,13 @@ func NewAzureClient() (*keyvault.BaseClient, error) {
 type Key struct {
 	Client *keyvault.BaseClient
 
-	id           string
 	vaultBaseURL string
 	name         string
 	version      string
 }
 
-// NewKey create a remote key referenced by a key identifier.
-func NewKey(client *keyvault.BaseClient, keyID string) (*Key, error) {
+// NewKeyFromID create a remote key referenced by a key identifier.
+func NewKeyFromID(client *keyvault.BaseClient, keyID string) (*Key, error) {
 	keyURL, err := url.Parse(keyID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid keyID: %q is not a valid URI", keyID)
@@ -57,11 +58,35 @@ func NewKey(client *keyvault.BaseClient, keyID string) (*Key, error) {
 	}
 
 	return &Key{
+			Client:       client,
+			vaultBaseURL: keyURL.Scheme + "://" + keyURL.Host,
+			name:         parts[1],
+			version:      parts[2],
+		},
+		nil
+}
+
+// NewKey create a remote key reference.
+func NewKey(client *keyvault.BaseClient, vaultName, keyName, keyVersion string) (*Key, error) {
+	dnssuffix := os.Getenv("AZURE_KEYVAULT_DNSSUFFIX")
+	if dnssuffix == "" {
+		var env azure.Environment
+		if envName := os.Getenv("AZURE_ENVIRONMENT"); envName == "" {
+			env = azure.PublicCloud
+		} else {
+			var err error
+			env, err = azure.EnvironmentFromName(envName)
+			if err != nil {
+				return nil, err
+			}
+		}
+		dnssuffix = env.KeyVaultDNSSuffix
+	}
+	return &Key{
 		Client:       client,
-		id:           keyID,
-		vaultBaseURL: keyURL.Scheme + "://" + keyURL.Host,
-		name:         parts[1],
-		version:      parts[2],
+		vaultBaseURL: "https://" + vaultName + "." + dnssuffix,
+		name:         keyName,
+		version:      keyVersion,
 	}, nil
 }
 
@@ -86,8 +111,8 @@ func (k *Key) Sign(ctx context.Context, algorithm keyvault.JSONWebKeySignatureAl
 	}
 
 	// Verify the result
-	if res.Kid == nil || *res.Kid != k.id {
-		return nil, errors.New("azure: response key id mismatch")
+	if res.Kid == nil {
+		return nil, errors.New("azure: nil kid")
 	}
 	if res.Result == nil {
 		return nil, errors.New("azure: invalid server response")
