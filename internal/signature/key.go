@@ -10,12 +10,16 @@ import (
 	"github.com/notaryproject/notation-go/plugin"
 )
 
-func newKey(keyID string) (*cloud.Key, error) {
+func newKey(keyID string, pluginConfig map[string]string) (*cloud.Key, error) {
 	client, err := cloud.NewAzureClient()
 	if err != nil {
 		return nil, err
 	}
-	return cloud.NewKey(client, keyID)
+	if vaultName := pluginConfig["vaultName"]; vaultName != "" {
+		keyVersion := pluginConfig["keyVersion"]
+		return cloud.NewKey(client, vaultName, keyID, keyVersion)
+	}
+	return cloud.NewKeyFromID(client, keyID)
 }
 
 func Key(ctx context.Context, req *plugin.DescribeKeyRequest) (*plugin.DescribeKeyResponse, error) {
@@ -25,9 +29,12 @@ func Key(ctx context.Context, req *plugin.DescribeKeyRequest) (*plugin.DescribeK
 			Err:  errors.New("invalid request input"),
 		}
 	}
-	key, err := newKey(req.KeyID)
+	key, err := newKey(req.KeyID, req.PluginConfig)
 	if err != nil {
-		return nil, err
+		return nil, plugin.RequestError{
+			Code: plugin.ErrorCodeValidation,
+			Err:  err,
+		}
 	}
 	cert, err := key.Certificate(ctx)
 	if err != nil {

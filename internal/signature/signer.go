@@ -24,7 +24,7 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 			Err:  errors.New("invalid request input"),
 		}
 	}
-	key, err := newKey(req.KeyID)
+	key, err := newKey(req.KeyID, req.PluginConfig)
 	if err != nil {
 		return nil, plugin.RequestError{
 			Code: plugin.ErrorCodeValidation,
