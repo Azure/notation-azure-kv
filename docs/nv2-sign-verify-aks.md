@@ -46,7 +46,6 @@ In this step, Gatekeeper will be configured, enabling deployment policies.
         --name-template=gatekeeper \
         --namespace gatekeeper-system --create-namespace \
         --set enableExternalData=true \
-        --set controllerManager.dnsPolicy=ClusterFirst,audit.dnsPolicy=ClusterFirst \
         --set validatingWebhookTimeoutSeconds=7
     ````
 
@@ -117,8 +116,7 @@ Clear up ratify and gatekeeper resources, leaving AKS in place
 
     ```bash
     helm uninstall ratify
-    helm install gatekeeper/gatekeeper
+    helm uninstall gatekeeper/gatekeeper
     kubectl delete ns demo
-    kubectl delete K8sSignedImages ratify-constraint
     ```
 <!-- kubectl delete secret regcred -->
