@@ -4,20 +4,15 @@
 
 > NOTE: The walkthrough uses pre-released versions of notation, notation plugins and ratify.  
 
-1. Install notation with plugin support from <https://github.com/notaryproject/notation/releases/tag/feat-kv-extensibility>
+1. Install notation with plugin support from <https://github.com/notaryproject/notation/releases/tag/v0.9.0-alpha.1>
 
     ```bash
-    # Choose a binary
-    timestamp=20220121081115
-    commit=17c7607
-
     # Download, extract and install
-    curl -Lo notation.tar.gz https://github.com/notaryproject/notation/releases/download/feat-kv-extensibility/notation-feat-kv-extensibility-$timestamp-$commit.tar.gz
+    curl -Lo notation.tar.gz https://github.com/notaryproject/notation/releases/download/v0.9.0-alpha.1/notation_0.9.0-alpha.1_linux_amd64.tar.gz
     tar xvzf notation.tar.gz
-    tar xvzf notation_0.0.0-SNAPSHOT-${commit}_linux_amd64.tar.gz -C ~/bin notation
         
     # Copy the notation cli to your bin directory
-    cp ./bin/notation ~/bin
+    mkdir -p ~/bin && cp ./notation ~/bin
     ```
 
 2. Install the notation-azure-kv plugin for remote signing and verification
@@ -28,7 +23,7 @@
     
     # Download the plugin
     curl -Lo notation-azure-kv.tar.gz \
-        https://github.com/Azure/notation-azure-kv/releases/download/v0.1.0-alpha.1/notation-azure-kv_0.1.0-alpha.1_Linux_amd64.tar.gz
+        https://github.com/Azure/notation-azure-kv/releases/download/v0.3.0-alpha.1/notation-azure-kv_0.3.0-alpha.1_Linux_amd64.tar.gz
     
     # Extract to the plugin directory    
     tar xvzf notation-azure-kv.tar.gz -C ~/.config/notation/plugins/azure-kv notation-azure-kv
@@ -118,7 +113,7 @@ To ease the execution of the commands to complete this article, provide values f
 1. Create an Azure container registry, capable of storing signed container images.
 
     ```azurecli
-    az group create --name $ACR_NAME --location $LOCATION
+    az group create --name $ACR_RG --location $LOCATION
 
     az acr create \
       --resource-group $ACR_RG \
@@ -150,7 +145,7 @@ If needed, create an Azure Kubernetes Cluster
 2. Create an AKS cluster with the [az aks create][az-aks-create] command.
 
     ```azurecli-interactive
-    az aks create -n $AKS_NAME -g $AKS_RG #--attach-acr $ACR_NAME
+    az aks create -n $AKS_NAME -g $AKS_RG --attach-acr $ACR_NAME --generate-ssh-keys
     az aks update -n $AKS_NAME -g $AKS_RG --attach-acr $ACR_NAME
     ```
 
@@ -275,7 +270,7 @@ Create or provide an x509 signing certificate, storing it in Azure Key Vault for
 4. Download public certificate
 
     ```bash
-    az keyvault certificate download --file $CERT_PATH --vault-name $AKV_NAME --name $KEY_ID --encoding PEM
+    az keyvault certificate download --file $CERT_PATH --vault-name $AKV_NAME --name $KEY_NAME --encoding PEM
     ```
 
 5. Add the Key Id to the keys and certs
