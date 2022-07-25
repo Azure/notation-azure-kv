@@ -32,8 +32,11 @@ helm install gatekeeper/gatekeeper  \
 
 1. Capture the public key for verification
 
-TODO: Understand why PUBLIC_KEY command is so complicated / can we make it easier/cleaner
-Previous step we download the certificate from AKV to the local trust store
+TODO: Short-term - Understand why PUBLIC_KEY command is so complicated / can we make it easier/cleaner?  
+TODO: Longer-term - if/once we enable certificate integration via CRDs, then we can separate the helm chart install from the certificate trust store/policies and have a separate step for this.
+
+Previous article we download the certificate from AKV to the local trust store, which is what we need for PUBLIC_KEY
+
 ```azure-cli
 CERT_ID=$(az keyvault certificate show -n $KEY_NAME --vault-name $AKV_NAME --query 'id' -o tsv)
 az keyvault certificate download --file $CERT_PATH --id $CERT_ID --encoding PEM
