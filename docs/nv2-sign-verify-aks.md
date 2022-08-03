@@ -16,41 +16,39 @@ This starts with the following basic Azure service configuration:
 
 In this step, Gatekeeper will be configured, enabling deployment policies.
 
-1. Install Gatekeeper
+```azurecli-interactive
+helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 
-    ```azurecli-interactive
-    helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
-
-    helm install gatekeeper/gatekeeper  \
-    --name-template=gatekeeper \
-    --namespace gatekeeper-system --create-namespace \
-    --set enableExternalData=true \
-    --set validatingWebhookTimeoutSeconds=7
-    ````
+helm install gatekeeper/gatekeeper  \
+--name-template=gatekeeper \
+--namespace gatekeeper-system --create-namespace \
+--set enableExternalData=true \
+--set validatingWebhookTimeoutSeconds=7
+````
 
 ## Install Ratify
 
 1. Capture the public key for verification
 
-In the previous article we downloaded the certificate from AKV to the local trust store, but we'll use a similar command to get the PUBLIC_KEY in a format ratify needs for the purposes of this demo.  In a production capacity, we should have [workload identity installed](https://azure.github.io/azure-workload-identity/docs/quick-start.html) so ratify can pull the trusted certificates from Azure key vault.
+    In the previous article we downloaded the certificate from AKV to the local trust store, but we'll use a similar command to get the PUBLIC_KEY in a format ratify needs for the purposes of this demo.  In a production capacity, we should have [workload identity installed](https://azure.github.io/azure-workload-identity/docs/quick-start.html) so ratify can pull the trusted certificates from Azure key vault.
 
-> Note: Use the same environment variable values [from the previous article](https://docs.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push#configure-environment-variables).
+    > Note: Use the same environment variable values [from the previous article](https://docs.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push#configure-environment-variables).
 
-```azure-cli
-export PUBLIC_KEY=$(az keyvault certificate show -n $KEY_NAME \
-                    --vault-name $AKV_NAME \
-                    -o json | jq -r '.cer' | base64 -d | openssl x509 -inform DER)
-```
+    ```azure-cli
+    export PUBLIC_KEY=$(az keyvault certificate show -n $KEY_NAME \
+                        --vault-name $AKV_NAME \
+                        -o json | jq -r '.cer' | base64 -d | openssl x509 -inform DER)
+    ```
 
-2. Install Ratify
+2. Install Ratify from helm chart
 
-```azurecli-interactive
-kubectl config set-context --current --namespace=default
-helm repo add ratify https://deislabs.github.io/ratify
-helm install ratify \
-    ratify/ratify \
-    --set ratifyTestCert="$PUBLIC_KEY"
-```
+    ```azurecli-interactive
+    kubectl config set-context --current --namespace=default
+    helm repo add ratify https://deislabs.github.io/ratify
+    helm install ratify \
+        ratify/ratify \
+        --set ratifyTestCert="$PUBLIC_KEY"
+    ```
 
 ## Apply policy and deploy images
 
@@ -58,12 +56,12 @@ Now that gatekeeper and ratify are installed, a K8sSignedImages gatekeeper const
 
 1. Apply a constraint policy to only allow signed images in the default namespace
 
-```azurecli-interactive
-kubectl apply -f https://deislabs.github.io/ratify/library/default/template.yaml
-kubectl apply -f https://deislabs.github.io/ratify/library/default/samples/constraint.yaml
-```
+    ```azurecli-interactive
+    kubectl apply -f https://deislabs.github.io/ratify/library/default/template.yaml
+    kubectl apply -f https://deislabs.github.io/ratify/library/default/samples/constraint.yaml
+    ```
 
-The constraint template applied denies any pods which are not signed in the `default` namespace.
+    The constraint template applied denies any pods which are not signed in the `default` namespace.
 
 2. Deploy a signed image to AKS - with a success
 
