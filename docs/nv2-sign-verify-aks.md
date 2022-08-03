@@ -32,10 +32,7 @@ helm install gatekeeper/gatekeeper  \
 
 1. Capture the public key for verification
 
-TODO: Short-term - Understand why PUBLIC_KEY command is so complicated / can we make it easier/cleaner?  
-TODO: Longer-term - if/once we enable certificate integration via CRDs, then we can separate the helm chart install from the certificate trust store/policies and have a separate step for this.
-
-Previous article we download the certificate from AKV to the local trust store, which is what we need for PUBLIC_KEY
+In the previous article we downloaded the certificate from AKV to the local trust store, but we'll use a similar command to get the PUBLIC_KEY in a format ratify needs for the purposes of this demo.  In a production capacity, we should have the 
 
 ```azure-cli
 CERT_ID=$(az keyvault certificate show -n $KEY_NAME --vault-name $AKV_NAME --query 'id' -o tsv)
@@ -64,38 +61,39 @@ The constraint template applied denies any pods which are not signed in the `dem
 
 Now that gatekeeper and ratify are installed, a K8sSignedImages gatekeeper constraint policy needs to be applied to enforce only allowing signed images to be deployed.  After applying this policy we will show a signed imaged deployed successfully and a non-signed or trusted image deployed with a failure.
 
-1.  Apply a constraint policy to only allow signed images in the demo namespace
+1. Apply a constraint policy to only allow signed images in the default namespace
 
 ```azurecli-interactive
-kubectl apply -f https://deislabs.github.io/ratify/charts/ratify-gatekeeper/templates/constraint.yaml
+kubectl config set-context --current --namespace=default
+kubectl apply -f https://deislabs.github.io/ratify/library/default/template.yaml
+kubectl apply -f https://deislabs.github.io/ratify/library/default/samples/constraint.yaml
 ```
 
-The constraint template applied denies any pods which are not signed in the `demo` namespace.
+The constraint template applied denies any pods which are not signed in the `default` namespace.
 
-2. Create the demo namespace on the AKS cluster
+2. Deploy a signed image to AKS - with a success
 
-    ```bash
-    kubectl create ns demo
-    ```
-
-3. Deploy a signed image to AKS - with a success
-
-This image was previously built and pushed to your ACR in [the previous article](https://docs.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push#configure-environment-variables). Replace <values> with your actual deployment name.
+    This image was previously built and pushed to your ACR in [the previous article](https://docs.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push#configure-environment-variables). Replace `myregistry` with your actual registry name.
 
     ```bash
-    kubectl run net-monitor --image=myregistry.azurecr.io/net-monitor:v1 -n demo
-    kubectl get pods -n demo -w
+    kubectl run net-monitor --image=myregistry.azurecr.io/net-monitor:v1
+    kubectl get pods
     ```
 
-4. Deploy an unsigned image to AKS - with a failure
+3. Deploy an unsigned image to AKS - with a failure
 
     ```bash
-    kubectl run hello-world \
-      --image=mcr.microsoft.com/azuredocs/aci-helloworld:latest \
-      -n demo
+    kubectl run testunsigned \
+      --image=ratify.azurecr.io/testimage:unsigned
     ```
 
-5. List the running pods
+    The error message should look like:
+
+    ```bash
+    Error from server (Forbidden): admission webhook "validation.gatekeeper.sh" denied the request: [ratify-constraint] Subject failed verification: ratify.azurecr.io/testimage:unsigned
+    ```
+
+4. List the running pods
 
     ```bash
     kubectl get pods -A
@@ -105,8 +103,9 @@ This image was previously built and pushed to your ACR in [the previous article]
 
 Clear up ratify and gatekeeper resources, leaving AKS in place
 
-    ```bash
-    helm uninstall ratify
-    helm uninstall gatekeeper/gatekeeper
-    kubectl delete ns demo
-    ```
+```bash
+helm uninstall ratify
+helm uninstall gatekeeper/gatekeeper
+kubectl delete -f https://deislabs.github.io/ratify/library/default/template.yaml
+kubectl delete -f https://deislabs.github.io/ratify/library/default/samples/constraint.yaml
+```
