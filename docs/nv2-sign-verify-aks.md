@@ -21,7 +21,7 @@ In this step, Gatekeeper will be configured, enabling deployment policies.
     ```azurecli-interactive
     helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
 
-helm install gatekeeper/gatekeeper  \
+    helm install gatekeeper/gatekeeper  \
     --name-template=gatekeeper \
     --namespace gatekeeper-system --create-namespace \
     --set enableExternalData=true \
@@ -32,13 +32,9 @@ helm install gatekeeper/gatekeeper  \
 
 1. Capture the public key for verification
 
-In the previous article we downloaded the certificate from AKV to the local trust store, but we'll use a similar command to get the PUBLIC_KEY in a format ratify needs for the purposes of this demo.  In a production capacity, we should have the 
+In the previous article we downloaded the certificate from AKV to the local trust store, but we'll use a similar command to get the PUBLIC_KEY in a format ratify needs for the purposes of this demo.  In a production capacity, we should have [workload identity installed](https://azure.github.io/azure-workload-identity/docs/quick-start.html) so ratify can pull the trusted certificates from Azure key vault.
 
-```azure-cli
-CERT_ID=$(az keyvault certificate show -n $KEY_NAME --vault-name $AKV_NAME --query 'id' -o tsv)
-az keyvault certificate download --file $CERT_PATH --id $CERT_ID --encoding PEM
-notation cert add --name $KEY_NAME $CERT_PATH
-```
+> Note: Use the same environment variable values [from the previous article](https://docs.microsoft.com/azure/container-registry/container-registry-tutorial-sign-build-push#configure-environment-variables).
 
 ```azure-cli
 export PUBLIC_KEY=$(az keyvault certificate show -n $KEY_NAME \
@@ -49,13 +45,12 @@ export PUBLIC_KEY=$(az keyvault certificate show -n $KEY_NAME \
 2. Install Ratify
 
 ```azurecli-interactive
+kubectl config set-context --current --namespace=default
 helm repo add ratify https://deislabs.github.io/ratify
 helm install ratify \
     ratify/ratify \
     --set ratifyTestCert="$PUBLIC_KEY"
 ```
-
-The constraint template applied denies any pods which are not signed in the `demo` namespace.
 
 ## Apply policy and deploy images
 
@@ -64,7 +59,6 @@ Now that gatekeeper and ratify are installed, a K8sSignedImages gatekeeper const
 1. Apply a constraint policy to only allow signed images in the default namespace
 
 ```azurecli-interactive
-kubectl config set-context --current --namespace=default
 kubectl apply -f https://deislabs.github.io/ratify/library/default/template.yaml
 kubectl apply -f https://deislabs.github.io/ratify/library/default/samples/constraint.yaml
 ```
