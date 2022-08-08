@@ -13,6 +13,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/notation-azure-kv/internal/cert"
 )
 
 // NewAzureClient returns a new Azure Key Vault client authorized in the order:
@@ -120,9 +121,11 @@ func (k *Key) Sign(ctx context.Context, algorithm keyvault.JSONWebKeySignatureAl
 	return base64.RawURLEncoding.DecodeString(*res.Result)
 }
 
-// Certificate returns the X.509 certificate associated with the key.
-func (k *Key) Certificate(ctx context.Context) (*x509.Certificate, error) {
-	res, err := k.Client.GetCertificate(
+// Certificate returns the X.509 certificate chain associated with the key.
+func (k *Key) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
+	// Need a certificate chain to pass the notation validation
+	// GetCertificate only returns the leaf certificate
+	res, err := k.Client.GetSecret(
 		ctx,
 		k.vaultBaseURL,
 		k.name,
@@ -131,8 +134,8 @@ func (k *Key) Certificate(ctx context.Context) (*x509.Certificate, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.Cer == nil {
+	if res.Value == nil {
 		return nil, errors.New("azure: invalid server response")
 	}
-	return x509.ParseCertificate(*res.Cer)
+	return cert.ParseCertificates([]byte(*res.Value))
 }
