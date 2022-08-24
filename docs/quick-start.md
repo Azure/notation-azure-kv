@@ -1,6 +1,9 @@
 # Quick Start
 
+
+## Prepare your working directoy
 ```bash
+# The name is only for demo, please use your own azure resources instead
 mkdir -p notation-akv-demo && cd notation-akv-demo
 AKV_NAME=yzhakv
 ACR_NAME=yzhregistry
@@ -11,7 +14,7 @@ IMAGE=${REGISTRY_NAME}/${REPO}:${TAG}
 KEY_NAME=test16
 ```
 
-## Create the CA
+## Create a CA
 Create a config file for openssl to create a valid CA
 ```bash
 cat <<EOF > ./ca_ext.cnf
@@ -30,7 +33,7 @@ openssl req -new -newkey rsa:2048 -nodes -out ca.csr -keyout ca.key -extensions 
 openssl x509 -signkey ca.key -days 365 -req -in ca.csr -set_serial 01 -out ca.crt -extensions v3_ca -extfile ./ca_ext.cnf
 ```
 
-## Create the leaf certificate from Azure KeyVault
+## Create a leaf certificate from Azure KeyVault
 Create a certificate policy, which will be used by keyvault to create the leaf certificate
 ```bash
 cat <<EOF > ./my_policy.json
@@ -62,20 +65,20 @@ cat <<EOF > ./my_policy.json
 }
 EOF
 ```
-Create your certificate
+Create your own leaf certificate
 ```bash
 az keyvault certificate create -n ${KEY_NAME} --vault-name ${AKV_NAME} -p @my_policy.json
 ```
 
-## Sign the leaf certificate
-Download the certificate signing request(CSR)
+## Sign your leaf certificate
+Download the certificate signing request(CSR) for your leaf certificate
 ```bash
 CSR=$(az keyvault certificate pending show --vault-name ${AKV_NAME} --name ${KEY_NAME} --query 'csr' -o tsv)
 CSR_PATH=${KEY_NAME}.csr
 printf -- "-----BEGIN CERTIFICATE REQUEST-----\n%s\n-----END CERTIFICATE REQUEST-----\n" $CSR > ${CSR_PATH}
 ```
 
-Create config file for openssl to sign the certificate
+Create a config file for openssl to sign the laef certificate
 ```bash
 cat <<EOF > ./ext.cnf
 [ v3_ca ]
@@ -86,7 +89,7 @@ EOF
 
 Sign and merge the certificate chain
 ```bash
-# sign your certificate by using the CA previously created
+# sign your leaf certificate by using the CA previously created
 SIGNED_CERT_PATH=${KEY_NAME}.crt
 openssl x509 -CA ca.crt -CAkey ca.key -days 365 -req -in ${CSR_PATH} -set_serial 02 -out ${SIGNED_CERT_PATH} -extensions v3_ca -extfile ./ext.cnf
 
@@ -114,6 +117,35 @@ KEY_ID=$(az keyvault certificate show -n ${KEY_NAME} --vault-name ${AKV_NAME} --
 notation key add --name ${KEY_NAME} --plugin azure-kv --id ${KEY_ID}
 notation key ls
 ```
+
+Choose an authorize mode to visit your keyvault from the plugin
+1. Authorize by Managed Identity(by default)
+    ```bash
+    export AKV_AUTH_METHOD="AKV_AUTH_FROM_MI"
+    ```
+
+    Make sure you have at least granted secret-get, certificate-get, key-sign permissions to your resources.
+
+    Below script is a demo to check and set your azure vm's access policy to your keyvault. For more details, please check https://docs.microsoft.com/en-us/azure/key-vault/general/assign-access-policy?tabs=azure-portal 
+    ```bash
+    # get your azure vm's principalId
+    az vm list --query "[?name=='${VM_NAME}'].identity"
+
+    # get your keyvault's access policy for your azure vm, $OID should be the principalId which we get from the above command
+    az keyvault show --name ${AKV_NAME} --query "properties.accessPolicies[].{objectId:objectId,permissions:permissions}[?contains(objectId,'${OID}')]"
+
+    # if policy doesn't meet the sign requirements, set the access policy.
+    az keyvault set-policy --name ${AKV_NAME} --object-id ${OID} --secret-permissions get --key-permissions sign --certificate-permissions get
+    ```
+2. Authorize by Azure CLI 2.0
+    ```bash
+    export AKV_AUTH_METHOD="AKV_AUTH_FROM_CLI"
+    ```
+    Login to your azure account by Azure CLI
+    ```bash
+    az login
+    az account set --subscription ${subscriptionID}
+    ```
 
 Sign the image
 ```bash
