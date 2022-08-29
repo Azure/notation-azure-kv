@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto"
 	"errors"
+	"fmt"
 	"net/http"
 
 	// Make required hashers available.
@@ -12,17 +13,22 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/notaryproject/notation-core-go/signer"
+
+	alg "github.com/notaryproject/notation-go/signature"
+
 	"github.com/notaryproject/notation-go/plugin"
 )
 
 func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureResponse, error) {
+	// validate request
 	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.Hash == "" {
 		return nil, plugin.RequestError{
 			Code: plugin.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
 		}
 	}
+
+	// create azure-keyvault client
 	key, err := newKey(req.KeyID, req.PluginConfig)
 	if err != nil {
 		return nil, plugin.RequestError{
@@ -30,28 +36,41 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 			Err:  err,
 		}
 	}
-	certs, err := key.CertificateChain(ctx)
+
+	// get keySpec
+	keySpec, err := alg.ParseKeySpecFromName(req.KeySpec)
 	if err != nil {
-		return nil, requestErr(err)
+		return nil, err
 	}
 
-	alg := keySpecToAlg(req.KeySpec)
-	if alg == "" {
+	// get hash and validate hash
+	if name := alg.KeySpecHashName(keySpec); name != req.Hash {
+		return nil, requestErr(fmt.Errorf("keySpec hash:%v mismatch request hash:%v", name, req.Hash))
+	}
+
+	// get signing alg
+	signAlg := keySpecToAlg(req.KeySpec)
+	if signAlg == "" {
 		return nil, errors.New("unrecognized key spec: " + string(req.KeySpec))
 	}
 
 	// Digest.
-	hashed, err := computeHash(req.Hash.HashFunc(), req.Payload)
+	hashed, err := computeHash(keySpec.SignatureAlgorithm().Hash(), req.Payload)
 	if err != nil {
 		return nil, err
 	}
 
 	// Sign.
-	sig, err := key.Sign(ctx, alg, hashed)
+	sig, err := key.Sign(ctx, signAlg, hashed)
 	if err != nil {
 		return nil, requestErr(err)
 	}
 
+	// get certificate
+	certs, err := key.CertificateChain(ctx)
+	if err != nil {
+		return nil, requestErr(err)
+	}
 	certChain := make([][]byte, 0, len(certs))
 	for _, cert := range certs {
 		certChain = append(certChain, cert.Raw)
@@ -59,7 +78,7 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	return &plugin.GenerateSignatureResponse{
 		KeyID:            req.KeyID,
 		Signature:        sig,
-		SigningAlgorithm: req.KeySpec.SignatureAlgorithm(),
+		SigningAlgorithm: alg.SigningAlgorithmName(keySpec.SignatureAlgorithm()),
 		CertificateChain: certChain,
 	}, nil
 }
@@ -97,19 +116,19 @@ func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-func keySpecToAlg(k signer.KeySpec) keyvault.JSONWebKeySignatureAlgorithm {
+func keySpecToAlg(k string) keyvault.JSONWebKeySignatureAlgorithm {
 	switch k {
-	case signer.RSA_2048:
+	case alg.RSA_2048:
 		return keyvault.PS256
-	case signer.RSA_3072:
+	case alg.RSA_3072:
 		return keyvault.PS384
-	case signer.RSA_4096:
+	case alg.RSA_4096:
 		return keyvault.PS512
-	case signer.EC_256:
+	case alg.EC_256:
 		return keyvault.ES256
-	case signer.EC_384:
+	case alg.EC_384:
 		return keyvault.ES384
-	case signer.EC_521:
+	case alg.EC_521:
 		return keyvault.ES512
 	}
 	return ""

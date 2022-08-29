@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	"github.com/Azure/notation-azure-kv/internal/cloud"
-	"github.com/notaryproject/notation-core-go/signer"
+	"github.com/notaryproject/notation-core-go/signature"
+	alg "github.com/notaryproject/notation-go/signature"
+
 	"github.com/notaryproject/notation-go/plugin"
 )
 
@@ -40,12 +42,12 @@ func Key(ctx context.Context, req *plugin.DescribeKeyRequest) (*plugin.DescribeK
 	if err != nil {
 		return nil, requestErr(err)
 	}
-	keySpec, err := signer.GetKeySpec(cert[0])
+	keySpec, err := signature.ExtractKeySpec(cert[0])
 	if err != nil {
 		return nil, fmt.Errorf("get key spec err: %w", err)
 	}
 	return &plugin.DescribeKeyResponse{
 		KeyID:   req.KeyID,
-		KeySpec: keySpec,
+		KeySpec: alg.KeySpecName(keySpec),
 	}, nil
 }
