@@ -176,15 +176,17 @@ CERT_PATH=${KEY_NAME}-cert.crt
 az keyvault secret download --file ${CERT_PATH} --id ${CERT_ID}
 ```
 
-Generate a certificate using CA
+Generate a CA certificate:
 
 ```bash
 notation cert add --name ${KEY_NAME} ${CERT_PATH}
 notation cert ls
+```
 
 Verify the container image:
 
-```
+```bash
 notation verify --cert ${KEY_NAME} ${IMAGE}
 ```
-You can use the notation verify command to ensure the container image hasn't been tampered with since build time by comparing the sha with what is in the registry.
+
+You can use the notation verify command to ensure the container image hasn't been tampered with since build time by comparing the `sha` with what is in the registry.
