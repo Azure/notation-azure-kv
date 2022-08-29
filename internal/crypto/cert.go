@@ -1,12 +1,12 @@
-package cert
+package crypto
 
 import (
 	"crypto/x509"
 	"encoding/pem"
 )
 
-// ParseCertificates parses certificates from either PEM or DER data
-// returns an empty list if no certificates are found
+// ParseCertificates parses certificates from either PEM or DER data.
+// It returns an empty list if no certificates are found.
 func ParseCertificates(data []byte) ([]*x509.Certificate, error) {
 	var certs []*x509.Certificate
 	block, rest := pem.Decode(data)

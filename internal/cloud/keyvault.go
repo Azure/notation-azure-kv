@@ -10,11 +10,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Azure/notation-azure-kv/internal/crypto"
+
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/notation-azure-kv/internal/cert"
 )
 
 // clientAuthMode is the authorize mode used by plugin
@@ -186,5 +187,5 @@ func (k *Key) CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
 	if res.Value == nil {
 		return nil, errors.New("azure: invalid server response")
 	}
-	return cert.ParseCertificates([]byte(*res.Value))
+	return crypto.ParseCertificates([]byte(*res.Value))
 }
