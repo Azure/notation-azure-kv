@@ -110,7 +110,7 @@ az keyvault certificate pending merge --vault-name ${AKV_NAME} --name ${KEY_NAME
 Log in to the ACR:
 
 ```bash
-export NOTATION_PASSWORD=$(az acr login --name ${REGISTRY} --expose-token --output tsv --query accessToken)
+export NOTATION_PASSWORD=$(az acr login --name ${ACR_NAME} --expose-token --output tsv --query accessToken)
 ```
 
 Get the Key ID for the certificate and add the Key ID to the keys and certs:

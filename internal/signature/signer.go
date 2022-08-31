@@ -12,7 +12,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
-
 	"github.com/notaryproject/notation-core-go/signer"
 	"github.com/notaryproject/notation-go/plugin"
 )
