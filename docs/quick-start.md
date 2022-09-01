@@ -189,4 +189,4 @@ Verify the container image:
 notation verify --cert ${KEY_NAME} ${IMAGE}
 ```
 
-You can use the notation verify command to ensure the container image hasn't been tampered with since build time by comparing the `sha` with what is in the registry.
+You can use the notation verify command to ensure the container image hasn't been tampered with since build time.
