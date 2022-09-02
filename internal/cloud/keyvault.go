@@ -12,25 +12,74 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
+	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/notation-azure-kv/internal/crypto"
 )
 
-// NewAzureClient returns a new Azure Key Vault client authorized in the order:
-// 1. Client credentials
-// 2. Client certificate
-// 3. Username password
-// 4. MSI
-// 5. Azure CLI 2.0
+// clientAuthMode is the authorize mode used by plugin
+type clientAuthMethod string
+
+// set of auth errors
+var (
+	errAuthorizerFromMI  = errors.New("authorized from Managed Identity failed, please ensure you have assigned identity to your resource")
+	errAuthorizerFromCLI = errors.New("authorized from Azure CLI 2.0 failed, please ensure you have logged in using the 'az' command line tool")
+	errUnknownAuthorizer = errors.New("unknown authorize method, please use a supported authorize method according to the document")
+)
+
+const (
+	// authMethodKey is the environment variable plugin used
+	authMethodKey = "AKV_AUTH_METHOD"
+	// authorizerFromMI auth akv from Managed Identity
+	// The auth order will be:
+	// 1. Client credentials
+	// 2. Client certificate
+	// 3. Username password
+	// 4. MSI
+	authorizerFromMI clientAuthMethod = "AKV_AUTH_FROM_MI"
+
+	// authorizerFromCLI auth akv from Azure cli 2.0
+	authorizerFromCLI clientAuthMethod = "AKV_AUTH_FROM_CLI"
+
+	// defaultAuthMethod is the default auth method if user doesn't provide an environment variable
+	// the default value will be authorizerFromMI
+	defaultAuthMethod = authorizerFromMI
+)
+
+// getAzureClientAuthMethod get authMethod from environment variable
+func getAzureClientAuthMethod() clientAuthMethod {
+	mode := clientAuthMethod(os.Getenv(authMethodKey))
+	switch mode {
+	case authorizerFromCLI:
+		return authorizerFromCLI
+	default:
+		return defaultAuthMethod
+	}
+}
+
+// NewAzureClient returns a new Azure Key Vault client
+// By default, the authorizer will be from Managed Identity
+// If user sets AKV_AUTH_METHOD to AKV_AUTH_FROM_CLI, it will use Azure CLI instead
 func NewAzureClient() (*keyvault.BaseClient, error) {
-	authorizer, err := auth.NewAuthorizerFromEnvironment()
-	if err != nil {
+	var (
+		authorizer autorest.Authorizer
+		err        error
+	)
+	authMethod := getAzureClientAuthMethod()
+	switch authMethod {
+	case authorizerFromMI:
+		authorizer, err = auth.NewAuthorizerFromEnvironment()
+		if err != nil {
+			return nil, fmt.Errorf("%w, origin error: %s", errAuthorizerFromMI, err.Error())
+		}
+	case authorizerFromCLI:
 		authorizer, err = auth.NewAuthorizerFromCLI()
 		if err != nil {
-			return nil, errors.New("Unable to authenticate with the Azure API, ensure you have your credentials set as environment variables, " +
-				"or you have logged in using the 'az' command line tool")
+			return nil, fmt.Errorf("%w, origin error: %s", errAuthorizerFromCLI, err.Error())
 		}
+	default:
+		return nil, errUnknownAuthorizer
 	}
-
 	client := keyvault.New()
 	client.Authorizer = authorizer
 	return &client, nil
@@ -120,9 +169,12 @@ func (k *Key) Sign(ctx context.Context, algorithm keyvault.JSONWebKeySignatureAl
 	return base64.RawURLEncoding.DecodeString(*res.Result)
 }
 
-// Certificate returns the X.509 certificate associated with the key.
-func (k *Key) Certificate(ctx context.Context) (*x509.Certificate, error) {
-	res, err := k.Client.GetCertificate(
+// Certificate returns the X.509 certificate chain associated with the key.
+func (k *Key) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
+	// Need a certificate chain to pass the notation validation
+	// GetCertificate only returns the leaf certificate
+	// So we need a GetSecret to get the full certificate chain
+	res, err := k.Client.GetSecret(
 		ctx,
 		k.vaultBaseURL,
 		k.name,
@@ -131,8 +183,8 @@ func (k *Key) Certificate(ctx context.Context) (*x509.Certificate, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.Cer == nil {
+	if res.Value == nil {
 		return nil, errors.New("azure: invalid server response")
 	}
-	return x509.ParseCertificate(*res.Cer)
+	return crypto.ParseCertificates([]byte(*res.Value))
 }

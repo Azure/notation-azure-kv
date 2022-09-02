@@ -12,8 +12,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
-
-	"github.com/notaryproject/notation-go"
+	"github.com/notaryproject/notation-core-go/signer"
 	"github.com/notaryproject/notation-go/plugin"
 )
 
@@ -31,7 +30,7 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 			Err:  err,
 		}
 	}
-	cert, err := key.Certificate(ctx)
+	certs, err := key.CertificateChain(ctx)
 	if err != nil {
 		return nil, requestErr(err)
 	}
@@ -53,11 +52,15 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 		return nil, requestErr(err)
 	}
 
+	certChain := make([][]byte, 0, len(certs))
+	for _, cert := range certs {
+		certChain = append(certChain, cert.Raw)
+	}
 	return &plugin.GenerateSignatureResponse{
 		KeyID:            req.KeyID,
 		Signature:        sig,
 		SigningAlgorithm: req.KeySpec.SignatureAlgorithm(),
-		CertificateChain: [][]byte{cert.Raw},
+		CertificateChain: certChain,
 	}, nil
 }
 
@@ -94,19 +97,19 @@ func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-func keySpecToAlg(k notation.KeySpec) keyvault.JSONWebKeySignatureAlgorithm {
+func keySpecToAlg(k signer.KeySpec) keyvault.JSONWebKeySignatureAlgorithm {
 	switch k {
-	case notation.RSA_2048:
+	case signer.RSA_2048:
 		return keyvault.PS256
-	case notation.RSA_3072:
+	case signer.RSA_3072:
 		return keyvault.PS384
-	case notation.RSA_4096:
+	case signer.RSA_4096:
 		return keyvault.PS512
-	case notation.EC_256:
+	case signer.EC_256:
 		return keyvault.ES256
-	case notation.EC_384:
+	case signer.EC_384:
 		return keyvault.ES384
-	case notation.EC_512:
+	case signer.EC_521:
 		return keyvault.ES512
 	}
 	return ""
