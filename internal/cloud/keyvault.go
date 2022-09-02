@@ -49,12 +49,10 @@ const (
 // getAzureClientAuthMethod get authMethod from environment variable
 func getAzureClientAuthMethod() clientAuthMethod {
 	mode := clientAuthMethod(os.Getenv(authMethodKey))
-	switch mode {
-	case authorizerFromCLI:
-		return authorizerFromCLI
-	default:
+	if mode == "" {
 		return defaultAuthMethod
 	}
+	return mode
 }
 
 // NewAzureClient returns a new Azure Key Vault client
