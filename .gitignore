@@ -17,6 +17,17 @@
 # IDE directories
 .vscode/
 .idea/
+.devcontainer
 
 # binary output
 bin/
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .terraform.lock.hcl
+.terraform.lock.hcl
