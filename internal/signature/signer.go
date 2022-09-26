@@ -13,9 +13,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
-
-	alg "github.com/notaryproject/notation-go/signature"
-
 	"github.com/notaryproject/notation-go/plugin"
 )
 
@@ -38,13 +35,13 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	}
 
 	// get keySpec
-	keySpec, err := alg.ParseKeySpecFromName(req.KeySpec)
+	keySpec, err := plugin.ParseKeySpec(req.KeySpec)
 	if err != nil {
 		return nil, err
 	}
 
 	// get hash and validate hash
-	if name := alg.KeySpecHashName(keySpec); name != req.Hash {
+	if name := plugin.KeySpecHashString(keySpec); name != req.Hash {
 		return nil, requestErr(fmt.Errorf("keySpec hash:%v mismatch request hash:%v", name, req.Hash))
 	}
 
@@ -78,7 +75,7 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	return &plugin.GenerateSignatureResponse{
 		KeyID:            req.KeyID,
 		Signature:        sig,
-		SigningAlgorithm: alg.SigningAlgorithmName(keySpec.SignatureAlgorithm()),
+		SigningAlgorithm: plugin.SigningAlgorithmString(keySpec.SignatureAlgorithm()),
 		CertificateChain: certChain,
 	}, nil
 }
@@ -118,17 +115,17 @@ func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
 
 func keySpecToAlg(k string) keyvault.JSONWebKeySignatureAlgorithm {
 	switch k {
-	case alg.RSA_2048:
+	case plugin.RSA_2048:
 		return keyvault.PS256
-	case alg.RSA_3072:
+	case plugin.RSA_3072:
 		return keyvault.PS384
-	case alg.RSA_4096:
+	case plugin.RSA_4096:
 		return keyvault.PS512
-	case alg.EC_256:
+	case plugin.EC_256:
 		return keyvault.ES256
-	case alg.EC_384:
+	case plugin.EC_384:
 		return keyvault.ES384
-	case alg.EC_521:
+	case plugin.EC_521:
 		return keyvault.ES512
 	}
 	return ""

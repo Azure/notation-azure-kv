@@ -7,8 +7,6 @@ import (
 
 	"github.com/Azure/notation-azure-kv/internal/cloud"
 	"github.com/notaryproject/notation-core-go/signature"
-	alg "github.com/notaryproject/notation-go/signature"
-
 	"github.com/notaryproject/notation-go/plugin"
 )
 
@@ -48,6 +46,6 @@ func Key(ctx context.Context, req *plugin.DescribeKeyRequest) (*plugin.DescribeK
 	}
 	return &plugin.DescribeKeyResponse{
 		KeyID:   req.KeyID,
-		KeySpec: alg.KeySpecName(keySpec),
+		KeySpec: plugin.KeySpecString(keySpec),
 	}, nil
 }
