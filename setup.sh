@@ -136,7 +136,7 @@ function spCreate {
     export AZURE_TENANT_ID=$(az account show --query "tenantId" --only-show-errors --output tsv) && echo "Azure Tenant ID: $AZURE_TENANT_ID"
 
     # Capture the Azure Service Principal Obect ID
-    export AZURE_OBJECT_ID=$(az ad sp list --display-name $SP_NAME --query "[].objectId" --only-show-errors --output tsv) && echo "Azure Object ID: $AZURE_OBJECT_ID"
+    export AZURE_OBJECT_ID=$(az ad sp list --display-name $SP_NAME --query "[].id" --only-show-errors --output tsv) && echo "Azure Object ID: $AZURE_OBJECT_ID"
 
     # TODO Add SP as a secret; sp name / client ID; query sp in KV
 }
@@ -348,7 +348,7 @@ function getOutput {
 # Deploy AKS, ACR, and Keyvault with Bicep
 function deployInfra {
     # Get ObjectId for user
-    objectId=$(az ad signed-in-user show --query objectId --only-show-errors --output tsv)
+    objectId=$(az ad signed-in-user show --query id --only-show-errors --output tsv)
 
     echo ''
     echo "Deploying the required infrastructure with the following..."
