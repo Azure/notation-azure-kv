@@ -112,26 +112,3 @@ resource "null_resource" "ratify_install" {
     helm_release.ratify
   ]
 }
-
-resource "null_resource" "notation_install" {
-
-  provisioner "local-exec" {
-    command = "./modules/configure/installnotation.sh"
-  }
-}
-
-resource "null_resource" "notation_configure" {
-  provisioner "local-exec" {
-    command = <<EOT
-        # Use notation to add the key id to the kms keys and certs
-        keyName=${data.azurerm_key_vault_certificate.signingCert.name}
-        certId=${data.azurerm_key_vault_certificate.signingCert.id}
-        keyId=$(az keyvault certificate show --name ${data.azurerm_key_vault_certificate.signingCert.name} --vault-name ${data.azurerm_key_vault.kv.name} --query kid -o tsv)
-        
-        notation key remove $keyName > /dev/null 2>&1
-        notation key add --name $keyName --plugin azure-kv --id $keyId --kms
-        notation cert remove $keyName > /dev/null 2>&1 
-        notation cert add --name $keyName --plugin azure-kv --id $certId --kms
-    EOT
-  }
-}
