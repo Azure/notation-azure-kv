@@ -219,7 +219,7 @@ resource "azurerm_key_vault_certificate" "signingCert" {
     }
 
     x509_certificate_properties {
-      extended_key_usage = ["1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2","1.3.6.1.5.5.7.3.3"]
+      extended_key_usage = ["1.3.6.1.5.5.7.3.3"]
 
       key_usage = [
         "cRLSign",
