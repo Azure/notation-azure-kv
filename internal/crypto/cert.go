@@ -2,24 +2,18 @@ package crypto
 
 import (
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
+
+	"golang.org/x/crypto/pkcs12"
 )
 
-// ParseCertificates parses certificates from either PEM or DER data.
-// It returns an empty list if no certificates are found.
-func ParseCertificates(data []byte) ([]*x509.Certificate, error) {
+func parsePEM(data []byte) ([]*x509.Certificate, error) {
 	var certs []*x509.Certificate
 	block, rest := pem.Decode(data)
-	if block == nil {
-		// data may be in DER format
-		derCerts, err := x509.ParseCertificates(data)
-		if err != nil {
-			return nil, err
-		}
-		certs = append(certs, derCerts...)
-	} else {
-		// data is in PEM format
-		for block != nil {
+	for block != nil {
+		// skip private key
+		if block.Type == "CERTIFICATE" {
 			cert, err := x509.ParseCertificate(block.Bytes)
 			if err != nil {
 				return nil, err
@@ -28,6 +22,40 @@ func ParseCertificates(data []byte) ([]*x509.Certificate, error) {
 			block, rest = pem.Decode(rest)
 		}
 	}
-
 	return certs, nil
+}
+
+func parsePKCS12(data []byte) ([]*x509.Certificate, error) {
+	pfx, err := base64.StdEncoding.DecodeString(string(data))
+	if err != nil {
+		return nil, err
+	}
+	// https://learn.microsoft.com/en-us/azure/key-vault/certificates/faq
+	// password won't be saved.
+	blocks, err := pkcs12.ToPEM(pfx, "")
+	if err != nil {
+		return nil, err
+	}
+	var certs []*x509.Certificate
+	for _, block := range blocks {
+		// skip private key
+		if block.Type == "CERTIFICATE" {
+			cert, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return nil, err
+			}
+			certs = append(certs, cert)
+		}
+	}
+	return certs, err
+}
+
+// ParseCertificates parses certificates from either PEM or PKCS12 data.
+// It returns an empty list if no certificates are found.
+// Parsing will skip private key.
+func ParseCertificates(data []byte, contentType string) (certs []*x509.Certificate, err error) {
+	if contentType == "application/x-pkcs12" {
+		return parsePKCS12(data)
+	}
+	return parsePEM(data)
 }

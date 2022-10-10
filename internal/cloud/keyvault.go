@@ -50,7 +50,7 @@ const (
 func getAzureClientAuthMethod() clientAuthMethod {
 	mode := clientAuthMethod(os.Getenv(authMethodKey))
 	if mode == "" {
-		return defaultAuthMethod
+		return authorizerFromCLI
 	}
 	return mode
 }
@@ -181,8 +181,8 @@ func (k *Key) CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
 	if err != nil {
 		return nil, err
 	}
-	if res.Value == nil {
+	if res.Value == nil || res.ContentType == nil {
 		return nil, errors.New("azure: invalid server response")
 	}
-	return crypto.ParseCertificates([]byte(*res.Value))
+	return crypto.ParseCertificates([]byte(*res.Value), *res.ContentType)
 }
