@@ -48,7 +48,7 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	// get signing alg
 	signAlg := keySpecToAlg(req.KeySpec)
 	if signAlg == "" {
-		return nil, errors.New("unrecognized key spec: " + string(req.KeySpec))
+		return nil, errors.New("unrecognized key spec: " + req.KeySpec)
 	}
 
 	// Digest.
