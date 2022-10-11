@@ -35,10 +35,12 @@ github.com/golang-jwt/jwt/v4 v4.4.2 h1:rcc4lwaZgFMCZ5jxF9ABolDcIHdBytAFgqFPbSJQA
 github.com/golang-jwt/jwt/v4 v4.4.2/go.mod h1:m21LjoU+eqJr34lmDMbreY2eSTRJ1cv77w39/MY0Ch0=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
-github.com/notaryproject/notation-core-go v0.1.0-alpha.3 h1:gzB+h5TGzuocWiJxuYZgE/FwUIbJyKAHfk2hWSBbCGg=
-github.com/notaryproject/notation-core-go v0.1.0-alpha.3/go.mod h1:Wfyh5SrQ718JegKPhTs7y74rXg86tWd5NfOx2uHK1nI=
-github.com/notaryproject/notation-go v0.10.0-alpha.3.0.20220819145229-a9fb055b8d92 h1:azkYdu/bED9ns4KreppbE2HGqZKP83+Tl58Q2k6KlWc=
-github.com/notaryproject/notation-go v0.10.0-alpha.3.0.20220819145229-a9fb055b8d92/go.mod h1:PQuu7OZweVU5erEyqriguCvK7CCGF+X5psDj63iEvGk=
+github.com/notaryproject/notation-core-go v0.1.0-alpha.3.0.20220929020818-b5df54c7465b h1:acKGhDN17oQn+JhsrkUklFpfhn7CS1ceQl3XqJm/9CI=
+github.com/notaryproject/notation-core-go v0.1.0-alpha.3.0.20220929020818-b5df54c7465b/go.mod h1:s8DZptmN1rZS0tBLTPt/w+d4o6eAcGWTYYJlXaJhQ4U=
+github.com/notaryproject/notation-core-go v0.1.0-alpha.4 h1:0OhA2PjwT0TAouHOrU4K+8H9YM6E/e4/ocoq+JiHeOw=
+github.com/notaryproject/notation-core-go v0.1.0-alpha.4/go.mod h1:s8DZptmN1rZS0tBLTPt/w+d4o6eAcGWTYYJlXaJhQ4U=
+github.com/notaryproject/notation-go v0.10.0-alpha.3.0.20220927020950-2bcfd343f974 h1:aJ5p4zydKHoyXVK62H50fmj5czcxXpSG5a24EgoZH5E=
+github.com/notaryproject/notation-go v0.10.0-alpha.3.0.20220927020950-2bcfd343f974/go.mod h1:TeQIoxMetPFqJSDzcHnGZ6x9kKzglfSmgxYrWt9/viA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/russross/blackfriday/v2 v2.0.1 h1:lPqVAte+HuHNfhJ/0LC98ESWRz8afy9tM/0RK8m9o+Q=

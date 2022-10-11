@@ -5,8 +5,8 @@ go 1.17
 require (
 	github.com/Azure/azure-sdk-for-go v65.0.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.24
-	github.com/notaryproject/notation-core-go v0.1.0-alpha.3
-	github.com/notaryproject/notation-go v0.10.0-alpha.3.0.20220819145229-a9fb055b8d92
+	github.com/notaryproject/notation-core-go v0.1.0-alpha.4
+	github.com/notaryproject/notation-go v0.10.0-alpha.3.0.20220927020950-2bcfd343f974
 	github.com/urfave/cli/v2 v2.3.0
 )
 

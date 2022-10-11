@@ -42,8 +42,8 @@ const (
 	authorizerFromCLI clientAuthMethod = "AKV_AUTH_FROM_CLI"
 
 	// defaultAuthMethod is the default auth method if user doesn't provide an environment variable
-	// the default value will be authorizerFromMI
-	defaultAuthMethod = authorizerFromMI
+	// the default value will be authorizerFromCLI
+	defaultAuthMethod = authorizerFromCLI
 )
 
 // getAzureClientAuthMethod get authMethod from environment variable
@@ -181,8 +181,8 @@ func (k *Key) CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
 	if err != nil {
 		return nil, err
 	}
-	if res.Value == nil {
+	if res.Value == nil || res.ContentType == nil {
 		return nil, errors.New("azure: invalid server response")
 	}
-	return crypto.ParseCertificates([]byte(*res.Value))
+	return crypto.ParseCertificates([]byte(*res.Value), *res.ContentType)
 }
