@@ -47,7 +47,7 @@ func parsePKCS12(data []byte) ([]*x509.Certificate, error) {
 			certs = append(certs, cert)
 		}
 	}
-	return certs, err
+	return certs, nil
 }
 
 // ParseCertificates parses certificates from either PEM or PKCS12 data.
