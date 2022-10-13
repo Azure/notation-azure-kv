@@ -6,8 +6,9 @@ require (
 	github.com/Azure/azure-sdk-for-go v65.0.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.24
 	github.com/notaryproject/notation-core-go v0.1.0-alpha.4
-	github.com/notaryproject/notation-go v0.10.0-alpha.3.0.20220927020950-2bcfd343f974
+	github.com/notaryproject/notation-go v0.11.0-alpha.4
 	github.com/urfave/cli/v2 v2.3.0
+	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 )
 
 require (
@@ -26,5 +27,4 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 )
