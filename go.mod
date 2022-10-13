@@ -8,7 +8,7 @@ require (
 	github.com/notaryproject/notation-core-go v0.1.0-alpha.4
 	github.com/notaryproject/notation-go v0.11.0-alpha.4
 	github.com/urfave/cli/v2 v2.19.2
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 )
 
 require (
