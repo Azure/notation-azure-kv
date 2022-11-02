@@ -2,7 +2,7 @@ package version
 
 var (
 	// Version shows the current notation-azure-kv version, optionally with pre-release.
-	Version = "v0.4.0-alpha.4"
+	Version = "v0.4.0-beta.1"
 
 	// BuildMetadata stores the build metadata.
 	BuildMetadata = "unreleased"
