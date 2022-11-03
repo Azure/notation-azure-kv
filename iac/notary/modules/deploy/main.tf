@@ -146,7 +146,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   location                         = azurerm_resource_group.example.location
   resource_group_name              = azurerm_resource_group.example.name
   dns_prefix                       = "${random_id.main.hex}-aks-dns"
-  kubernetes_version               = "1.22.11"
+  kubernetes_version               = "1.23.12"
   sku_tier                         = "Free"
   http_application_routing_enabled = true
 
