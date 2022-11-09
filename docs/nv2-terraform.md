@@ -60,15 +60,86 @@ Run the following commands:
     azure_resource_group_name = "notary-4d32ffd6-rg"
     signing_key_name = "example"
     ```
+6. Configure Kubectl
+
+    ```bash
+    rgName="$(terraform output -raw azure_resource_group_name)"
+    aksName="$(terraform output -raw azure_kubernetes_cluster_name)"
+    az aks get-credentials --name $aksName --resource-group $rgName --admin --only-show-errors --overwrite-existing
+    ```
 
 > **Warning**
-> **Changes will be made to your local system**. Terraform state files will be stored to disk and kubectl will be configured to communicate with the AKS cluster deployed.
+> **Changes will be made to your local system**. Terraform state files will be stored to disk.
+
+## Deploy Gatekeeper to AKS
+
+1. Add the Gatekeeper repository to deploy the Helm chart.
+    ```bash
+    helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+    ```
+2. Run the `helm` install` command to install Gatekeeper
+    ```bash
+    helm install gatekeeper/gatekeeper  \
+    --name-template=gatekeeper \
+    --namespace gatekeeper-system --create-namespace \
+    --set enableExternalData=true
+    ```
+
+## Deploy Ratify to AKS
+
+1. Create an Azure Container Registry token for your AKS cluster to access container images within the regsitry.
+    ```bash
+    registry="$(terraform output -raw azure_container_registry_name)"
+
+    tokenPassword=$(az acr token create \
+        --name exampleToken \
+        --registry $registry \
+        --scope-map _repositories_admin \
+        --query 'credentials.passwords[0].value' \
+        --only-show-errors \
+        --output tsv)
+    ```
+2. Use `kubectl` to create a Kubernetes secret
+
+    ```bash
+    kubectl create secret docker-registry regcred \
+    --docker-server=$registry \
+    --docker-username=exampleToken \
+    --docker-password=$tokenPassword \
+    --docker-email=someone@example.com
+    ```
+
+3. Add the Ratify repository to your Helm configuration
+
+    ```bash
+    helm repo add ratify https://deislabs.github.io/ratify
+    ```
+
+4. Install the Ratify with Helm
+
+    ```bash
+    publickey="$(terraform output -raw notary_signing_cert_data)"
+    
+    helm install ratify ratify/ratify \
+    --set registryCredsSecret=regcred \
+    --set ratifyTestCert="$publickey"
+    ```
+
+5. Deploy the Ratify templates
+
+    ```bash
+    curl -L https://deislabs.github.io/ratify/library/default/template.yaml -o template.yaml;
+    curl -L https://deislabs.github.io/ratify/library/default/samples/constraint.yaml -o constraint.yaml;
+    kubectl apply -f template.yaml;
+    kubectl apply -f constraint.yaml;
+    rm template.yaml constraint.yaml
+    ```
 
 ## Install Notation
 
 1. Download the binary.
     ```bash
-    curl -Lo notation.tar.gz https://github.com/notaryproject/notation/releases/download/v0.9.0-alpha.1/notation_0.9.0-alpha.1_linux_amd64.tar.gz
+    curl -Lo notation.tar.gz https://github.com/notaryproject/notation/releases/download/v0.11.0-alpha.4/notation_0.11.0-alpha.4_linux_amd64.tar.gz
     ```
 2. Extract the Notation CLI.
     ```bash
@@ -79,7 +150,6 @@ Run the following commands:
 3. Add Notation to that PATH environment variable.
     ```bash
     export PATH="$HOME/bin:$PATH"
-    notation --version
     ```
 
 ## Install the Azure Key Vault plugin
@@ -87,7 +157,7 @@ Run the following commands:
 1. Download the plugin.
     ```bash
     curl -Lo notation-azure-kv.tar.gz \
-    https://github.com/Azure/notation-azure-kv/releases/download/v0.3.1-alpha.1/notation-azure-kv_0.3.1-alpha.1_linux_amd64.tar.gz
+    https://github.com/Azure/notation-azure-kv/releases/download/v0.4.0-beta.1/notation-azure-kv_0.4.0-beta.1_linux_amd64.tar.gz
     ```
 2. Extract the plugin
     ```bash
@@ -105,9 +175,9 @@ Run the following commands:
 1. Use the output of the `terraform apply` command in the previous step to populate the following variables:
 
     ```bash
-    keyName="$(terraform output -raw signing_key_name)"
-    acrName="$(terraform output -raw azure_container_registry)"
-    kvName="$(terraform output -raw azure_key_vault_name)"
+    keyName="$(terraform output -raw signing_cert_name)"
+    acrName="$(terraform output -raw azure_container_registry_name)"
+    kvName="$(terraform output -raw azure_keyvault_name)"
     ```
 
 2. Download the certificate and capture the key id as a variables:
@@ -123,9 +193,9 @@ Run the following commands:
     
     ```bash
     notation key add --name $keyName --id $keyId --plugin azure-kv 
-    notation cert add --name $keyName $certPath
+    <!-- notation cert add $keyName $certPath
     notation key list
-    notation cert list
+    notation cert list -->
     ```
 
 ## Build and sign a container image
@@ -136,8 +206,8 @@ Once the Terraform configuration is complete use the [Notation](https://github.c
 1. Export the required notation envrionment variables
 
     ```bash
-    export NOTATION_USERNAME=$(az keyvault secret show --name NOTATION-USERNAME --vault-name $kvName --query 'value' --only-show-errors --output tsv)
-    export NOTATION_PASSWORD=$(az keyvault secret show --name NOTATION-PASSWORD --vault-name $kvName --query 'value' --only-show-errors --output tsv)
+    export NOTATION_USERNAME=exampleToken
+    export NOTATION_PASSWORD=$tokenPassword
     export AZURE_CLIENT_SECRET=$(az keyvault secret show --name AZURE-CLIENT-SECRET --vault-name $kvName --query 'value' --only-show-errors --output tsv)
     export AZURE_CLIENT_ID=$(az keyvault secret show --name AZURE-CLIENT-ID --vault-name $kvName --query 'value' --only-show-errors --output tsv)
     export AZURE_TENANT_ID=$(az keyvault secret show --name AZURE-TENANT-ID --vault-name $kvName --query 'value' --only-show-errors --output tsv)
@@ -160,13 +230,14 @@ Once the Terraform configuration is complete use the [Notation](https://github.c
 3. Remotely sign the container image
 
     ```bash
-    notation sign --key $keyName $acrName.azurecr.io/$IMAGE && echo "Image successfullly signed using $keyname"
+    notation sign --key $keyName $acrName.azurecr.io/$IMAGE 
     ```
 
 4. Deploy the signed container image
 
     ```bash
-    kubectl run net-monitor --image=$acrName.azurecr.io/$IMAGE --namespace demo
-    sleep 5
-    kubectl get pods -n demo
+    kubectl create namespace demo;
+    kubectl run net-monitor --image=$acrName.azurecr.io/$IMAGE --namespace demo;
+    sleep 5;
+    kubectl get pods -n demo;
     ```
