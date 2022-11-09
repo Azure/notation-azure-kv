@@ -193,9 +193,6 @@ Run the following commands:
     
     ```bash
     notation key add --name $keyName --id $keyId --plugin azure-kv 
-    <!-- notation cert add $keyName $certPath
-    notation key list
-    notation cert list -->
     ```
 
 ## Build and sign a container image
@@ -208,9 +205,6 @@ Once the Terraform configuration is complete use the [Notation](https://github.c
     ```bash
     export NOTATION_USERNAME=exampleToken
     export NOTATION_PASSWORD=$tokenPassword
-    export AZURE_CLIENT_SECRET=$(az keyvault secret show --name AZURE-CLIENT-SECRET --vault-name $kvName --query 'value' --only-show-errors --output tsv)
-    export AZURE_CLIENT_ID=$(az keyvault secret show --name AZURE-CLIENT-ID --vault-name $kvName --query 'value' --only-show-errors --output tsv)
-    export AZURE_TENANT_ID=$(az keyvault secret show --name AZURE-TENANT-ID --vault-name $kvName --query 'value' --only-show-errors --output tsv)
     ```
 
     NOTE: Notation uses these environment variables to connect to the Azure Container Registry. Optionally, you could also pass them in as command-line arguments. 
