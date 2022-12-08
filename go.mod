@@ -5,8 +5,8 @@ go 1.19
 require (
 	github.com/Azure/azure-sdk-for-go v67.0.0+incompatible
 	github.com/Azure/go-autorest/autorest v0.11.28
-	github.com/notaryproject/notation-core-go v0.2.0-beta.1
-	github.com/notaryproject/notation-go v0.12.0-beta.1
+	github.com/notaryproject/notation-core-go v1.0.0-rc.1
+	github.com/notaryproject/notation-go v1.0.0-rc.1
 	github.com/urfave/cli/v2 v2.19.2
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 )
