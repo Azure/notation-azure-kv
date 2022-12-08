@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/version"
-	"github.com/notaryproject/notation-go/plugin"
+	"github.com/notaryproject/notation-go/plugin/proto"
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,10 +23,10 @@ func main() {
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
-		var reer plugin.RequestError
+		var reer proto.RequestError
 		if !errors.As(err, &reer) {
-			err = plugin.RequestError{
-				Code: plugin.ErrorCodeGeneric,
+			err = proto.RequestError{
+				Code: proto.ErrorCodeGeneric,
 				Err:  err,
 			}
 		}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/Azure/notation-azure-kv/internal/cloud"
 	"github.com/notaryproject/notation-core-go/signature"
-	"github.com/notaryproject/notation-go/plugin"
+	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
 func newKey(keyID string, pluginConfig map[string]string) (*cloud.Key, error) {
@@ -22,17 +22,17 @@ func newKey(keyID string, pluginConfig map[string]string) (*cloud.Key, error) {
 	return cloud.NewKeyFromID(client, keyID)
 }
 
-func Key(ctx context.Context, req *plugin.DescribeKeyRequest) (*plugin.DescribeKeyResponse, error) {
+func Key(ctx context.Context, req *proto.DescribeKeyRequest) (*proto.DescribeKeyResponse, error) {
 	if req == nil || req.KeyID == "" {
-		return nil, plugin.RequestError{
-			Code: plugin.ErrorCodeValidation,
+		return nil, proto.RequestError{
+			Code: proto.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
 		}
 	}
 	key, err := newKey(req.KeyID, req.PluginConfig)
 	if err != nil {
-		return nil, plugin.RequestError{
-			Code: plugin.ErrorCodeValidation,
+		return nil, proto.RequestError{
+			Code: proto.ErrorCodeValidation,
 			Err:  err,
 		}
 	}
@@ -44,8 +44,12 @@ func Key(ctx context.Context, req *plugin.DescribeKeyRequest) (*plugin.DescribeK
 	if err != nil {
 		return nil, fmt.Errorf("get key spec err: %w", err)
 	}
-	return &plugin.DescribeKeyResponse{
+	notationKeySpec, err := proto.EncodeKeySpec(keySpec)
+	if err != nil {
+		return nil, fmt.Errorf("encode key spec err: %w", err)
+	}
+	return &proto.DescribeKeyResponse{
 		KeyID:   req.KeyID,
-		KeySpec: plugin.KeySpecString(keySpec),
+		KeySpec: notationKeySpec,
 	}, nil
 }
