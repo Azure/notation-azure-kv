@@ -8,13 +8,13 @@ import (
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/signature"
-	"github.com/notaryproject/notation-go/plugin"
+	"github.com/notaryproject/notation-go/plugin/proto"
 
 	"github.com/urfave/cli/v2"
 )
 
 var signCommand = &cli.Command{
-	Name:   string(plugin.CommandGenerateSignature),
+	Name:   string(proto.CommandGenerateSignature),
 	Usage:  "Sign artifacts with keys in Azure Key Vault",
 	Action: runSign,
 	Flags: []cli.Flag{
@@ -38,18 +38,18 @@ func runSign(ctx *cli.Context) error {
 	} else {
 		r = os.Stdin
 	}
-	var req plugin.GenerateSignatureRequest
+	var req proto.GenerateSignatureRequest
 	err := json.NewDecoder(r).Decode(&req)
 	if err != nil {
-		return plugin.RequestError{
-			Code: plugin.ErrorCodeValidation,
+		return proto.RequestError{
+			Code: proto.ErrorCodeValidation,
 			Err:  fmt.Errorf("failed to unmarshal request input: %w", err),
 		}
 	}
 
 	resp, err := signature.Sign(ctx.Context, &req)
 	if err != nil {
-		var rerr plugin.RequestError
+		var rerr proto.RequestError
 		if errors.As(err, &rerr) {
 			return rerr
 		}

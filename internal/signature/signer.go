@@ -13,14 +13,14 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/notaryproject/notation-go/plugin"
+	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
-func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.GenerateSignatureResponse, error) {
+func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.GenerateSignatureResponse, error) {
 	// validate request
 	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.Hash == "" {
-		return nil, plugin.RequestError{
-			Code: plugin.ErrorCodeValidation,
+		return nil, proto.RequestError{
+			Code: proto.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
 		}
 	}
@@ -28,27 +28,31 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	// create azure-keyvault client
 	key, err := newKey(req.KeyID, req.PluginConfig)
 	if err != nil {
-		return nil, plugin.RequestError{
-			Code: plugin.ErrorCodeValidation,
+		return nil, proto.RequestError{
+			Code: proto.ErrorCodeValidation,
 			Err:  err,
 		}
 	}
 
 	// get keySpec
-	keySpec, err := plugin.ParseKeySpec(req.KeySpec)
+	keySpec, err := proto.DecodeKeySpec(req.KeySpec)
 	if err != nil {
 		return nil, err
 	}
 
 	// get hash and validate hash
-	if name := plugin.KeySpecHashString(keySpec); name != req.Hash {
-		return nil, requestErr(fmt.Errorf("keySpec hash:%v mismatch request hash:%v", name, req.Hash))
+	hashName, err := proto.HashAlgorithmFromKeySpec(keySpec)
+	if err != nil {
+		return nil, err
+	}
+	if hashName != req.Hash {
+		return nil, requestErr(fmt.Errorf("keySpec hash:%v mismatch request hash:%v", hashName, req.Hash))
 	}
 
 	// get signing alg
 	signAlg := keySpecToAlg(req.KeySpec)
 	if signAlg == "" {
-		return nil, errors.New("unrecognized key spec: " + req.KeySpec)
+		return nil, errors.New("unrecognized key spec: " + string(req.KeySpec))
 	}
 
 	// Digest.
@@ -72,30 +76,34 @@ func Sign(ctx context.Context, req *plugin.GenerateSignatureRequest) (*plugin.Ge
 	for _, cert := range certs {
 		certChain = append(certChain, cert.Raw)
 	}
-	return &plugin.GenerateSignatureResponse{
+	signatureAlgorithmString, err := proto.EncodeSigningAlgorithm(keySpec.SignatureAlgorithm())
+	if err != nil {
+		return nil, err
+	}
+	return &proto.GenerateSignatureResponse{
 		KeyID:            req.KeyID,
 		Signature:        sig,
-		SigningAlgorithm: plugin.SigningAlgorithmString(keySpec.SignatureAlgorithm()),
+		SigningAlgorithm: string(signatureAlgorithmString),
 		CertificateChain: certChain,
 	}, nil
 }
 
-func requestErr(err error) plugin.RequestError {
-	var code plugin.ErrorCode
+func requestErr(err error) proto.RequestError {
+	var code proto.ErrorCode
 	var aerr *azure.RequestError
 	if errors.As(err, &aerr) {
 		switch aerr.StatusCode {
 		case http.StatusUnauthorized:
-			code = plugin.ErrorCodeAccessDenied
+			code = proto.ErrorCodeAccessDenied
 		case http.StatusRequestTimeout:
-			code = plugin.ErrorCodeTimeout
+			code = proto.ErrorCodeTimeout
 		case http.StatusTooManyRequests:
-			code = plugin.ErrorCodeThrottled
+			code = proto.ErrorCodeThrottled
 		default:
-			code = plugin.ErrorCodeGeneric
+			code = proto.ErrorCodeGeneric
 		}
 	}
-	return plugin.RequestError{
+	return proto.RequestError{
 		Code: code,
 		Err:  err,
 	}
@@ -113,19 +121,19 @@ func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-func keySpecToAlg(k string) keyvault.JSONWebKeySignatureAlgorithm {
+func keySpecToAlg(k proto.KeySpec) keyvault.JSONWebKeySignatureAlgorithm {
 	switch k {
-	case plugin.RSA_2048:
+	case proto.KeySpecRSA2048:
 		return keyvault.PS256
-	case plugin.RSA_3072:
+	case proto.KeySpecRSA3072:
 		return keyvault.PS384
-	case plugin.RSA_4096:
+	case proto.KeySpecRSA4096:
 		return keyvault.PS512
-	case plugin.EC_256:
+	case proto.KeySpecEC256:
 		return keyvault.ES256
-	case plugin.EC_384:
+	case proto.KeySpecEC384:
 		return keyvault.ES384
-	case plugin.EC_521:
+	case proto.KeySpecEC521:
 		return keyvault.ES512
 	}
 	return ""

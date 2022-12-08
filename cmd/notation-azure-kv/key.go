@@ -8,13 +8,13 @@ import (
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/signature"
-	"github.com/notaryproject/notation-go/plugin"
+	"github.com/notaryproject/notation-go/plugin/proto"
 
 	"github.com/urfave/cli/v2"
 )
 
 var describeKeyCommand = &cli.Command{
-	Name:   string(plugin.CommandDescribeKey),
+	Name:   string(proto.CommandDescribeKey),
 	Usage:  "Azure key description",
 	Action: runDescribeKey,
 	Flags: []cli.Flag{
@@ -38,18 +38,18 @@ func runDescribeKey(ctx *cli.Context) error {
 	} else {
 		r = os.Stdin
 	}
-	var req plugin.DescribeKeyRequest
+	var req proto.DescribeKeyRequest
 	err := json.NewDecoder(r).Decode(&req)
 	if err != nil {
-		return plugin.RequestError{
-			Code: plugin.ErrorCodeValidation,
+		return proto.RequestError{
+			Code: proto.ErrorCodeValidation,
 			Err:  fmt.Errorf("failed to unmarshal request input: %w", err),
 		}
 	}
 
 	resp, err := signature.Key(ctx.Context, &req)
 	if err != nil {
-		var rerr plugin.RequestError
+		var rerr proto.RequestError
 		if errors.As(err, &rerr) {
 			return rerr
 		}
