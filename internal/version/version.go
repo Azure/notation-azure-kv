@@ -5,7 +5,7 @@ var (
 	Version = "v1.0.0-rc.1"
 
 	// BuildMetadata stores the build metadata.
-	BuildMetadata = ""
+	BuildMetadata = "unreleased"
 )
 
 // GetVersion returns the version string in SemVer 2.
