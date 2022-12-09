@@ -19,7 +19,7 @@ builds:
       - goos: windows
         goarch: arm64
     ldflags:
-      - -s -w -X {{.ModulePath}}/internal/version.Version={{.Version}} -X {{.ModulePath}}/internal/version.BuildMetadata={{.FullCommit}}
+      - -s -w -X {{.ModulePath}}/internal/version.Version={{.Version}} -X {{.ModulePath}}/internal/version.BuildMetadata=
 release:
   prerelease: auto
   draft: true

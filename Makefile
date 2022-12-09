@@ -3,8 +3,8 @@ COMMANDS       = notation-azure-kv
 GIT_TAG        = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 BUILD_METADATA =
 ifeq ($(GIT_TAG),) # unreleased build
-    GIT_COMMIT     = $(shell git rev-parse HEAD)
-    GIT_STATUS     = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "unreleased")
+	GIT_COMMIT     = $(shell git rev-parse HEAD)
+	GIT_STATUS     = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "unreleased")
 	BUILD_METADATA = $(GIT_COMMIT).$(GIT_STATUS)
 endif
 LDFLAGS        = -X $(MODULE)/internal/version.BuildMetadata=$(BUILD_METADATA)
