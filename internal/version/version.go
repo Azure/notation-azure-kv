@@ -2,10 +2,10 @@ package version
 
 var (
 	// Version shows the current notation-azure-kv version, optionally with pre-release.
-	Version = "v0.4.0-beta.1"
+	Version = "v1.0.0-rc.1"
 
 	// BuildMetadata stores the build metadata.
-	BuildMetadata = "unreleased"
+	BuildMetadata = ""
 )
 
 // GetVersion returns the version string in SemVer 2.
