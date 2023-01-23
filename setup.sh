@@ -395,8 +395,8 @@ function deployInfra {
 }
 
 function setup {
-    # getNotationProject
-    # installNotationKvPlugin
+    getNotationProject
+    installNotationKvPlugin
     spCreate
     deployInfra
     acrTokenCreate
@@ -404,7 +404,7 @@ function setup {
     createSigningCertforKV
     secureAKSwithRatify
     buildImageandSign
-    # notes
+    notes
 }
 
 # Call setup function
