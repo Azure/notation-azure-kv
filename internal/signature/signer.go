@@ -75,13 +75,13 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	if err != nil {
 		return nil, requestErr(err)
 	}
-	// complete the cert chain by cert bundle from plugin configuration
-	completeCertChain, err := cert.CompleteCertificateChain(req.PluginConfig, certs)
+	// merged the cert chain by cert bundle from plugin configuration
+	mergedCertChain, err := cert.MergeCertificateChain(req.PluginConfig, certs)
 	if err != nil {
 		return nil, requestErr(err)
 	}
-	rawCertChain := make([][]byte, 0, len(completeCertChain))
-	for _, cert := range completeCertChain {
+	rawCertChain := make([][]byte, 0, len(mergedCertChain))
+	for _, cert := range mergedCertChain {
 		rawCertChain = append(rawCertChain, cert.Raw)
 	}
 
