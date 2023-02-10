@@ -19,8 +19,8 @@ func parsePEM(data []byte) ([]*x509.Certificate, error) {
 				return nil, err
 			}
 			certs = append(certs, cert)
-			block, rest = pem.Decode(rest)
 		}
+		block, rest = pem.Decode(rest)
 	}
 	return certs, nil
 }
