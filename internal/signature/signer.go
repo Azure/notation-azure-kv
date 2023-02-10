@@ -13,9 +13,12 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
+	cert "github.com/Azure/notation-azure-kv/internal/crypto"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
+// Sign generates the signature for the given payload using the specified key and hash algorithm.
+// It also returns the signing algorithm used, and the certificate chain of the signing key.
 func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.GenerateSignatureResponse, error) {
 	// validate request
 	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.Hash == "" {
@@ -72,10 +75,16 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	if err != nil {
 		return nil, requestErr(err)
 	}
-	certChain := make([][]byte, 0, len(certs))
-	for _, cert := range certs {
-		certChain = append(certChain, cert.Raw)
+	// complete the cert chain by cert bundle from plugin configuration
+	completeCertChain, err := cert.CompleteCertificateChain(req.PluginConfig, certs)
+	if err != nil {
+		return nil, requestErr(err)
 	}
+	rawCertChain := make([][]byte, 0, len(completeCertChain))
+	for _, cert := range completeCertChain {
+		rawCertChain = append(rawCertChain, cert.Raw)
+	}
+
 	signatureAlgorithmString, err := proto.EncodeSigningAlgorithm(keySpec.SignatureAlgorithm())
 	if err != nil {
 		return nil, err
@@ -84,7 +93,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 		KeyID:            req.KeyID,
 		Signature:        sig,
 		SigningAlgorithm: string(signatureAlgorithmString),
-		CertificateChain: certChain,
+		CertificateChain: rawCertChain,
 	}, nil
 }
 
