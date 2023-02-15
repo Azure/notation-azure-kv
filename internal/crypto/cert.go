@@ -10,12 +10,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"golang.org/x/crypto/pkcs12"
 )
 
-const certBundleKey = "certbundle"
+const certBundleKey = "ca_certs"
 
 func parsePEM(data []byte) ([]*x509.Certificate, error) {
 	var certs []*x509.Certificate
@@ -83,7 +82,6 @@ func MergeCertificateChain(pluginConfig map[string]string, originalCerts []*x509
 	}
 
 	// validate certificate bundle path
-	certBundlePath = strings.Trim(certBundlePath, " ")
 	basename := filepath.Base(certBundlePath)
 	if !isValidFileName(basename) {
 		return nil, fmt.Errorf("the filename of certificate bundle path is not cross-platform compatible. filename: %s", basename)
