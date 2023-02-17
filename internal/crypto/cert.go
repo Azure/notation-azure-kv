@@ -8,13 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
-	"regexp"
 
 	"golang.org/x/crypto/pkcs12"
 )
 
-const certBundleKey = "ca_certs"
+const CertBundleKey = "ca_certs"
 
 func parsePEM(data []byte) ([]*x509.Certificate, error) {
 	var certs []*x509.Certificate
@@ -68,25 +66,11 @@ func ParseCertificates(data []byte, contentType string) (certs []*x509.Certifica
 	return parsePEM(data)
 }
 
-// MergeCertificateChain returns the complete certificate chain by appending the parent certificate from the certificate bundle to the original certificate chain.
-// If the certificate bundle path is not set in the pluginConfig, it returns the original certificate chain.
-// If an error occurs while reading the certificate bundle or parsing its PEM, it returns a nil slice and a non-nil error indicating the failure reason.
-func MergeCertificateChain(pluginConfig map[string]string, originalCerts []*x509.Certificate) ([]*x509.Certificate, error) {
-	// get cert bundle path
-	if pluginConfig == nil {
-		return originalCerts, nil
-	}
-	certBundlePath, ok := pluginConfig[certBundleKey]
-	if !ok {
-		return originalCerts, nil
-	}
-
-	// validate certificate bundle path
-	basename := filepath.Base(certBundlePath)
-	if !isValidFileName(basename) {
-		return nil, fmt.Errorf("the filename of certificate bundle path is not cross-platform compatible. filename: %s", basename)
-	}
-
+// MergeCertificateChain is a function that takes in a plugin configuration map
+// and a slice of x509 certificate instances, and attempts to merge the
+// certificate chain of the original certificates with a certificate bundle
+// specified in the plugin configuration.
+func MergeCertificateChain(certBundlePath string, originalCerts []*x509.Certificate) ([]*x509.Certificate, error) {
 	// read certificate bundle
 	certBundleBytes, err := os.ReadFile(certBundlePath)
 	if err != nil {
@@ -96,25 +80,42 @@ func MergeCertificateChain(pluginConfig map[string]string, originalCerts []*x509
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse user provided cert bundle file %q with err: %w", certBundlePath, err)
 	}
+	if len(certBundle) == 0 {
+		return nil, errors.New("the certificate bundle file is empty or not in PEM format")
+	}
+
 	// merge certificate chain
-	return mergeCertChain(originalCerts, certBundle)
+	return mergeCertificateChain(originalCerts, certBundle)
 }
 
-// mergeCertChain appends the parent certificate from the certificate bundle to the original certificate chain.
-// It returns the complete certificate chain along with a nil error if successful, otherwise it returns a nil slice and a non-nil error indicating the failure reason.
-func mergeCertChain(originalCerts, certBundle []*x509.Certificate) ([]*x509.Certificate, error) {
-	if len(originalCerts) == 0 {
-		return nil, errors.New("the certificate chain accessed from Azure Key Vault is empty")
-	}
-	if len(certBundle) == 0 {
-		return nil, errors.New("the certificate bundle file is empty or in a unsupported format")
-	}
-	// leaf certificate
-	leafCert := originalCerts[0]
+// mergeCertificateChain is a helper function for MergeCertificateChain function.
+// It obtains the originalCerts and a new certBundle and appends the latter
+// to the former then calls ValidateCertChain function, returns the result.
+func mergeCertificateChain(originalCerts, certBundle []*x509.Certificate) ([]*x509.Certificate, error) {
+	return ValidateCertificateChain(append(originalCerts, certBundle...))
+}
 
+// ValidateCertificateChain is a function that takes in a slice of x509 certificate
+// instances and validates the certificate chain. It first generates two
+// empty certificate pools, rootPool and intermediatePool, and then
+// iterates through the input `certs` to classify each one as either a "root"
+// or "intermediate" certificate and adding it to the appropriate pool.
+// It then sets up the options for certificate chain verification and calls
+// leafCert.Verify on the first certificate in the input slice (which is
+// assumed to be the "leaf certificate"). If the verification is successful,
+// it returns the first chain of authenticated certificates, otherwise it
+// logs the error and returns nil and an error.
+func ValidateCertificateChain(certs []*x509.Certificate) ([]*x509.Certificate, error) {
 	// generate certificate pools
 	rootPool := x509.NewCertPool()
 	intermediatePool := x509.NewCertPool()
+	for _, cert := range certs[1:] {
+		if bytes.Equal(cert.RawIssuer, cert.RawSubject) {
+			rootPool.AddCert(cert)
+		} else {
+			intermediatePool.AddCert(cert)
+		}
+	}
 
 	// verify options
 	opts := x509.VerifyOptions{
@@ -122,39 +123,13 @@ func mergeCertChain(originalCerts, certBundle []*x509.Certificate) ([]*x509.Cert
 		Intermediates: intermediatePool,
 		KeyUsages:     []x509.ExtKeyUsage{x509.ExtKeyUsageAny},
 	}
+	// leaf certificate
+	leafCert := certs[0]
 
-	// try to validate the certificate chain by using the original certificates
-	// accessed from AKV.
-	for _, cert := range originalCerts[1:] {
-		if bytes.Equal(cert.RawIssuer, cert.RawSubject) {
-			rootPool.AddCert(cert)
-		} else {
-			intermediatePool.AddCert(cert)
-		}
-	}
-	// verify and build certificate chain for leaf CA.
-	// skip the error because it will try to use cert bundle to fix it.
-	if certChains, err := leafCert.Verify(opts); err == nil {
-		return certChains[0], nil
-	}
-
-	// if the original certificates are not enough for generating the chain,
-	// try to use the certificate bundle.
-	for _, cert := range certBundle {
-		if bytes.Equal(cert.RawIssuer, cert.RawSubject) {
-			rootPool.AddCert(cert)
-		} else {
-			intermediatePool.AddCert(cert)
-		}
-	}
+	// verify and build certificate chain for leaf.
 	certChains, err := leafCert.Verify(opts)
 	if err != nil {
-		return nil, fmt.Errorf("cannot merge the certificate chain by the certificate bundle. error: %w", err)
+		return nil, fmt.Errorf("failed to validate certificate chain. error: %w", err)
 	}
 	return certChains[0], nil
-}
-
-// isValidFileName checks if a file name is cross-platform compatible
-func isValidFileName(fileName string) bool {
-	return regexp.MustCompile(`^[a-zA-Z0-9_.-]+$`).MatchString(fileName)
 }

@@ -75,13 +75,23 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	if err != nil {
 		return nil, requestErr(err)
 	}
-	// merged the cert chain by cert bundle from plugin configuration
-	mergedCertChain, err := cert.MergeCertificateChain(req.PluginConfig, certs)
+	// validate and build certificate chain from original certs fetched from AKV.
+	validCertChain, err := cert.ValidateCertificateChain(certs)
 	if err != nil {
-		return nil, requestErr(err)
+		// if the certs are not enough to build the chain,
+		// try to build cert chain with ca_certs of pluginConfig
+		certBundlePath, ok := req.PluginConfig[cert.CertBundleKey]
+		if !ok {
+			return nil, errors.New("the certificates fetched from AKV are not enough to build a certificate chain. Please provide a path of a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as the key name")
+		}
+		if validCertChain, err = cert.MergeCertificateChain(certBundlePath, certs); err != nil {
+			return nil, requestErr(err)
+		}
 	}
-	rawCertChain := make([][]byte, 0, len(mergedCertChain))
-	for _, cert := range mergedCertChain {
+
+	// build raw cert chain
+	rawCertChain := make([][]byte, 0, len(validCertChain))
+	for _, cert := range validCertChain {
 		rawCertChain = append(rawCertChain, cert.Raw)
 	}
 
