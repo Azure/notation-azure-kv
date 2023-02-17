@@ -13,9 +13,12 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest/azure"
+	cert "github.com/Azure/notation-azure-kv/internal/crypto"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
+// Sign generates the signature for the given payload using the specified key and hash algorithm.
+// It also returns the signing algorithm used, and the certificate chain of the signing key.
 func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.GenerateSignatureResponse, error) {
 	// validate request
 	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.Hash == "" {
@@ -72,10 +75,26 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	if err != nil {
 		return nil, requestErr(err)
 	}
-	certChain := make([][]byte, 0, len(certs))
-	for _, cert := range certs {
-		certChain = append(certChain, cert.Raw)
+	// validate and build certificate chain from original certs fetched from AKV.
+	validCertChain, err := cert.ValidateCertificateChain(certs)
+	if err != nil {
+		// if the certs are not enough to build the chain,
+		// try to build cert chain with ca_certs of pluginConfig
+		certBundlePath, ok := req.PluginConfig[cert.CertBundleKey]
+		if !ok {
+			return nil, fmt.Errorf("failed to build a certificate chain using certificates fetched from AKV with error: %w. Try again with a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as key name and file path as value", err)
+		}
+		if validCertChain, err = cert.MergeCertificateChain(certBundlePath, certs); err != nil {
+			return nil, requestErr(err)
+		}
 	}
+
+	// build raw cert chain
+	rawCertChain := make([][]byte, 0, len(validCertChain))
+	for _, cert := range validCertChain {
+		rawCertChain = append(rawCertChain, cert.Raw)
+	}
+
 	signatureAlgorithmString, err := proto.EncodeSigningAlgorithm(keySpec.SignatureAlgorithm())
 	if err != nil {
 		return nil, err
@@ -84,7 +103,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 		KeyID:            req.KeyID,
 		Signature:        sig,
 		SigningAlgorithm: string(signatureAlgorithmString),
-		CertificateChain: certChain,
+		CertificateChain: rawCertChain,
 	}, nil
 }
 
