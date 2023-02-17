@@ -84,14 +84,6 @@ func MergeCertificateChain(certBundlePath string, originalCerts []*x509.Certific
 		return nil, errors.New("the certificate bundle file is empty or not in PEM format")
 	}
 
-	// merge certificate chain
-	return mergeCertificateChain(originalCerts, certBundle)
-}
-
-// mergeCertificateChain is a helper function for MergeCertificateChain function.
-// It obtains the originalCerts and a new certBundle and appends the latter
-// to the former then calls ValidateCertChain function, returns the result.
-func mergeCertificateChain(originalCerts, certBundle []*x509.Certificate) ([]*x509.Certificate, error) {
 	return ValidateCertificateChain(append(originalCerts, certBundle...))
 }
 

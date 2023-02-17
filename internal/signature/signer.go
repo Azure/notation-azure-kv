@@ -82,7 +82,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 		// try to build cert chain with ca_certs of pluginConfig
 		certBundlePath, ok := req.PluginConfig[cert.CertBundleKey]
 		if !ok {
-			return nil, errors.New("the certificates fetched from AKV are not enough to build a certificate chain. Please provide a path of a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as the key name")
+			return nil, fmt.Errorf("failed to build a certificate chain using certificates fetched from AKV with error: %w. Try again with a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as key name and file path as value", err)
 		}
 		if validCertChain, err = cert.MergeCertificateChain(certBundlePath, certs); err != nil {
 			return nil, requestErr(err)
