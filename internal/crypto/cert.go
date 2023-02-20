@@ -12,6 +12,8 @@ import (
 	"golang.org/x/crypto/pkcs12"
 )
 
+// CertBundleKey defines the key name for the path of a certificate bundle file
+// passing through pluginConfig
 const CertBundleKey = "ca_certs"
 
 func parsePEM(data []byte) ([]*x509.Certificate, error) {

@@ -68,12 +68,12 @@ func NewAzureClient() (*keyvault.BaseClient, error) {
 	case authorizerFromMI:
 		authorizer, err = auth.NewAuthorizerFromEnvironment()
 		if err != nil {
-			return nil, fmt.Errorf("%w, origin error: %s", errAuthorizerFromMI, err.Error())
+			return nil, fmt.Errorf("%w, origin error: %w", errAuthorizerFromMI, err)
 		}
 	case authorizerFromCLI:
 		authorizer, err = auth.NewAuthorizerFromCLI()
 		if err != nil {
-			return nil, fmt.Errorf("%w, origin error: %s", errAuthorizerFromCLI, err.Error())
+			return nil, fmt.Errorf("%w, origin error: %w", errAuthorizerFromCLI, err)
 		}
 	default:
 		return nil, errUnknownAuthorizer
@@ -167,7 +167,7 @@ func (k *Key) Sign(ctx context.Context, algorithm keyvault.JSONWebKeySignatureAl
 	return base64.RawURLEncoding.DecodeString(*res.Result)
 }
 
-// Certificate returns the X.509 certificate chain associated with the key.
+// CertificateChain returns the X.509 certificate chain associated with the key.
 func (k *Key) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
 	// Need a certificate chain to pass the notation validation
 	// GetCertificate only returns the leaf certificate
