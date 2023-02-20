@@ -22,9 +22,9 @@ type clientAuthMethod string
 
 // set of auth errors
 var (
-	errAuthorizerFromMI  = errors.New("authorized from Managed Identity failed, please ensure you have assigned identity to your resource")
-	errAuthorizerFromCLI = errors.New("authorized from Azure CLI 2.0 failed, please ensure you have logged in using the 'az' command line tool")
-	errUnknownAuthorizer = errors.New("unknown authorize method, please use a supported authorize method according to the document")
+	errMsgAuthorizerFromMI  = "authorized from Managed Identity failed, please ensure you have assigned identity to your resource"
+	errMsgAuthorizerFromCLI = "authorized from Azure CLI 2.0 failed, please ensure you have logged in using the 'az' command line tool"
+	errMsgUnknownAuthorizer = "unknown authorize method, please use a supported authorize method according to the document"
 )
 
 const (
@@ -68,15 +68,15 @@ func NewAzureClient() (*keyvault.BaseClient, error) {
 	case authorizerFromMI:
 		authorizer, err = auth.NewAuthorizerFromEnvironment()
 		if err != nil {
-			return nil, fmt.Errorf("%w, origin error: %w", errAuthorizerFromMI, err)
+			return nil, fmt.Errorf("%s, origin error: %w", errMsgAuthorizerFromMI, err)
 		}
 	case authorizerFromCLI:
 		authorizer, err = auth.NewAuthorizerFromCLI()
 		if err != nil {
-			return nil, fmt.Errorf("%w, origin error: %w", errAuthorizerFromCLI, err)
+			return nil, fmt.Errorf("%s, origin error: %w", errMsgAuthorizerFromCLI, err)
 		}
 	default:
-		return nil, errUnknownAuthorizer
+		return nil, errors.New(errMsgUnknownAuthorizer)
 	}
 	client := keyvault.New()
 	client.Authorizer = authorizer
