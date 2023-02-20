@@ -121,7 +121,7 @@ func ValidateCertificateChain(certs []*x509.Certificate) ([]*x509.Certificate, e
 	// verify and build certificate chain for leaf.
 	certChains, err := leafCert.Verify(opts)
 	if err != nil {
-		return nil, fmt.Errorf("failed to validate certificate chain. error: %w", err)
+		return nil, err
 	}
 	return certChains[0], nil
 }
