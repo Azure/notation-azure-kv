@@ -53,7 +53,7 @@ func runSign(ctx *cli.Context) error {
 		if errors.As(err, &rerr) {
 			return rerr
 		}
-		return fmt.Errorf("failed to sign payload: %w", err)
+		return err
 	}
 
 	jsonResp, err := json.Marshal(resp)
