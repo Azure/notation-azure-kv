@@ -1,6 +1,6 @@
 module github.com/Azure/notation-azure-kv
 
-go 1.19
+go 1.20
 
 require (
 	github.com/Azure/azure-sdk-for-go v67.0.0+incompatible
