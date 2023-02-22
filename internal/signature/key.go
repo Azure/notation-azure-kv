@@ -5,12 +5,16 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/notation-azure-kv/internal/cloud"
 	"github.com/notaryproject/notation-core-go/signature"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
 func newKey(keyID string, pluginConfig map[string]string) (*cloud.Key, error) {
+	cliCredential, err := azidentity.NewAzureCLICredential(nil)
+	cliCredential.GetToken(context.Background())
+
 	client, err := cloud.NewAzureClient()
 	if err != nil {
 		return nil, err

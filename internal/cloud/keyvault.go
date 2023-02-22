@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azcertificates"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	"github.com/Azure/go-autorest/autorest"
@@ -81,6 +83,18 @@ func NewAzureClient() (*keyvault.BaseClient, error) {
 	client := keyvault.New()
 	client.Authorizer = authorizer
 	return &client, nil
+}
+
+func newAzureClient() error {
+	cliCredential, err := azidentity.NewAzureCLICredential(nil)
+	if err != nil {
+		return err
+	}
+	cliCredential.GetToken(context.Background())
+	client, err := azcertificates.NewClient("https://<TODO: your vault name>.vault.azure.net", credential, nil)
+	if err != nil {
+		// TODO: handle error
+	}
 }
 
 // Key represents a remote key in the Azure Key Vault.
