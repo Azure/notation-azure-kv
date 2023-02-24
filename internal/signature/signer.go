@@ -71,7 +71,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	}
 
 	// get certificate
-	certs, err := kv.Certificate(ctx)
+	certs, err := kv.CertificateChain(ctx)
 	if err != nil {
 		return nil, requestErr(err)
 	}
