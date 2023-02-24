@@ -20,8 +20,8 @@ type clientAuthMethod string
 
 // set of auth errors
 var (
-	errMsgAuthorizerFromMI  = "authorized from Managed Identity failed, please ensure you have assigned identity to your resource"
-	errMsgAuthorizerFromCLI = "authorized from Azure CLI 2.0 failed, please ensure you have logged in using the 'az' command line tool"
+	errMsgAuthorizerFromMI  = "authorized from Managed Identity failed, please ensure you have assigned identity to your resource."
+	errMsgAuthorizerFromCLI = "authorized from Azure CLI 2.0 failed, please ensure you have logged in using the 'az' command line tool."
 	errMsgUnknownAuthorizer = "unknown authorize method, please use a supported authorize method according to the document"
 )
 
@@ -58,8 +58,16 @@ func AzureCredential() (credential azcore.TokenCredential, err error) {
 	switch authMethod {
 	case authorizerFromMI:
 		credential, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			err = fmt.Errorf("%s original error: %w", errMsgAuthorizerFromMI, err)
+		}
 	case authorizerFromCLI:
 		credential, err = azidentity.NewAzureCLICredential(nil)
+		if err != nil {
+			err = fmt.Errorf("%s original error: %w", errMsgAuthorizerFromCLI, err)
+		}
+	default:
+		err = errors.New(errMsgUnknownAuthorizer)
 	}
 	return
 }
