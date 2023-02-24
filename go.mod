@@ -7,6 +7,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.2.1
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azcertificates v0.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys v0.9.0
+	github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets v0.11.0
 	github.com/notaryproject/notation-core-go v1.0.0-rc.2
 	github.com/notaryproject/notation-go v1.0.0-rc.3
 	github.com/urfave/cli/v2 v2.23.6

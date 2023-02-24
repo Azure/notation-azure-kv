@@ -3,7 +3,6 @@ package cloud
 import (
 	"context"
 	"crypto/x509"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azcertificates"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 	"github.com/Azure/notation-azure-kv/internal/crypto"
 )
 
@@ -66,8 +66,9 @@ func AzureCredential() (credential azcore.TokenCredential, err error) {
 
 // KeyVault represents a remote key in the Azure KeyVault Vault.
 type KeyVault struct {
-	KeyClient  *azkeys.Client
-	CertClient *azcertificates.Client
+	keyClient    *azkeys.Client
+	certClient   *azcertificates.Client
+	secretClient *azsecrets.Client
 
 	name    string
 	version string
@@ -90,28 +91,30 @@ func NewKeyVault(vaultName, dnsSuffix, keyName, version string) (*KeyVault, erro
 	if err != nil {
 		return nil, err
 	}
+	secretClient, err := azsecrets.NewClient(vaultURL, credential, nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return &KeyVault{
-		KeyClient:  keyClient,
-		CertClient: certClient,
-		name:       keyName,
-		version:    version,
+		keyClient:    keyClient,
+		certClient:   certClient,
+		secretClient: secretClient,
+		name:         keyName,
+		version:      version,
 	}, nil
 }
 
 // Sign signs the message digest with the algorithm provided.
 func (k *KeyVault) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error) {
-	// Prepare the message
-	value := base64.RawURLEncoding.EncodeToString(digest)
-
 	// Sign the message
-	res, err := k.KeyClient.Sign(
+	res, err := k.keyClient.Sign(
 		ctx,
 		k.name,
 		k.version,
 		azkeys.SignParameters{
 			Algorithm: &algorithm,
-			Value:     []byte(value),
+			Value:     digest,
 		},
 		nil,
 	)
@@ -126,14 +129,17 @@ func (k *KeyVault) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatur
 	if res.Result == nil {
 		return nil, errors.New("azure: invalid server response")
 	}
-	return base64.RawURLEncoding.DecodeString(string(res.Result))
+	return res.Result, nil
 }
 
-// Certificate returns the X.509 certificate chain associated with the key.
-func (k *KeyVault) Certificate(ctx context.Context) ([]*x509.Certificate, error) {
-	cert, err := k.CertClient.GetCertificate(ctx, k.name, k.version, nil)
+// CertificateChain returns the X.509 certificate chain associated with the key.
+func (k *KeyVault) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
+	secret, err := k.secretClient.GetSecret(ctx, k.name, k.version, nil)
 	if err != nil {
 		return nil, err
 	}
-	return crypto.ParseCertificates(cert.CER, *cert.ContentType)
+	if secret.Value == nil || secret.ContentType == nil {
+		return nil, errors.New("azure: invalid server response")
+	}
+	return crypto.ParseCertificates([]byte(*secret.Value), *secret.ContentType)
 }
