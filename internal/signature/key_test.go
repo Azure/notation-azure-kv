@@ -10,7 +10,7 @@ func Test_parseKeyID(t *testing.T) {
 		name          string
 		args          args
 		wantVaultName string
-		wantDnsSuffix string
+		wantDNSSuffix string
 		wantKeyName   string
 		wantSha       string
 		wantErr       bool
@@ -19,7 +19,7 @@ func Test_parseKeyID(t *testing.T) {
 			name:          "valid keyID",
 			args:          args{keyID: "https://akvname.vault.azure.net/keys/keyname/b33b9e97ed0b4569b8cdede2162f4000"},
 			wantVaultName: "akvname",
-			wantDnsSuffix: "vault.azure.net",
+			wantDNSSuffix: "vault.azure.net",
 			wantKeyName:   "keyname",
 			wantSha:       "b33b9e97ed0b4569b8cdede2162f4000",
 			wantErr:       false,
@@ -28,7 +28,7 @@ func Test_parseKeyID(t *testing.T) {
 			name:          "valid keyID",
 			args:          args{keyID: "https://akvname.vault-test.azure.net/keys/keyname/b33b9e97ed0b4569b8cdede2162f4000"},
 			wantVaultName: "akvname",
-			wantDnsSuffix: "vault-test.azure.net",
+			wantDNSSuffix: "vault-test.azure.net",
 			wantKeyName:   "keyname",
 			wantSha:       "b33b9e97ed0b4569b8cdede2162f4000",
 			wantErr:       false,
@@ -49,7 +49,7 @@ func Test_parseKeyID(t *testing.T) {
 			if gotVaultName != tt.wantVaultName {
 				t.Errorf("parseKeyID() gotVaultName = %v, want %v", gotVaultName, tt.wantVaultName)
 			}
-			if gotDnsSuffix != tt.wantDnsSuffix {
+			if gotDnsSuffix != tt.wantDNSSuffix {
 				t.Errorf("parseKeyID() gotDnsSuffix = %v, want %v", gotVaultName, tt.wantVaultName)
 			}
 			if gotKeyName != tt.wantKeyName {

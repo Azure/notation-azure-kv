@@ -12,7 +12,7 @@ import (
 )
 
 // re is the regular expression for parsing keyID: https://{vaultName}.vault.azure.net/keys/{keyName}/{version}
-var re = `^https:\/\/(.*?)\.(.*)\/keys\/(.*)\/(.*)`
+const re = `^https:\/\/(.*?)\.(.*)\/keys\/(.*)\/(.*)`
 
 func newKeyVault(keyID string) (*cloud.KeyVault, error) {
 	vaultName, dnsSuffix, keyName, version, err := parseKeyID(keyID)
@@ -57,7 +57,7 @@ func Key(ctx context.Context, req *proto.DescribeKeyRequest) (*proto.DescribeKey
 func parseKeyID(keyID string) (vaultName, dnsSuffix, keyName, keyVersion string, err error) {
 	match := regexp.MustCompile(re).FindStringSubmatch(keyID)
 	if len(match) < 5 {
-		err = fmt.Errorf("invalid keyID. Preferred keyID schema is https://{vaultName}.vault.azure.net/keys/{keyName}/{Sha}")
+		err = fmt.Errorf("invalid keyID. Preferred keyID schema is https://{vaultName}.vault.azure.net/keys/{keyName}/{version}")
 		return
 	}
 	vaultName = match[1]
