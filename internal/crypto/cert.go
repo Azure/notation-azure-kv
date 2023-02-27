@@ -12,9 +12,18 @@ import (
 	"golang.org/x/crypto/pkcs12"
 )
 
-// CertBundleKey defines the key name for the path of a certificate bundle file
-// passing through pluginConfig
-const CertBundleKey = "ca_certs"
+const (
+	// CertSecretKey defines the pluginConfig key name for triggering
+	// GetSecret (Get secret permission is required) operation to
+	// fetch the certificate chain instead of GetCertificate operation.
+	//
+	// To enable the feature, the value of the key should be "true".
+	CertSecretKey = "get_secret"
+
+	// CertBundleKey defines the pluginConfig key name for the path of
+	// a certificate bundle file passing through pluginConfig
+	CertBundleKey = "ca_certs"
+)
 
 func parsePEM(data []byte) ([]*x509.Certificate, error) {
 	var certs []*x509.Certificate
@@ -89,17 +98,22 @@ func MergeCertificateChain(certBundlePath string, originalCerts []*x509.Certific
 	return ValidateCertificateChain(append(originalCerts, certBundle...))
 }
 
-// ValidateCertificateChain is a function that takes in a slice of x509 certificate
-// instances and validates the certificate chain. It first generates two
-// empty certificate pools, rootPool and intermediatePool, and then
-// iterates through the input `certs` to classify each one as either a "root"
-// or "intermediate" certificate and adding it to the appropriate pool.
-// It then sets up the options for certificate chain verification and calls
-// leafCert.Verify on the first certificate in the input slice (which is
-// assumed to be the "leaf certificate"). If the verification is successful,
-// it returns the first chain of authenticated certificates, otherwise it
-// logs the error and returns nil and an error.
+// ValidateCertificateChain verifies a certificate chain and returns the valid
+// chain coupled with any error that may occur. It checks for a self signed leaf
+// certificate if the input contains only one certificate. It also generates two
+// pools, one for the root certificate and the other for intermediate
+// certificates. The function then verifies the options passed and builds a
+// certificate chain for the leaf certificate, finally returns the valid chain.
 func ValidateCertificateChain(certs []*x509.Certificate) ([]*x509.Certificate, error) {
+	if len(certs) == 1 {
+		// validate self-signed leaf cert
+		cert := certs[0]
+		if err := cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature); err != nil {
+			return nil, fmt.Errorf("invalid self-signed leaf cert. error %w", err)
+		}
+		return certs, nil
+	}
+
 	// generate certificate pools
 	rootPool := x509.NewCertPool()
 	intermediatePool := x509.NewCertPool()

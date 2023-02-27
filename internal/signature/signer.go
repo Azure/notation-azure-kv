@@ -5,15 +5,15 @@ import (
 	"crypto"
 	"errors"
 	"fmt"
-	"net/http"
 
 	// Make required hashers available.
 	_ "crypto/sha256"
 	_ "crypto/sha512"
+	"crypto/x509"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
-	cert "github.com/Azure/notation-azure-kv/internal/crypto"
+	"github.com/Azure/notation-azure-kv/internal/cloud"
+	certutils "github.com/Azure/notation-azure-kv/internal/crypto"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
@@ -43,13 +43,13 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 		return nil, err
 	}
 
-	// get hash and validate hash
+	// get hash name and validate hash
 	hashName, err := proto.HashAlgorithmFromKeySpec(keySpec)
 	if err != nil {
 		return nil, err
 	}
 	if hashName != req.Hash {
-		return nil, requestErr(fmt.Errorf("keySpec hash:%v mismatch request hash:%v", hashName, req.Hash))
+		return nil, fmt.Errorf("keySpec hash:%v mismatch request hash:%v", hashName, req.Hash)
 	}
 
 	// get signing alg
@@ -58,41 +58,22 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 		return nil, errors.New("unrecognized key spec: " + string(req.KeySpec))
 	}
 
-	// Digest.
+	// compute hash for the payload
 	hashed, err := computeHash(keySpec.SignatureAlgorithm().Hash(), req.Payload)
 	if err != nil {
 		return nil, err
 	}
 
-	// Sign.
+	// sign
 	sig, err := kv.Sign(ctx, signAlg, hashed)
 	if err != nil {
-		return nil, requestErr(err)
+		return nil, err
 	}
 
-	// get certificate
-	certs, err := kv.CertificateChain(ctx)
+	// get certificate chain
+	rawCertChain, err := getCertificateChain(ctx, kv, req.PluginConfig)
 	if err != nil {
-		return nil, requestErr(err)
-	}
-	// validate and build certificate chain from original certs fetched from AKV.
-	validCertChain, err := cert.ValidateCertificateChain(certs)
-	if err != nil {
-		// if the certs are not enough to build the chain,
-		// try to build cert chain with ca_certs of pluginConfig
-		certBundlePath, ok := req.PluginConfig[cert.CertBundleKey]
-		if !ok {
-			return nil, fmt.Errorf("failed to build a certificate chain using certificates fetched from AKV because %w. Try again with a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as key name and file path as value", err)
-		}
-		if validCertChain, err = cert.MergeCertificateChain(certBundlePath, certs); err != nil {
-			return nil, fmt.Errorf("failed to build a certificate chain with certificate bundle because %w", err)
-		}
-	}
-
-	// build raw cert chain
-	rawCertChain := make([][]byte, 0, len(validCertChain))
-	for _, cert := range validCertChain {
-		rawCertChain = append(rawCertChain, cert.Raw)
+		return nil, err
 	}
 
 	signatureAlgorithmString, err := proto.EncodeSigningAlgorithm(keySpec.SignatureAlgorithm())
@@ -107,25 +88,47 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	}, nil
 }
 
-func requestErr(err error) proto.RequestError {
-	var code proto.ErrorCode
-	var aerr *azcore.ResponseError
-	if errors.As(err, &aerr) {
-		switch aerr.StatusCode {
-		case http.StatusUnauthorized:
-			code = proto.ErrorCodeAccessDenied
-		case http.StatusRequestTimeout:
-			code = proto.ErrorCodeTimeout
-		case http.StatusTooManyRequests:
-			code = proto.ErrorCodeThrottled
-		default:
-			code = proto.ErrorCodeGeneric
+func getCertificateChain(ctx context.Context, kv *cloud.KeyVault, pluginConfig map[string]string) ([][]byte, error) {
+	var (
+		certs []*x509.Certificate
+		err   error
+	)
+
+	if v := pluginConfig[certutils.CertSecretKey]; v == "true" {
+		// get the certificate chain by GetSecret (get secret permission)
+		certs, err = kv.CertificateChain(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// get the leaf cert by GetCertificate (get certificate permission)
+		cert, err := kv.Certificate(ctx)
+		if err != nil {
+			return nil, err
+		}
+		certs = append(certs, cert)
+	}
+
+	// validate and build certificate chain from original certs fetched from AKV.
+	validCertChain, err := certutils.ValidateCertificateChain(certs)
+	if err != nil {
+		// if the certs are not enough to build the chain,
+		// try to build cert chain with ca_certs of pluginConfig
+		certBundlePath, ok := pluginConfig[certutils.CertBundleKey]
+		if !ok {
+			return nil, fmt.Errorf("failed to build a certificate chain using certificates fetched from AKV because %w. Try again with a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as key name and file path as value", err)
+		}
+		if validCertChain, err = certutils.MergeCertificateChain(certBundlePath, certs); err != nil {
+			return nil, fmt.Errorf("failed to build a certificate chain with certificate bundle because %w", err)
 		}
 	}
-	return proto.RequestError{
-		Code: code,
-		Err:  err,
+
+	// build raw cert chain
+	rawCertChain := make([][]byte, 0, len(validCertChain))
+	for _, cert := range validCertChain {
+		rawCertChain = append(rawCertChain, cert.Raw)
 	}
+	return rawCertChain, nil
 }
 
 // computeHash computes the digest of the message with the given hash algorithm.
