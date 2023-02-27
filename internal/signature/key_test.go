@@ -41,7 +41,7 @@ func Test_parseKeyID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotVaultName, gotDnsSuffix, gotKeyName, gotSha, err := parseKeyID(tt.args.keyID)
+			gotVaultName, gotDNSSuffix, gotKeyName, gotSha, err := parseKeyID(tt.args.keyID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseKeyID() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -49,7 +49,7 @@ func Test_parseKeyID(t *testing.T) {
 			if gotVaultName != tt.wantVaultName {
 				t.Errorf("parseKeyID() gotVaultName = %v, want %v", gotVaultName, tt.wantVaultName)
 			}
-			if gotDnsSuffix != tt.wantDNSSuffix {
+			if gotDNSSuffix != tt.wantDNSSuffix {
 				t.Errorf("parseKeyID() gotDnsSuffix = %v, want %v", gotVaultName, tt.wantVaultName)
 			}
 			if gotKeyName != tt.wantKeyName {

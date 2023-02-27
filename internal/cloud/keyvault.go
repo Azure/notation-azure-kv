@@ -20,8 +20,8 @@ type clientAuthMethod string
 
 // set of auth errors
 var (
-	errMsgAuthorizerFromMI  = "authorized from Managed Identity failed, please ensure you have assigned identity to your resource."
-	errMsgAuthorizerFromCLI = "authorized from Azure CLI 2.0 failed, please ensure you have logged in using the 'az' command line tool."
+	errMsgAuthorizerFromMI  = "authorized from Managed Identity failed, please ensure you have assigned identity to your resource"
+	errMsgAuthorizerFromCLI = "authorized from Azure CLI 2.0 failed, please ensure you have logged in using the 'az' command line tool"
 	errMsgUnknownAuthorizer = "unknown authorize method, please use a supported authorize method according to the document"
 )
 
@@ -53,18 +53,19 @@ func getAzureClientAuthMethod() clientAuthMethod {
 	return mode
 }
 
+// AzureCredential returns an Azure TokenCredential
 func AzureCredential() (credential azcore.TokenCredential, err error) {
 	authMethod := getAzureClientAuthMethod()
 	switch authMethod {
 	case authorizerFromMI:
 		credential, err = azidentity.NewManagedIdentityCredential(nil)
 		if err != nil {
-			err = fmt.Errorf("%s original error: %w", errMsgAuthorizerFromMI, err)
+			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromMI, err)
 		}
 	case authorizerFromCLI:
 		credential, err = azidentity.NewAzureCLICredential(nil)
 		if err != nil {
-			err = fmt.Errorf("%s original error: %w", errMsgAuthorizerFromCLI, err)
+			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromCLI, err)
 		}
 	default:
 		err = errors.New(errMsgUnknownAuthorizer)
@@ -72,7 +73,7 @@ func AzureCredential() (credential azcore.TokenCredential, err error) {
 	return
 }
 
-// KeyVault represents a remote key in the Azure KeyVault Vault.
+// KeyVault represents a Azure KeyVault Vault.
 type KeyVault struct {
 	keyClient    *azkeys.Client
 	certClient   *azcertificates.Client
@@ -82,6 +83,7 @@ type KeyVault struct {
 	version string
 }
 
+// NewKeyVault function creates a new instance of KeyVault struct
 func NewKeyVault(vaultName, dnsSuffix, keyName, version string) (*KeyVault, error) {
 	// get credential
 	credential, err := AzureCredential()
