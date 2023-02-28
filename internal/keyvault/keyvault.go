@@ -1,11 +1,13 @@
-package cloud
+package keyvault
 
 import (
 	"context"
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -53,8 +55,13 @@ func getAzureClientAuthMethod() clientAuthMethod {
 	return mode
 }
 
-// AzureCredential returns an Azure TokenCredential
-func AzureCredential() (credential azcore.TokenCredential, err error) {
+// azureCredential returns an Azure TokenCredential
+func azureCredential() (azcore.TokenCredential, error) {
+	var (
+		credential azcore.TokenCredential
+		err        error
+	)
+
 	authMethod := getAzureClientAuthMethod()
 	switch authMethod {
 	case authorizerFromMI:
@@ -70,11 +77,11 @@ func AzureCredential() (credential azcore.TokenCredential, err error) {
 	default:
 		err = errors.New(errMsgUnknownAuthorizer)
 	}
-	return
+	return credential, err
 }
 
-// KeyVault represents a Azure KeyVault Vault.
-type KeyVault struct {
+// Certificate represents a Azure Certificate Vault.
+type Certificate struct {
 	keyClient    *azkeys.Client
 	certClient   *azcertificates.Client
 	secretClient *azsecrets.Client
@@ -83,16 +90,33 @@ type KeyVault struct {
 	version string
 }
 
-// NewKeyVault function creates a new instance of KeyVault struct
-func NewKeyVault(vaultName, dnsSuffix, keyName, version string) (*KeyVault, error) {
+func NewCertificateFromID(id string) (*Certificate, error) {
+	u, err := url.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid certificate/key identifier: %q. The preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}.", id)
+	}
+
+	if u.Scheme != "https" {
+		return nil, fmt.Errorf("invalid certificate/key identifier: %q. The preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}.", id)
+	}
+
+	parts := strings.Split(strings.TrimPrefix(u.Path, "/"), "/")
+	if len(parts) != 3 || (parts[0] != "keys" && parts[0] != "certificates") {
+		return nil, fmt.Errorf("invalid certificate/key identifier: %q. The preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}.", id)
+	}
+	return NewCertificate(u.Host, parts[1], parts[2])
+}
+
+// NewCertificate function creates a new instance of KeyVault struct
+func NewCertificate(vaultHost, keyName, version string) (*Certificate, error) {
 	// get credential
-	credential, err := AzureCredential()
+	credential, err := azureCredential()
 	if err != nil {
 		return nil, err
 	}
 
 	// create cert and key clients
-	vaultURL := fmt.Sprintf("https://%s.%s", vaultName, dnsSuffix)
+	vaultURL := fmt.Sprintf("https://%s", vaultHost)
 	keyClient, err := azkeys.NewClient(vaultURL, credential, nil)
 	if err != nil {
 		return nil, err
@@ -106,7 +130,7 @@ func NewKeyVault(vaultName, dnsSuffix, keyName, version string) (*KeyVault, erro
 		return nil, err
 	}
 
-	return &KeyVault{
+	return &Certificate{
 		keyClient:    keyClient,
 		certClient:   certClient,
 		secretClient: secretClient,
@@ -116,7 +140,7 @@ func NewKeyVault(vaultName, dnsSuffix, keyName, version string) (*KeyVault, erro
 }
 
 // Sign signs the message digest with the algorithm provided.
-func (k *KeyVault) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error) {
+func (k *Certificate) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error) {
 	// Sign the message
 	res, err := k.keyClient.Sign(
 		ctx,
@@ -143,7 +167,7 @@ func (k *KeyVault) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatur
 }
 
 // CertificateChain returns the X.509 certificate chain associated with the key.
-func (k *KeyVault) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
+func (k *Certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
 	secret, err := k.secretClient.GetSecret(ctx, k.name, k.version, nil)
 	if err != nil {
 		return nil, err
