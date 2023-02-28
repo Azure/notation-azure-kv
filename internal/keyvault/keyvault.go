@@ -46,40 +46,6 @@ const (
 	defaultAuthMethod = authorizerFromCLI
 )
 
-// getAzureClientAuthMethod get authMethod from environment variable
-func getAzureClientAuthMethod() clientAuthMethod {
-	mode := clientAuthMethod(os.Getenv(authMethodKey))
-	if mode == "" {
-		return defaultAuthMethod
-	}
-	return mode
-}
-
-// azureCredential returns an Azure TokenCredential
-func azureCredential() (azcore.TokenCredential, error) {
-	var (
-		credential azcore.TokenCredential
-		err        error
-	)
-
-	authMethod := getAzureClientAuthMethod()
-	switch authMethod {
-	case authorizerFromMI:
-		credential, err = azidentity.NewManagedIdentityCredential(nil)
-		if err != nil {
-			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromMI, err)
-		}
-	case authorizerFromCLI:
-		credential, err = azidentity.NewAzureCLICredential(nil)
-		if err != nil {
-			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromCLI, err)
-		}
-	default:
-		err = errors.New(errMsgUnknownAuthorizer)
-	}
-	return credential, err
-}
-
 // Certificate represents a Azure Certificate Vault.
 type Certificate struct {
 	keyClient    *azkeys.Client
@@ -93,16 +59,16 @@ type Certificate struct {
 func NewCertificateFromID(id string) (*Certificate, error) {
 	u, err := url.Parse(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid certificate/key identifier: %q. The preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}.", id)
+		return nil, fmt.Errorf("invalid certificate/key identifier: %q. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", id)
 	}
 
 	if u.Scheme != "https" {
-		return nil, fmt.Errorf("invalid certificate/key identifier: %q. The preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}.", id)
+		return nil, fmt.Errorf("invalid certificate/key identifier: %q. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", id)
 	}
 
 	parts := strings.Split(strings.TrimPrefix(u.Path, "/"), "/")
 	if len(parts) != 3 || (parts[0] != "keys" && parts[0] != "certificates") {
-		return nil, fmt.Errorf("invalid certificate/key identifier: %q. The preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}.", id)
+		return nil, fmt.Errorf("invalid certificate/key identifier: %q. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", id)
 	}
 	return NewCertificate(u.Host, parts[1], parts[2])
 }
@@ -137,6 +103,40 @@ func NewCertificate(vaultHost, keyName, version string) (*Certificate, error) {
 		name:         keyName,
 		version:      version,
 	}, nil
+}
+
+// azureCredential returns an Azure TokenCredential
+func azureCredential() (azcore.TokenCredential, error) {
+	var (
+		credential azcore.TokenCredential
+		err        error
+	)
+
+	authMethod := getAzureClientAuthMethod()
+	switch authMethod {
+	case authorizerFromMI:
+		credential, err = azidentity.NewManagedIdentityCredential(nil)
+		if err != nil {
+			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromMI, err)
+		}
+	case authorizerFromCLI:
+		credential, err = azidentity.NewAzureCLICredential(nil)
+		if err != nil {
+			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromCLI, err)
+		}
+	default:
+		err = errors.New(errMsgUnknownAuthorizer)
+	}
+	return credential, err
+}
+
+// getAzureClientAuthMethod get authMethod from environment variable
+func getAzureClientAuthMethod() clientAuthMethod {
+	mode := clientAuthMethod(os.Getenv(authMethodKey))
+	if mode == "" {
+		return defaultAuthMethod
+	}
+	return mode
 }
 
 // Sign signs the message digest with the algorithm provided.
