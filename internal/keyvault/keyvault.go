@@ -187,5 +187,7 @@ func (k *Certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate
 	if secret.Value == nil || secret.ContentType == nil {
 		return nil, errors.New("azure: invalid server response")
 	}
+	// For PKCS12 format, secret.Value is base64 encoded data.
+	// for PEM format, secret.Value is the raw data in PEM format.
 	return crypto.ParseCertificates([]byte(*secret.Value), *secret.ContentType)
 }
