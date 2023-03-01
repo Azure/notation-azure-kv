@@ -94,7 +94,7 @@ func NewCertificate(vaultHost, keyName, version string) (*Certificate, error) {
 	}
 
 	// create cert and key clients
-	vaultURL := fmt.Sprintf("https://%s", vaultHost)
+	vaultURL := "https://" + vaultHost
 	keyClient, err := azkeys.NewClient(vaultURL, credential, nil)
 	if err != nil {
 		return nil, err
