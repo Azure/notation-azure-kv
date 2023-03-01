@@ -56,21 +56,33 @@ type Certificate struct {
 	version string
 }
 
+// NewCertificateFromID creates a Certificate with given key identifier or
+// certificate identifier.
 func NewCertificateFromID(id string) (*Certificate, error) {
+	host, name, version, err := parseIdentifier(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid certificate/key identifier with error: %w. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", err)
+	}
+	return NewCertificate(host, name, version)
+}
+
+// parseIdentifier parses the key/certificate identifier and returns the
+// host, name and version.
+func parseIdentifier(id string) (string, string, string, error) {
 	u, err := url.Parse(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid certificate/key identifier: %q. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", id)
+		return "", "", "", err
 	}
 
 	if u.Scheme != "https" {
-		return nil, fmt.Errorf("invalid certificate/key identifier: %q. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", id)
+		return "", "", "", err
 	}
 
 	parts := strings.Split(strings.TrimPrefix(u.Path, "/"), "/")
 	if len(parts) != 3 || (parts[0] != "keys" && parts[0] != "certificates") {
-		return nil, fmt.Errorf("invalid certificate/key identifier: %q. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", id)
+		return "", "", "", err
 	}
-	return NewCertificate(u.Host, parts[1], parts[2])
+	return u.Host, parts[1], parts[2], nil
 }
 
 // NewCertificate function creates a new instance of KeyVault struct
