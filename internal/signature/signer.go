@@ -11,9 +11,10 @@ import (
 	_ "crypto/sha256"
 	_ "crypto/sha512"
 
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
-	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
 	cert "github.com/Azure/notation-azure-kv/internal/crypto"
+	"github.com/Azure/notation-azure-kv/internal/keyvault"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
@@ -29,7 +30,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	}
 
 	// create azure-keyvault client
-	key, err := newKey(req.KeyID, req.PluginConfig)
+	kv, err := keyvault.NewCertificateFromID(req.KeyID)
 	if err != nil {
 		return nil, proto.RequestError{
 			Code: proto.ErrorCodeValidation,
@@ -65,13 +66,13 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	}
 
 	// Sign.
-	sig, err := key.Sign(ctx, signAlg, hashed)
+	sig, err := kv.Sign(ctx, signAlg, hashed)
 	if err != nil {
 		return nil, requestErr(err)
 	}
 
 	// get certificate
-	certs, err := key.CertificateChain(ctx)
+	certs, err := kv.CertificateChain(ctx)
 	if err != nil {
 		return nil, requestErr(err)
 	}
@@ -109,7 +110,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 
 func requestErr(err error) proto.RequestError {
 	var code proto.ErrorCode
-	var aerr *azure.RequestError
+	var aerr *azcore.ResponseError
 	if errors.As(err, &aerr) {
 		switch aerr.StatusCode {
 		case http.StatusUnauthorized:
@@ -140,20 +141,20 @@ func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-func keySpecToAlg(k proto.KeySpec) keyvault.JSONWebKeySignatureAlgorithm {
+func keySpecToAlg(k proto.KeySpec) azkeys.JSONWebKeySignatureAlgorithm {
 	switch k {
 	case proto.KeySpecRSA2048:
-		return keyvault.PS256
+		return azkeys.JSONWebKeySignatureAlgorithmPS256
 	case proto.KeySpecRSA3072:
-		return keyvault.PS384
+		return azkeys.JSONWebKeySignatureAlgorithmPS384
 	case proto.KeySpecRSA4096:
-		return keyvault.PS512
+		return azkeys.JSONWebKeySignatureAlgorithmPS512
 	case proto.KeySpecEC256:
-		return keyvault.ES256
+		return azkeys.JSONWebKeySignatureAlgorithmES256
 	case proto.KeySpecEC384:
-		return keyvault.ES384
+		return azkeys.JSONWebKeySignatureAlgorithmES384
 	case proto.KeySpecEC521:
-		return keyvault.ES512
+		return azkeys.JSONWebKeySignatureAlgorithmES512
 	}
 	return ""
 }
