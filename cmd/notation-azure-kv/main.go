@@ -1,27 +1,35 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/Azure/notation-azure-kv/internal/version"
 	"github.com/notaryproject/notation-go/plugin/proto"
-	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	app := &cli.App{
-		Name:    "notation-azure-kv",
-		Usage:   "Notation - Notary V2 Azure KV plugin",
-		Version: version.GetVersion(),
-		Commands: []*cli.Command{
-			metadataCommand,
-			signCommand,
-			describeKeyCommand,
-		},
+	if len(os.Args) < 2 {
+		help()
+		return
 	}
-	if err := app.Run(os.Args); err != nil {
+	ctx := context.Background()
+	var err error
+	switch os.Args[1] {
+	case string(proto.CommandGetMetadata):
+		runGetMetadata()
+	case string(proto.CommandDescribeKey):
+		err = runDescribeKey(ctx)
+	case string(proto.CommandGenerateSignature):
+		err = runSign(ctx)
+	default:
+		err = fmt.Errorf("invalid command: %s", os.Args[1])
+	}
+
+	if err != nil {
 		var reer proto.RequestError
 		if !errors.As(err, &reer) {
 			err = proto.RequestError{
@@ -33,4 +41,21 @@ func main() {
 		os.Stderr.Write(data)
 		os.Exit(1)
 	}
+}
+
+func help() {
+	fmt.Printf(`NAME:
+   notation-azure-kv - Notation - Notary V2 Azure KV plugin
+
+USAGE:
+   notation-azure-kv [global options] command [command options] [arguments...]
+
+VERSION:
+   %s
+
+COMMANDS:
+   get-plugin-metadata  Get plugin metadata
+   generate-signature   Sign artifacts with keys in Azure Key Vault
+   describe-key         Azure key description
+`, version.GetVersion())
 }
