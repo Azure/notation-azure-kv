@@ -12,9 +12,8 @@ import (
 )
 
 func runSign(ctx context.Context) error {
-	r := os.Stdin
 	var req proto.GenerateSignatureRequest
-	err := json.NewDecoder(r).Decode(&req)
+	err := json.NewDecoder(os.Stdin).Decode(&req)
 	if err != nil {
 		return proto.RequestError{
 			Code: proto.ErrorCodeValidation,

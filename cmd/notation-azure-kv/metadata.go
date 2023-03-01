@@ -25,7 +25,8 @@ func init() {
 	}
 }
 
-func runGetMetadata() {
+func runGetMetadata() error {
 	// write response
-	os.Stdout.Write(metadata)
+	_, err := os.Stdout.Write(metadata)
+	return err
 }

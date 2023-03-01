@@ -18,12 +18,12 @@ func main() {
 	}
 	ctx := context.Background()
 	var err error
-	switch os.Args[1] {
-	case string(proto.CommandGetMetadata):
-		runGetMetadata()
-	case string(proto.CommandDescribeKey):
+	switch proto.Command(os.Args[1]) {
+	case proto.CommandGetMetadata:
+		err = runGetMetadata()
+	case proto.CommandDescribeKey:
 		err = runDescribeKey(ctx)
-	case string(proto.CommandGenerateSignature):
+	case proto.CommandGenerateSignature:
 		err = runSign(ctx)
 	default:
 		err = fmt.Errorf("invalid command: %s", os.Args[1])
@@ -44,18 +44,20 @@ func main() {
 }
 
 func help() {
-	fmt.Printf(`NAME:
-   notation-azure-kv - Notation - Notary V2 Azure KV plugin
+	fmt.Printf(`notation-azure-kv - Notation - Notary V2 Azure KV plugin
 
-USAGE:
-   notation-azure-kv [global options] command [command options] [arguments...]
+Usage:
+  notation-azure-kv <command>
 
-VERSION:
-   %s
+Version:
+  %s
 
-COMMANDS:
-   get-plugin-metadata  Get plugin metadata
-   generate-signature   Sign artifacts with keys in Azure Key Vault
-   describe-key         Azure key description
+Commands:
+  get-plugin-metadata  Get plugin metadata
+  generate-signature   Sign artifacts with keys in Azure Key Vault
+  describe-key         Azure key description
+
+Documentation:
+  https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#plugin-contract
 `, version.GetVersion())
 }
