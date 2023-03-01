@@ -53,11 +53,11 @@ Version:
   %s
 
 Commands:
-  get-plugin-metadata  Get plugin metadata
-  generate-signature   Sign artifacts with keys in Azure Key Vault
   describe-key         Azure key description
+  generate-signature   Sign artifacts with keys in Azure Key Vault
+  get-plugin-metadata  Get plugin metadata
 
 Documentation:
-  https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#plugin-contract
+  https://github.com/notaryproject/notaryproject/blob/v1.0.0-rc.2/specs/plugin-extensibility.md#plugin-contract
 `, version.GetVersion())
 }
