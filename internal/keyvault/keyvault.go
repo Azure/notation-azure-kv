@@ -75,12 +75,12 @@ func parseIdentifier(id string) (string, string, string, error) {
 	}
 
 	if u.Scheme != "https" {
-		return "", "", "", err
+		return "", "", "", fmt.Errorf("invalid url schema %q", u.Scheme)
 	}
 
 	parts := strings.Split(strings.TrimPrefix(u.Path, "/"), "/")
 	if len(parts) != 3 || (parts[0] != "keys" && parts[0] != "certificates") {
-		return "", "", "", err
+		return "", "", "", errors.New("invalid identifier format")
 	}
 	return u.Host, parts[1], parts[2], nil
 }
