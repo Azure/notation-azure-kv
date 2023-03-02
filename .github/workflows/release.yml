@@ -30,7 +30,7 @@ jobs:
           check-latest: true
 
       - name: Goreleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v4
         with:
           version: latest
           args: release --rm-dist
