@@ -17,9 +17,6 @@ import (
 	"github.com/Azure/notation-azure-kv/internal/crypto"
 )
 
-// clientAuthMode is the authorize mode used by plugin
-type clientAuthMethod string
-
 // set of auth errors
 var (
 	errMsgAuthorizerFromMI  = "authorized from Managed Identity failed, please ensure you have assigned identity to your resource"
@@ -27,19 +24,20 @@ var (
 	errMsgUnknownAuthorizer = "unknown authorize method, please use a supported authorize method according to the document"
 )
 
+// clientAuthMode is the authorize mode used by plugin
+type authorizer string
+
+const (
+	// authorizerFromMI auth akv from Managed Identity
+	authorizerFromMI authorizer = "AKV_AUTH_FROM_MI"
+
+	// authorizerFromCLI auth akv from Azure cli 2.0
+	authorizerFromCLI authorizer = "AKV_AUTH_FROM_CLI"
+)
+
 const (
 	// authMethodKey is the environment variable plugin used
 	authMethodKey = "AKV_AUTH_METHOD"
-	// authorizerFromMI auth akv from Managed Identity
-	// The auth order will be:
-	// 1. Client credentials
-	// 2. Client certificate
-	// 3. Username password
-	// 4. MSI
-	authorizerFromMI clientAuthMethod = "AKV_AUTH_FROM_MI"
-
-	// authorizerFromCLI auth akv from Azure cli 2.0
-	authorizerFromCLI clientAuthMethod = "AKV_AUTH_FROM_CLI"
 
 	// defaultAuthMethod is the default auth method if user doesn't provide an environment variable
 	// the default value will be authorizerFromCLI
@@ -143,8 +141,8 @@ func azureCredential() (azcore.TokenCredential, error) {
 }
 
 // getAzureClientAuthMethod get authMethod from environment variable
-func getAzureClientAuthMethod() clientAuthMethod {
-	mode := clientAuthMethod(os.Getenv(authMethodKey))
+func getAzureClientAuthMethod() authorizer {
+	mode := authorizer(os.Getenv(authMethodKey))
 	if mode == "" {
 		return defaultAuthMethod
 	}
@@ -190,4 +188,16 @@ func (k *Certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate
 	// For PKCS12 format, secret.Value is base64 encoded data.
 	// for PEM format, secret.Value is the raw data in PEM format.
 	return crypto.ParseCertificates([]byte(*secret.Value), *secret.ContentType)
+}
+
+// Certificate returns the X.509 certificate associated with the key.
+func (k *Certificate) Certificate(ctx context.Context) (*x509.Certificate, error) {
+	cert, err := k.certClient.GetCertificate(ctx, k.name, k.version, nil)
+	if err != nil {
+		return nil, err
+	}
+	if cert.KID == nil {
+		return nil, errors.New("azure: invalid server response")
+	}
+	return x509.ParseCertificate(cert.CER)
 }

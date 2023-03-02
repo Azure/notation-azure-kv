@@ -24,7 +24,7 @@ func Key(ctx context.Context, req *proto.DescribeKeyRequest) (*proto.DescribeKey
 			Err:  err,
 		}
 	}
-	cert, err := kv.CertificateChain(ctx)
+	cert, err := kv.Certificate(ctx)
 	if err != nil {
 		return nil, err
 	}

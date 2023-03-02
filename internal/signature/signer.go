@@ -12,7 +12,6 @@ import (
 	"crypto/x509"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
-	"github.com/Azure/notation-azure-kv/internal/cloud"
 	certutils "github.com/Azure/notation-azure-kv/internal/crypto"
 	"github.com/Azure/notation-azure-kv/internal/keyvault"
 	"github.com/notaryproject/notation-go/plugin/proto"
@@ -89,7 +88,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	}, nil
 }
 
-func getCertificateChain(ctx context.Context, kv *cloud.KeyVault, pluginConfig map[string]string) ([][]byte, error) {
+func getCertificateChain(ctx context.Context, kv *keyvault.Certificate, pluginConfig map[string]string) ([][]byte, error) {
 	var (
 		certs []*x509.Certificate
 		err   error
