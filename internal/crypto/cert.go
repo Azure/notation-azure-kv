@@ -99,11 +99,7 @@ func MergeCertificateChain(certBundlePath string, originalCerts []*x509.Certific
 }
 
 // ValidateCertificateChain verifies a certificate chain and returns the valid
-// chain coupled with any error that may occur. It checks for a self signed leaf
-// certificate if the input contains only one certificate. It also generates two
-// pools, one for the root certificate and the other for intermediate
-// certificates. The function then verifies the options passed and builds a
-// certificate chain for the leaf certificate, finally returns the valid chain.
+// chain coupled with any error that may occur.
 func ValidateCertificateChain(certs []*x509.Certificate) ([]*x509.Certificate, error) {
 	if len(certs) == 1 {
 		// validate self-signed leaf cert
@@ -117,7 +113,7 @@ func ValidateCertificateChain(certs []*x509.Certificate) ([]*x509.Certificate, e
 	// generate certificate pools
 	rootPool := x509.NewCertPool()
 	intermediatePool := x509.NewCertPool()
-	for _, cert := range certs[1:] {
+	for _, cert := range certs {
 		if bytes.Equal(cert.RawIssuer, cert.RawSubject) {
 			rootPool.AddCert(cert)
 		} else {

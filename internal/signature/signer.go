@@ -14,6 +14,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
 	"github.com/Azure/notation-azure-kv/internal/cloud"
 	certutils "github.com/Azure/notation-azure-kv/internal/crypto"
+	"github.com/Azure/notation-azure-kv/internal/keyvault"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
@@ -29,7 +30,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	}
 
 	// create azure-keyvault client
-	kv, err := newKeyVault(req.KeyID)
+	kv, err := keyvault.NewCertificateFromID(req.KeyID)
 	if err != nil {
 		return nil, proto.RequestError{
 			Code: proto.ErrorCodeValidation,

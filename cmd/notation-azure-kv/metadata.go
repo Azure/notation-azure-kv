@@ -6,23 +6,7 @@ import (
 
 	"github.com/Azure/notation-azure-kv/internal/version"
 	"github.com/notaryproject/notation-go/plugin/proto"
-
-	"github.com/urfave/cli/v2"
 )
-
-var metadataCommand = &cli.Command{
-	Name:   string(proto.CommandGetMetadata),
-	Usage:  "Get plugin metadata",
-	Action: runGetMetadata,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:      "file",
-			Usage:     "request json file",
-			TakesFile: true,
-			Hidden:    true,
-		},
-	},
-}
 
 var metadata []byte
 
@@ -41,8 +25,8 @@ func init() {
 	}
 }
 
-func runGetMetadata(ctx *cli.Context) error {
+func runGetMetadata() error {
 	// write response
-	os.Stdout.Write(metadata)
-	return nil
+	_, err := os.Stdout.Write(metadata)
+	return err
 }

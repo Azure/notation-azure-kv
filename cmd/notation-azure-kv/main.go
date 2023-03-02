@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,46 +10,55 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/notation-azure-kv/internal/version"
 	"github.com/notaryproject/notation-go/plugin/proto"
-	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	app := &cli.App{
-		Name:    "notation-azure-kv",
-		Usage:   "Notation - Notary V2 Azure KV plugin",
-		Version: version.GetVersion(),
-		Commands: []*cli.Command{
-			metadataCommand,
-			signCommand,
-			describeKeyCommand,
-		},
+	if len(os.Args) < 2 {
+		help()
+		return
 	}
-	if err := app.Run(os.Args); err != nil {
-		data, _ := json.Marshal(wrapErr(err))
+	ctx := context.Background()
+	var err error
+	switch proto.Command(os.Args[1]) {
+	case proto.CommandGetMetadata:
+		err = runGetMetadata()
+	case proto.CommandDescribeKey:
+		err = runDescribeKey(ctx)
+	case proto.CommandGenerateSignature:
+		err = runSign(ctx)
+	default:
+		err = fmt.Errorf("invalid command: %s", os.Args[1])
+	}
+
+	if err != nil {
+		var reer proto.RequestError
+		if !errors.As(err, &reer) {
+			err = proto.RequestError{
+				Code: proto.ErrorCodeGeneric,
+				Err:  err,
+			}
+		}
+		data, _ := json.Marshal(err)
 		os.Stderr.Write(data)
 		os.Exit(1)
 	}
 }
 
-func wrapErr(err error) proto.RequestError {
-	// default error code
-	code := proto.ErrorCodeGeneric
+func help() {
+	fmt.Printf(`notation-azure-kv - Notation - Notary V2 Azure KV plugin
 
-	// wrap Azure response
-	var aerr *azcore.ResponseError
-	if errors.As(err, &aerr) {
-		switch aerr.StatusCode {
-		case http.StatusUnauthorized:
-			code = proto.ErrorCodeAccessDenied
-		case http.StatusRequestTimeout:
-			code = proto.ErrorCodeTimeout
-		case http.StatusTooManyRequests:
-			code = proto.ErrorCodeThrottled
-		}
-	}
+Usage:
+  notation-azure-kv <command>
 
-	return proto.RequestError{
-		Code: code,
-		Err:  err,
-	}
+Version:
+  %s
+
+Commands:
+  describe-key         Azure key description
+  generate-signature   Sign artifacts with keys in Azure Key Vault
+  get-plugin-metadata  Get plugin metadata
+
+Documentation:
+  https://github.com/notaryproject/notaryproject/blob/v1.0.0-rc.2/specs/plugin-extensibility.md#plugin-contract
+`, version.GetVersion())
 }
