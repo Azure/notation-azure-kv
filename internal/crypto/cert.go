@@ -18,7 +18,7 @@ const (
 	// fetch the certificate chain instead of GetCertificate operation.
 	//
 	// To enable the feature, the value of the key should be "true".
-	CertSecretKey = "get_secret"
+	CertSecretKey = "as_secret"
 
 	// CertBundleKey defines the pluginConfig key name for the path of
 	// a certificate bundle file passing through pluginConfig
