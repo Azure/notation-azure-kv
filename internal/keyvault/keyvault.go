@@ -24,7 +24,7 @@ var (
 	errMsgUnknownAuthorizer = "unknown authorize method, please use a supported authorize method according to the document"
 )
 
-// clientAuthMode is the authorize mode used by plugin
+// authorizer is the authorize mode used by plugin
 type authorizer string
 
 const (

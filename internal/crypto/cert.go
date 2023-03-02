@@ -101,15 +101,6 @@ func MergeCertificateChain(certBundlePath string, originalCerts []*x509.Certific
 // ValidateCertificateChain verifies a certificate chain and returns the valid
 // chain coupled with any error that may occur.
 func ValidateCertificateChain(certs []*x509.Certificate) ([]*x509.Certificate, error) {
-	if len(certs) == 1 {
-		// validate self-signed leaf cert
-		cert := certs[0]
-		if err := cert.CheckSignature(cert.SignatureAlgorithm, cert.RawTBSCertificate, cert.Signature); err != nil {
-			return nil, fmt.Errorf("invalid self-signed leaf cert. error %w", err)
-		}
-		return certs, nil
-	}
-
 	// generate certificate pools
 	rootPool := x509.NewCertPool()
 	intermediatePool := x509.NewCertPool()
