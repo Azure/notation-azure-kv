@@ -22,7 +22,7 @@ import (
 func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.GenerateSignatureResponse, error) {
 	// validate request
 	if req == nil || req.KeyID == "" || req.KeySpec == "" || req.Hash == "" {
-		return nil, proto.RequestError{
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
 		}
@@ -31,7 +31,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	// create azure-keyvault client
 	kv, err := keyvault.NewCertificateFromID(req.KeyID)
 	if err != nil {
-		return nil, proto.RequestError{
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  err,
 		}

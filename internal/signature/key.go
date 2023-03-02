@@ -12,14 +12,14 @@ import (
 
 func Key(ctx context.Context, req *proto.DescribeKeyRequest) (*proto.DescribeKeyResponse, error) {
 	if req == nil || req.KeyID == "" {
-		return nil, proto.RequestError{
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
 		}
 	}
 	kv, err := keyvault.NewCertificateFromID(req.KeyID)
 	if err != nil {
-		return nil, proto.RequestError{
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  err,
 		}

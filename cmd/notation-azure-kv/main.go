@@ -38,7 +38,13 @@ func main() {
 	}
 }
 
-func wrapErr(err error) proto.RequestError {
+func wrapErr(err error) *proto.RequestError {
+	// already wrapped
+	var nerr *proto.RequestError
+	if errors.As(err, &nerr) {
+		return nerr
+	}
+
 	// default error code
 	code := proto.ErrorCodeGeneric
 
@@ -54,8 +60,7 @@ func wrapErr(err error) proto.RequestError {
 			code = proto.ErrorCodeThrottled
 		}
 	}
-
-	return proto.RequestError{
+	return &proto.RequestError{
 		Code: code,
 		Err:  err,
 	}

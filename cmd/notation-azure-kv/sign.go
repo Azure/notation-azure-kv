@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 
@@ -15,7 +14,7 @@ func runSign(ctx context.Context) error {
 	var req proto.GenerateSignatureRequest
 	err := json.NewDecoder(os.Stdin).Decode(&req)
 	if err != nil {
-		return proto.RequestError{
+		return &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  fmt.Errorf("failed to unmarshal request input: %w", err),
 		}
@@ -23,10 +22,6 @@ func runSign(ctx context.Context) error {
 
 	resp, err := signature.Sign(ctx, &req)
 	if err != nil {
-		var rerr proto.RequestError
-		if errors.As(err, &rerr) {
-			return rerr
-		}
 		return err
 	}
 
