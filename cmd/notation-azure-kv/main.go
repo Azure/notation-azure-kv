@@ -32,13 +32,13 @@ func main() {
 	}
 
 	if err != nil {
-		data, _ := json.Marshal(wrapErr(err))
+		data, _ := json.Marshal(wrapError(err))
 		os.Stderr.Write(data)
 		os.Exit(1)
 	}
 }
 
-func wrapErr(err error) *proto.RequestError {
+func wrapError(err error) *proto.RequestError {
 	// already wrapped
 	var nerr *proto.RequestError
 	if errors.As(err, &nerr) {
