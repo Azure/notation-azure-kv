@@ -22,7 +22,7 @@ func runDescribeKey(ctx context.Context) error {
 
 	resp, err := signature.Key(ctx, &req)
 	if err != nil {
-		return fmt.Errorf("failed to sign payload: %w", err)
+		return err
 	}
 
 	jsonResp, err := json.Marshal(resp)
