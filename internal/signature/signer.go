@@ -116,7 +116,7 @@ func getCertificateChain(ctx context.Context, kv *keyvault.Certificate, pluginCo
 		// try to build cert chain with ca_certs of pluginConfig
 		certBundlePath, ok := pluginConfig[certutils.CertBundleKey]
 		if !ok {
-			return nil, fmt.Errorf("failed to build a certificate chain using certificates fetched from AKV because %w. Try again with a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as key name and file path as value", err)
+			return nil, fmt.Errorf("failed to build a certificate chain using certificates fetched from AKV because %w. Try again with a certificate bundle file (including intermediate and root certificates) in PEM format through pluginConfig with `ca_certs` as key name and file path as value, or if your Azure KeyVault certificate containing full certificate chain, please set %s=true through pluginConfig to enable accessing certificate chain with GetSecret permission", err, certutils.CertSecretKey)
 		}
 		if validCertChain, err = certutils.MergeCertificateChain(certBundlePath, certs); err != nil {
 			return nil, fmt.Errorf("failed to build a certificate chain with certificate bundle because %w", err)
