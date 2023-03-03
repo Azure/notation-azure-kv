@@ -24,15 +24,15 @@ var (
 	errMsgUnknownAuthorizer = "unknown authorize method, please use a supported authorize method according to the document"
 )
 
-// authorizer is the authorize mode used by plugin
-type authorizer string
+// authMethod is the authorize mode used by plugin
+type authMethod string
 
 const (
-	// authorizerFromMI auth akv from Managed Identity
-	authorizerFromMI authorizer = "AKV_AUTH_FROM_MI"
+	// authMethodFromMI auth akv from Managed Identity
+	authMethodFromMI authMethod = "AKV_AUTH_FROM_MI"
 
-	// authorizerFromCLI auth akv from Azure cli 2.0
-	authorizerFromCLI authorizer = "AKV_AUTH_FROM_CLI"
+	// authMethodFromCLI auth akv from Azure cli 2.0
+	authMethodFromCLI authMethod = "AKV_AUTH_FROM_CLI"
 )
 
 const (
@@ -41,7 +41,7 @@ const (
 
 	// defaultAuthMethod is the default auth method if user doesn't provide an environment variable
 	// the default value will be authorizerFromCLI
-	defaultAuthMethod = authorizerFromCLI
+	defaultAuthMethod = authMethodFromCLI
 )
 
 // Certificate represents a Azure Certificate Vault.
@@ -122,14 +122,14 @@ func azureCredential() (azcore.TokenCredential, error) {
 		err        error
 	)
 
-	authMethod := getAzureClientAuthMethod()
-	switch authMethod {
-	case authorizerFromMI:
+	method := getAzureClientAuthMethod()
+	switch method {
+	case authMethodFromMI:
 		credential, err = azidentity.NewManagedIdentityCredential(nil)
 		if err != nil {
 			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromMI, err)
 		}
-	case authorizerFromCLI:
+	case authMethodFromCLI:
 		credential, err = azidentity.NewAzureCLICredential(nil)
 		if err != nil {
 			err = fmt.Errorf("%s. Original error: %w", errMsgAuthorizerFromCLI, err)
@@ -141,12 +141,12 @@ func azureCredential() (azcore.TokenCredential, error) {
 }
 
 // getAzureClientAuthMethod get authMethod from environment variable
-func getAzureClientAuthMethod() authorizer {
-	mode := authorizer(os.Getenv(authMethodKey))
-	if mode == "" {
+func getAzureClientAuthMethod() authMethod {
+	method := authMethod(os.Getenv(authMethodKey))
+	if method == "" {
 		return defaultAuthMethod
 	}
-	return mode
+	return method
 }
 
 // Sign signs the message digest with the algorithm provided.

@@ -49,7 +49,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 		return nil, err
 	}
 	if hashName != req.Hash {
-		return nil, fmt.Errorf("keySpec hash:%v mismatch request hash:%v", hashName, req.Hash)
+		return nil, fmt.Errorf("keySpec hash: %v mismatch request hash: %v", hashName, req.Hash)
 	}
 
 	// get signing alg
