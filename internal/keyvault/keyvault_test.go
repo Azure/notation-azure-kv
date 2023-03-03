@@ -79,7 +79,7 @@ func (s *keyVault) Sign(ctx context.Context, name string, version string, parame
 func TestSign(t *testing.T) {
 	t.Run("check return error", func(t *testing.T) {
 		certificate := Certificate{
-			key: &keyVault{err: errors.New("error")},
+			keyClient: &keyVault{err: errors.New("error")},
 		}
 		_, err := certificate.Sign(context.Background(), "", nil)
 		if err == nil {
@@ -89,7 +89,7 @@ func TestSign(t *testing.T) {
 
 	t.Run("check KID is nil", func(t *testing.T) {
 		certificate := Certificate{
-			key: &keyVault{
+			keyClient: &keyVault{
 				resp: azkeys.SignResponse{
 					KeyOperationResult: azkeys.KeyOperationResult{},
 				},
@@ -104,7 +104,7 @@ func TestSign(t *testing.T) {
 	t.Run("check Result is nil", func(t *testing.T) {
 		var keyID azkeys.ID = "id"
 		certificate := Certificate{
-			key: &keyVault{
+			keyClient: &keyVault{
 				resp: azkeys.SignResponse{
 					KeyOperationResult: azkeys.KeyOperationResult{
 						KID: &keyID,
@@ -121,7 +121,7 @@ func TestSign(t *testing.T) {
 	t.Run("valid return", func(t *testing.T) {
 		var keyID azkeys.ID = "id"
 		certificate := Certificate{
-			key: &keyVault{
+			keyClient: &keyVault{
 				resp: azkeys.SignResponse{
 					KeyOperationResult: azkeys.KeyOperationResult{
 						KID:    &keyID,
@@ -149,7 +149,7 @@ func (s *certificateVault) GetCertificate(ctx context.Context, certificateName s
 func TestCertificate(t *testing.T) {
 	t.Run("check return error", func(t *testing.T) {
 		certificate := Certificate{
-			cert: &certificateVault{err: errors.New("error")},
+			certificateClient: &certificateVault{err: errors.New("error")},
 		}
 		_, err := certificate.Certificate(context.Background())
 		if err == nil {
@@ -159,7 +159,7 @@ func TestCertificate(t *testing.T) {
 
 	t.Run("check KID", func(t *testing.T) {
 		certificate := Certificate{
-			cert: &certificateVault{resp: azcertificates.GetCertificateResponse{
+			certificateClient: &certificateVault{resp: azcertificates.GetCertificateResponse{
 				CertificateBundle: azcertificates.CertificateBundle{},
 			}},
 		}
@@ -172,7 +172,7 @@ func TestCertificate(t *testing.T) {
 	t.Run("invalid cert", func(t *testing.T) {
 		var keyID = "id"
 		certificate := Certificate{
-			cert: &certificateVault{resp: azcertificates.GetCertificateResponse{
+			certificateClient: &certificateVault{resp: azcertificates.GetCertificateResponse{
 				CertificateBundle: azcertificates.CertificateBundle{
 					KID: &keyID,
 					CER: []byte{},
@@ -198,7 +198,7 @@ func (s *secretVault) GetSecret(ctx context.Context, name string, version string
 func TestCertificateChain(t *testing.T) {
 	t.Run("check return error", func(t *testing.T) {
 		certificate := Certificate{
-			secret: &secretVault{err: errors.New("error")},
+			secretClient: &secretVault{err: errors.New("error")},
 		}
 		_, err := certificate.CertificateChain(context.Background())
 		if err == nil {
@@ -208,7 +208,7 @@ func TestCertificateChain(t *testing.T) {
 
 	t.Run("check Value is not nil", func(t *testing.T) {
 		certificate := Certificate{
-			secret: &secretVault{resp: azsecrets.GetSecretResponse{
+			secretClient: &secretVault{resp: azsecrets.GetSecretResponse{
 				SecretBundle: azsecrets.SecretBundle{},
 			}},
 		}
@@ -221,7 +221,7 @@ func TestCertificateChain(t *testing.T) {
 	t.Run("check ContentType is not nil", func(t *testing.T) {
 		var value = "value"
 		certificate := Certificate{
-			secret: &secretVault{resp: azsecrets.GetSecretResponse{
+			secretClient: &secretVault{resp: azsecrets.GetSecretResponse{
 				SecretBundle: azsecrets.SecretBundle{
 					Value: &value,
 				},
@@ -237,7 +237,7 @@ func TestCertificateChain(t *testing.T) {
 		var value = "value"
 		var contentType = "application/x-pkcs12"
 		certificate := Certificate{
-			secret: &secretVault{resp: azsecrets.GetSecretResponse{
+			secretClient: &secretVault{resp: azsecrets.GetSecretResponse{
 				SecretBundle: azsecrets.SecretBundle{
 					Value:       &value,
 					ContentType: &contentType,

@@ -5,8 +5,6 @@ import (
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
-var metadata []byte
-
 func runGetMetadata() *proto.GetMetadataResponse {
 	return &proto.GetMetadataResponse{
 		Name:                      "azure-kv",

@@ -12,9 +12,8 @@ import (
 
 func runSign(ctx context.Context, input io.Reader) (*proto.GenerateSignatureResponse, error) {
 	var req proto.GenerateSignatureRequest
-	err := json.NewDecoder(input).Decode(&req)
-	if err != nil {
-		return nil, proto.RequestError{
+	if err := json.NewDecoder(input).Decode(&req); err != nil {
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  fmt.Errorf("failed to unmarshal request input: %w", err),
 		}
