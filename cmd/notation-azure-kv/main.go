@@ -20,17 +20,26 @@ func main() {
 	}
 	ctx := context.Background()
 	var err error
+	var resp any
 	switch proto.Command(os.Args[1]) {
 	case proto.CommandGetMetadata:
-		err = runGetMetadata()
+		resp = runGetMetadata()
 	case proto.CommandDescribeKey:
-		err = runDescribeKey(ctx)
+		resp, err = runDescribeKey(ctx, os.Stdin)
 	case proto.CommandGenerateSignature:
-		err = runSign(ctx)
+		resp, err = runSign(ctx, os.Stdin)
 	default:
 		err = fmt.Errorf("invalid command: %s", os.Args[1])
 	}
 
+	// output the response
+	if err == nil {
+		// ignore the error because the response only contains valid JSON field.
+		jsonResp, _ := json.Marshal(resp)
+		_, err = os.Stdout.Write(jsonResp)
+	}
+
+	// output the error
 	if err != nil {
 		data, _ := json.Marshal(wrapError(err))
 		os.Stderr.Write(data)

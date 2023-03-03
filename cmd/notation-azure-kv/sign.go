@@ -4,33 +4,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 
 	"github.com/Azure/notation-azure-kv/internal/signature"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
-func runSign(ctx context.Context) error {
+func runSign(ctx context.Context, input io.Reader) (*proto.GenerateSignatureResponse, error) {
 	var req proto.GenerateSignatureRequest
-	err := json.NewDecoder(os.Stdin).Decode(&req)
-	if err != nil {
-		return &proto.RequestError{
+	if err := json.NewDecoder(input).Decode(&req); err != nil {
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  fmt.Errorf("failed to unmarshal request input: %w", err),
 		}
 	}
 
-	resp, err := signature.Sign(ctx, &req)
-	if err != nil {
-		return err
-	}
-
-	jsonResp, err := json.Marshal(resp)
-	if err != nil {
-		return err
-	}
-
-	// write response
-	os.Stdout.Write(jsonResp)
-	return nil
+	return signature.Sign(ctx, &req)
 }
