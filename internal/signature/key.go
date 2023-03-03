@@ -12,23 +12,23 @@ import (
 
 func Key(ctx context.Context, req *proto.DescribeKeyRequest) (*proto.DescribeKeyResponse, error) {
 	if req == nil || req.KeyID == "" {
-		return nil, proto.RequestError{
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  errors.New("invalid request input"),
 		}
 	}
 	kv, err := keyvault.NewCertificateFromID(req.KeyID)
 	if err != nil {
-		return nil, proto.RequestError{
+		return nil, &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  err,
 		}
 	}
-	cert, err := kv.CertificateChain(ctx)
+	cert, err := kv.Certificate(ctx)
 	if err != nil {
-		return nil, requestErr(err)
+		return nil, err
 	}
-	keySpec, err := signature.ExtractKeySpec(cert[0])
+	keySpec, err := signature.ExtractKeySpec(cert)
 	if err != nil {
 		return nil, fmt.Errorf("get key spec err: %w", err)
 	}

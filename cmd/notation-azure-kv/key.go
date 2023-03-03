@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 
@@ -15,7 +14,7 @@ func runDescribeKey(ctx context.Context) error {
 	var req proto.DescribeKeyRequest
 	err := json.NewDecoder(os.Stdin).Decode(&req)
 	if err != nil {
-		return proto.RequestError{
+		return &proto.RequestError{
 			Code: proto.ErrorCodeValidation,
 			Err:  fmt.Errorf("failed to unmarshal request input: %w", err),
 		}
@@ -23,11 +22,7 @@ func runDescribeKey(ctx context.Context) error {
 
 	resp, err := signature.Key(ctx, &req)
 	if err != nil {
-		var rerr proto.RequestError
-		if errors.As(err, &rerr) {
-			return rerr
-		}
-		return fmt.Errorf("failed to sign payload: %w", err)
+		return err
 	}
 
 	jsonResp, err := json.Marshal(resp)

@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/notation-azure-kv/internal/version"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
@@ -30,16 +32,37 @@ func main() {
 	}
 
 	if err != nil {
-		var reer proto.RequestError
-		if !errors.As(err, &reer) {
-			err = proto.RequestError{
-				Code: proto.ErrorCodeGeneric,
-				Err:  err,
-			}
-		}
-		data, _ := json.Marshal(err)
+		data, _ := json.Marshal(wrapError(err))
 		os.Stderr.Write(data)
 		os.Exit(1)
+	}
+}
+
+func wrapError(err error) *proto.RequestError {
+	// already wrapped
+	var nerr *proto.RequestError
+	if errors.As(err, &nerr) {
+		return nerr
+	}
+
+	// default error code
+	code := proto.ErrorCodeGeneric
+
+	// wrap Azure response
+	var aerr *azcore.ResponseError
+	if errors.As(err, &aerr) {
+		switch aerr.StatusCode {
+		case http.StatusUnauthorized:
+			code = proto.ErrorCodeAccessDenied
+		case http.StatusRequestTimeout:
+			code = proto.ErrorCodeTimeout
+		case http.StatusTooManyRequests:
+			code = proto.ErrorCodeThrottled
+		}
+	}
+	return &proto.RequestError{
+		Code: code,
+		Err:  err,
 	}
 }
 
