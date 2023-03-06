@@ -1,5 +1,6 @@
 # notation-azure-kv
 
+[![codecov](https://codecov.io/gh/Azure/notation-azure-kv/branch/main/graph/badge.svg)](https://codecov.io/gh/Azure/notation-azure-kv)
 Azure Provider for the Notary v2 [Notation CLI](https://github.com/notaryproject/notation)
 
 ## Getting Started:
