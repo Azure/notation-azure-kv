@@ -7,10 +7,12 @@ import (
 	"io"
 
 	"github.com/Azure/notation-azure-kv/internal/keyvault"
-	sig "github.com/notaryproject/notation-core-go/signature"
+	"github.com/notaryproject/notation-core-go/signature"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
+// newCertificateFromID is the function for generating a key vault certificate
+// client. It will be override by unit test.
 var newCertificateFromID = keyvault.NewCertificateFromID
 
 func runDescribeKey(ctx context.Context, input io.Reader) (*proto.DescribeKeyResponse, error) {
@@ -23,7 +25,7 @@ func runDescribeKey(ctx context.Context, input io.Reader) (*proto.DescribeKeyRes
 		}
 	}
 
-	// get key spec
+	// get key spec for notation
 	keySpec, err := notationKeySpec(ctx, req.KeyID)
 	if err != nil {
 		return nil, err
@@ -36,6 +38,7 @@ func runDescribeKey(ctx context.Context, input io.Reader) (*proto.DescribeKeyRes
 }
 
 func notationKeySpec(ctx context.Context, keyID string) (proto.KeySpec, error) {
+	// get the certificate
 	certificate, err := newCertificateFromID(keyID)
 	if err != nil {
 		return "", err
@@ -44,7 +47,9 @@ func notationKeySpec(ctx context.Context, keyID string) (proto.KeySpec, error) {
 	if err != nil {
 		return "", err
 	}
-	keySpec, err := sig.ExtractKeySpec(cert)
+
+	// extract key spec from certificate
+	keySpec, err := signature.ExtractKeySpec(cert)
 	if err != nil {
 		return "", err
 	}
