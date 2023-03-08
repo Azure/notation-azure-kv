@@ -12,7 +12,7 @@ import (
 )
 
 // newCertificateFromID is the function for generating a key vault certificate
-// client. It will be override by unit test.
+// client. It will be overridden by unit test.
 var newCertificateFromID = keyvault.NewCertificateFromID
 
 func runDescribeKey(ctx context.Context, input io.Reader) (*proto.DescribeKeyResponse, error) {

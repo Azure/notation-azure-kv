@@ -36,10 +36,6 @@ func (c *certificateMock) Certificate(ctx context.Context) (*x509.Certificate, e
 	return c.cert, c.err
 }
 
-func newCertificateFromIdMock(id string) (keyvault.KeyVaultCertificate, error) {
-	return nil, nil
-}
-
 func Test_runDescribeKey(t *testing.T) {
 	certs, err := crypto.ParseCertificates(validPEMCert, "application/x-pem-file")
 	if err != nil {
@@ -58,7 +54,7 @@ func Test_runDescribeKey(t *testing.T) {
 	type args struct {
 		ctx   context.Context
 		input string
-		fun   func(id string) (keyvault.KeyVaultCertificate, error)
+		fun   func(id string) (keyvault.Certificate, error)
 	}
 	tests := []struct {
 		name    string
@@ -69,7 +65,7 @@ func Test_runDescribeKey(t *testing.T) {
 			name: "invalid AES signed Certificate",
 			args: args{
 				input: `{"contractVersion":"1.0","keyId":"https://notationakvtest.vault.azure.net/keys/notationrsademo/version"}`,
-				fun: func(id string) (keyvault.KeyVaultCertificate, error) {
+				fun: func(id string) (keyvault.Certificate, error) {
 					return &certificateMock{cert: sha1Certs[0]}, nil
 				},
 			},
@@ -79,7 +75,7 @@ func Test_runDescribeKey(t *testing.T) {
 			name: "valid describe key",
 			args: args{
 				input: `{"contractVersion":"1.0","keyId":"https://notationakvtest.vault.azure.net/keys/notationrsademo/version"}`,
-				fun: func(id string) (keyvault.KeyVaultCertificate, error) {
+				fun: func(id string) (keyvault.Certificate, error) {
 					return &certificateMock{cert: certs[0]}, nil
 				},
 			},
@@ -89,7 +85,7 @@ func Test_runDescribeKey(t *testing.T) {
 			name: "newCertificateFromID error",
 			args: args{
 				input: `{"contractVersion":"1.0","keyId":"https://notationakvtest.vault.azure.net/keys/notationrsademo/version"}`,
-				fun: func(id string) (keyvault.KeyVaultCertificate, error) {
+				fun: func(id string) (keyvault.Certificate, error) {
 					return &certificateMock{}, errors.New("error")
 				},
 			},
@@ -99,7 +95,7 @@ func Test_runDescribeKey(t *testing.T) {
 			name: "get certificate failed",
 			args: args{
 				input: `{"contractVersion":"1.0","keyId":"https://notationakvtest.vault.azure.net/keys/notationrsademo/version"}`,
-				fun: func(id string) (keyvault.KeyVaultCertificate, error) {
+				fun: func(id string) (keyvault.Certificate, error) {
 					return &certificateMock{err: errors.New("error")}, nil
 				},
 			},
@@ -109,7 +105,7 @@ func Test_runDescribeKey(t *testing.T) {
 			name: "parse input error",
 			args: args{
 				input: `{"contractVersion":,"keyId":"https://notationakvtest.vault.azure.net/keys/notationrsademo/version"}`,
-				fun: func(id string) (keyvault.KeyVaultCertificate, error) {
+				fun: func(id string) (keyvault.Certificate, error) {
 					return &certificateMock{}, nil
 				},
 			},
