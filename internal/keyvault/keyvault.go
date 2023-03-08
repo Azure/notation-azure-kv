@@ -15,6 +15,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 	"github.com/Azure/notation-azure-kv/internal/crypto"
+	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
 // set of auth errors
@@ -56,6 +57,13 @@ type secretClient interface {
 	GetSecret(ctx context.Context, name string, version string, options *azsecrets.GetSecretOptions) (azsecrets.GetSecretResponse, error)
 }
 
+// KeyVaultCertificate includes Sign, CertificateChain, Certificate functions.
+type KeyVaultCertificate interface {
+	Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error)
+	CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
+	Certificate(ctx context.Context) (*x509.Certificate, error)
+}
+
 // Certificate represents a Azure Certificate Vault.
 type Certificate struct {
 	keyClient         keyClient
@@ -68,10 +76,13 @@ type Certificate struct {
 
 // NewCertificateFromID creates a Certificate with given key identifier or
 // certificate identifier.
-func NewCertificateFromID(id string) (*Certificate, error) {
+func NewCertificateFromID(id string) (KeyVaultCertificate, error) {
 	host, name, version, err := parseIdentifier(id)
 	if err != nil {
-		return nil, fmt.Errorf("invalid certificate/key identifier with error: %w. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", err)
+		return nil, &proto.RequestError{
+			Code: proto.ErrorCodeValidation,
+			Err:  fmt.Errorf("invalid certificate/key identifier with error: %w. the preferred schema is https://{vaultHost}/[certificates|keys]/{keyName}/{version}", err),
+		}
 	}
 	return NewCertificate(host, name, version)
 }
@@ -96,7 +107,7 @@ func parseIdentifier(id string) (string, string, string, error) {
 }
 
 // NewCertificate function creates a new instance of KeyVault struct
-func NewCertificate(vaultHost, keyName, version string) (*Certificate, error) {
+func NewCertificate(vaultHost, keyName, version string) (KeyVaultCertificate, error) {
 	// get credential
 	credential, err := azureCredential()
 	if err != nil {
