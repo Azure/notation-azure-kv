@@ -6,15 +6,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Azure/notation-azure-kv/internal/keyvault"
-	sig "github.com/notaryproject/notation-core-go/signature"
+	"github.com/Azure/notation-azure-kv/internal/signature"
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
-var newCertificateFromID = keyvault.NewCertificateFromID
-
 func runDescribeKey(ctx context.Context, input io.Reader) (*proto.DescribeKeyResponse, error) {
-	// parse input request
 	var req proto.DescribeKeyRequest
 	if err := json.NewDecoder(input).Decode(&req); err != nil {
 		return nil, &proto.RequestError{
@@ -23,30 +19,5 @@ func runDescribeKey(ctx context.Context, input io.Reader) (*proto.DescribeKeyRes
 		}
 	}
 
-	// get key spec
-	keySpec, err := notationKeySpec(ctx, req.KeyID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &proto.DescribeKeyResponse{
-		KeyID:   req.KeyID,
-		KeySpec: keySpec,
-	}, nil
-}
-
-func notationKeySpec(ctx context.Context, keyID string) (proto.KeySpec, error) {
-	certificate, err := newCertificateFromID(keyID)
-	if err != nil {
-		return "", err
-	}
-	cert, err := certificate.Certificate(ctx)
-	if err != nil {
-		return "", err
-	}
-	keySpec, err := sig.ExtractKeySpec(cert)
-	if err != nil {
-		return "", err
-	}
-	return proto.EncodeKeySpec(keySpec)
+	return signature.Key(ctx, &req)
 }
