@@ -11,9 +11,9 @@ The plugin supports Azure CLI identity and Managed Identity for accessing AKV.
 ## Installation
 Install the latest released Notation CLI and Azure-kv plugin via the command-line with curl
 ```sh
-# install Notation & Azure-kv plugin
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/install.sh)" -- notation azure-kv
-
+```
+```
 # example output
 Installing on Linux amd64
 Collecting notation latest release...
