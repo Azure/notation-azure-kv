@@ -154,6 +154,16 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    Successfully verified signature for localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
 
+## Uninstall
+Uninstall Azure-kv plugin via command-line with curl:
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/uninstall.sh)" -- azure-kv
+```
+- if you uninstall both Notation and Azure-kv plugin, please execute the command:
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/uninstall.sh)" -- notation azure-kv
+```
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
