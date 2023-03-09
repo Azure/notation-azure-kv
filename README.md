@@ -164,6 +164,11 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/ma
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/uninstall.sh)" -- notation azure-kv
 ```
 
+To clean Notation configurations, please execute the command:
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/uninstall.sh)" -- config
+```
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
