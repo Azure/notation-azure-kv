@@ -57,15 +57,15 @@ type secretClient interface {
 	GetSecret(ctx context.Context, name string, version string, options *azsecrets.GetSecretOptions) (azsecrets.GetSecretResponse, error)
 }
 
-// KeyVaultCertificate includes Sign, CertificateChain, Certificate functions.
-type KeyVaultCertificate interface {
+// Certificate includes Sign, CertificateChain, Certificate functions.
+type Certificate interface {
 	Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error)
 	CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
 	Certificate(ctx context.Context) (*x509.Certificate, error)
 }
 
-// Certificate represents a Azure Certificate Vault.
-type Certificate struct {
+// certificate represents a Azure certificate Vault.
+type certificate struct {
 	keyClient         keyClient
 	certificateClient certificateClient
 	secretClient      secretClient
@@ -76,7 +76,7 @@ type Certificate struct {
 
 // NewCertificateFromID creates a Certificate with given key identifier or
 // certificate identifier.
-func NewCertificateFromID(id string) (KeyVaultCertificate, error) {
+func NewCertificateFromID(id string) (Certificate, error) {
 	host, name, version, err := parseIdentifier(id)
 	if err != nil {
 		return nil, &proto.RequestError{
@@ -107,7 +107,7 @@ func parseIdentifier(id string) (string, string, string, error) {
 }
 
 // NewCertificate function creates a new instance of KeyVault struct
-func NewCertificate(vaultHost, keyName, version string) (KeyVaultCertificate, error) {
+func NewCertificate(vaultHost, keyName, version string) (Certificate, error) {
 	// get credential
 	credential, err := azureCredential()
 	if err != nil {
@@ -129,7 +129,7 @@ func NewCertificate(vaultHost, keyName, version string) (KeyVaultCertificate, er
 		return nil, err
 	}
 
-	return &Certificate{
+	return &certificate{
 		keyClient:         keyClient,
 		certificateClient: certClient,
 		secretClient:      secretClient,
@@ -173,7 +173,7 @@ func getAzureClientAuthMethod() authMethod {
 }
 
 // Sign signs the message digest with the algorithm provided.
-func (k *Certificate) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error) {
+func (k *certificate) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error) {
 	// Sign the message
 	res, err := k.keyClient.Sign(
 		ctx,
@@ -200,7 +200,7 @@ func (k *Certificate) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySigna
 }
 
 // CertificateChain returns the X.509 certificate chain associated with the key.
-func (k *Certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
+func (k *certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
 	secret, err := k.secretClient.GetSecret(ctx, k.name, k.version, nil)
 	if err != nil {
 		return nil, err
@@ -214,7 +214,7 @@ func (k *Certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate
 }
 
 // Certificate returns the X.509 certificate associated with the key.
-func (k *Certificate) Certificate(ctx context.Context) (*x509.Certificate, error) {
+func (k *certificate) Certificate(ctx context.Context) (*x509.Certificate, error) {
 	cert, err := k.certificateClient.GetCertificate(ctx, k.name, k.version, nil)
 	if err != nil {
 		return nil, err
