@@ -14,8 +14,12 @@ set -e
 
 osType="$(uname -s)"
 case "${osType}" in
-Linux*) ;;
-Darwin*) ;;
+Linux*)
+    pluginInstallPath="${HOME}/.config/notation/plugins/azure-kv"
+    ;;
+Darwin*)
+    pluginInstallPath="${HOME}/Library/Application Support/notation/plugins/azure-kv"
+    ;;
 *)
     echo "unsupported OS ${osType}"
     exit 1
@@ -104,7 +108,6 @@ fi
 # install notation-akv-plugin
 if [ $installAzureKV = true ]; then
     pluginName=notation-azure-kv
-    pluginInstallPath=~/.config/notation/plugins/azure-kv
     echo "Collecting $pluginName latest release..."
     pluginTar=$(downloadLatestBinary Azure $pluginName)
     install $pluginTar $pluginName $pluginInstallPath

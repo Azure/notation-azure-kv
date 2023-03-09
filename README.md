@@ -9,9 +9,9 @@ The notation-azure-kv plugin provides the capability to signing the Notation gen
 The plugin supports Azure CLI identity and Managed Identity for accessing AKV.
 
 ## Installation
-install the latest released Notation CLI and Azure-kv plugin via the command-line with curl
+Install the latest released Notation CLI and Azure-kv plugin via the command-line with curl
 ```sh
-# input
+# install Notation & Azure-kv plugin
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/install.sh)" -- notation azure-kv
 
 # example output
