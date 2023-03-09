@@ -38,8 +38,8 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/ma
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/install.sh)" -- azure-kv
 ```
 > The installation script only supports Linux and MacOS based on amd64 or arm64 architecture. For Windows amd64 users to install Azure-kv plugin, please download the latest released binary for Windows and extract the `notation-azure-kv.exe` binary from the Zip file to `%AppData%\notation\plugins\azure-kv` directory manually.
-## Getting Started with a self-signed Azure Key Vault Certificate:
-To demonstrate the basic use case, starting with a self-signed certificate is easier to understand how the azure-kv plugin works with Notation, however, you should not use this in production  because the self-signed certificate is not secure enough.
+## Getting Started with a self-signed Azure Key Vault Certificate
+To demonstrate the basic use case, starting with a self-signed certificate is easier to understand how the Azure-kv plugin works with Notation, however, you **should not** use this in production because the self-signed certificate is not trusted.
 1. install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 2. login with Azure CLI and set the subscription:
    ```sh
