@@ -124,8 +124,11 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    notation cert add --type ca --store selfSigned ./selfSignedCert.crt
    
    # add notation trust policy
-   mkdir -p ~/.config/notation
-   cat <<EOF > ~/.config/notation/trustpolicy.json
+   notationConfigDir="${HOME}/.config/notation"                      # for Linux
+   notationConfigDir="${HOME}/Library/Application Support/notation"  # for MacOS
+
+   mkdir -p $notationConfigDir
+   cat <<EOF > $notationConfigDir/trustpolicy.json
    {
     "version": "1.0",
     "trustPolicies": [
