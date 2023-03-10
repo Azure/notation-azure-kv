@@ -17,13 +17,13 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/ma
 # example output
 Installing on Linux amd64
 Collecting notation latest release...
-notation_1.0.0-rc.3_linux_amd64.tar.gz               100%[===========>]   3.31M   673KB/s    in 5.0s    
+############################################################ 100.0%
 Sucessfully installed notation-v1.0.0-rc.3 to /home/exampleuser/bin
 Run the command to add the notation to PATH:
   export PATH=$PATH:/home/exampleuser/bin
 
 Collecting notation-azure-kv latest release...
-notation-azure-kv_0.5.0-rc.1_Linux_amd64.tar.gz      100%[===========>]   3.02M   873KB/s    in 3.5s    
+############################################################ 100.0%
 Successfully installed notation-azure-kv-v0.5.0-rc.1 to /home/exampleuser/.config/notation/plugins/azure-kv
 Run the command to show the installed plugins:
   /home/exampleuser/bin/notation plugin list

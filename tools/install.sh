@@ -59,8 +59,7 @@ downloadLatestBinary() {
         -H "X-GitHub-Api-Version: 2022-11-28" \
         https://api.github.com/repos/${owner}/${repo}/releases |
         awk "BEGIN{IGNORECASE = 1}/browser_download_url/ && /${osType}/ && /${archType}/;" | grep -v dev | head -1 | awk -F '"' '{print $4}')"
-    wget -q --show-progress --progress=bar:force $downloadLink -P $tempDir
-
+    curl -OL $downloadLink --progress-bar --output-dir $tempDir
     # return target path
     echo "${tempDir}/$(basename ${downloadLink})"
 }
