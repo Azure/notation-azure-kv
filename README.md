@@ -146,6 +146,7 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
     ]
    }
    EOF
+   chmod 0600 $notationConfigDir/trustpolicy.json
 
    # verify signature
    notation verify localhost:5000/hello-world:v1

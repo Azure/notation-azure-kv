@@ -27,15 +27,15 @@ esac
 
 for i in $*; do
     case $i in
-    notation*)
+    notation)
         rm "${HOME}/bin/notation" \
             && echo "Successfully uninstalled notation"
         ;;
-    azure-kv*)
+    azure-kv)
         rm -r "${configDir}/plugins/azure-kv" \
             && echo "Successfully uninstalled notation-azure-kv plugin"
         ;;
-    config*)
+    config)
         rm -f "${configDir}/trustpolicy.json" \
             && rm -f "${configDir}/signingkeys.json" \
             && rm -f "${configDir}/config.json" \

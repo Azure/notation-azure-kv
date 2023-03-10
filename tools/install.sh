@@ -16,9 +16,11 @@ osType="$(uname -s)"
 case "${osType}" in
 Linux*)
     pluginInstallPath="${HOME}/.config/notation/plugins/azure-kv"
+    osType="Linux"
     ;;
 Darwin*)
     pluginInstallPath="${HOME}/Library/Application Support/notation/plugins/azure-kv"
+    osType="Darwin"
     ;;
 *)
     echo "unsupported OS ${osType}"
@@ -28,9 +30,9 @@ esac
 
 archOut="$(uname -m)"
 case "${archOut}" in
-x86_64*) archType="amd64" ;;  # MacOS os Linux amd64
-aarch64*) archType="arm64" ;; # Linux ARM
-arm64*) atchType="arm64" ;;   # MacOS ARM
+x86_64) archType="amd64" ;;  # MacOS os Linux amd64
+aarch64) archType="arm64" ;; # Linux ARM
+arm64) atchType="arm64" ;;   # MacOS ARM
 *)
     echo "Unsupported architecture ${archType}"
     exit 1
@@ -84,8 +86,8 @@ installAzureKV=false
 
 for i in $*; do
     case $i in
-    notation*) installNotation=true ;;
-    azure-kv*) installAzureKV=true ;;
+    notation) installNotation=true ;;
+    azure-kv) installAzureKV=true ;;
     *)
         echo "unknown argument: $i"
         exit 1
