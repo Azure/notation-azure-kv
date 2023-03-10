@@ -60,9 +60,9 @@ type secretClient interface {
 // Certificate is an abstract of Azure Key Vault Certificate, including Sign,
 // CertificateChain and Certificate methods.
 type Certificate interface {
-	Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error)
-	CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
+	Sign(ctx context.Context, digest []byte, algorithm azkeys.JSONWebKeySignatureAlgorithm) ([]byte, error)
 	Certificate(ctx context.Context) (*x509.Certificate, error)
+	CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
 }
 
 // certificate represents a Azure certificate Vault.
@@ -174,7 +174,7 @@ func getAzureClientAuthMethod() authMethod {
 }
 
 // Sign signs the message digest with the algorithm provided.
-func (k *certificate) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error) {
+func (k *certificate) Sign(ctx context.Context, digest []byte, algorithm azkeys.JSONWebKeySignatureAlgorithm) ([]byte, error) {
 	// Sign the message
 	res, err := k.keyClient.Sign(
 		ctx,
@@ -200,6 +200,18 @@ func (k *certificate) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySigna
 	return res.Result, nil
 }
 
+// Certificate returns the X.509 certificate associated with the key.
+func (k *certificate) Certificate(ctx context.Context) (*x509.Certificate, error) {
+	cert, err := k.certificateClient.GetCertificate(ctx, k.name, k.version, nil)
+	if err != nil {
+		return nil, err
+	}
+	if cert.KID == nil {
+		return nil, errors.New("azure: invalid server response")
+	}
+	return x509.ParseCertificate(cert.CER)
+}
+
 // CertificateChain returns the X.509 certificate chain associated with the key.
 func (k *certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
 	secret, err := k.secretClient.GetSecret(ctx, k.name, k.version, nil)
@@ -212,16 +224,4 @@ func (k *certificate) CertificateChain(ctx context.Context) ([]*x509.Certificate
 	// For PKCS12 format, secret.Value is base64 encoded data.
 	// for PEM format, secret.Value is the raw data in PEM format.
 	return crypto.ParseCertificates([]byte(*secret.Value), *secret.ContentType)
-}
-
-// Certificate returns the X.509 certificate associated with the key.
-func (k *certificate) Certificate(ctx context.Context) (*x509.Certificate, error) {
-	cert, err := k.certificateClient.GetCertificate(ctx, k.name, k.version, nil)
-	if err != nil {
-		return nil, err
-	}
-	if cert.KID == nil {
-		return nil, errors.New("azure: invalid server response")
-	}
-	return x509.ParseCertificate(cert.CER)
 }

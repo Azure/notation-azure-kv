@@ -24,16 +24,16 @@ type certificateMock struct {
 	err  error
 }
 
-func (c *certificateMock) Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error) {
-	panic("not implemented") // TODO: Implement
-}
-
-func (c *certificateMock) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
+func (c *certificateMock) Sign(ctx context.Context, digest []byte, algorithm azkeys.JSONWebKeySignatureAlgorithm) ([]byte, error) {
 	panic("not implemented") // TODO: Implement
 }
 
 func (c *certificateMock) Certificate(ctx context.Context) (*x509.Certificate, error) {
 	return c.cert, c.err
+}
+
+func (c *certificateMock) CertificateChain(ctx context.Context) ([]*x509.Certificate, error) {
+	panic("not implemented") // TODO: Implement
 }
 
 func Test_runDescribeKey(t *testing.T) {

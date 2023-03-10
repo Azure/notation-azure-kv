@@ -59,20 +59,20 @@ func sign(ctx context.Context, certificate keyvault.Certificate, payload []byte,
 		return nil, "", err
 	}
 
+	// hash the payload
+	digest, err := hashPayload(payload, keySpec.SignatureAlgorithm().Hash())
+	if err != nil {
+		return nil, "", err
+	}
+
 	// get signing algorithm
 	signAlgorithm := keySpecToAlg(encodedKeySpec)
 	if signAlgorithm == "" {
 		return nil, "", fmt.Errorf("unrecognized key spec: %v", encodedKeySpec)
 	}
 
-	// compute hash for the payload
-	hashed, err := computeHash(keySpec.SignatureAlgorithm().Hash(), payload)
-	if err != nil {
-		return nil, "", err
-	}
-
 	// sign the digest
-	sig, err := certificate.Sign(ctx, signAlgorithm, hashed)
+	sig, err := certificate.Sign(ctx, digest, signAlgorithm)
 	if err != nil {
 		return nil, "", err
 	}
@@ -127,8 +127,8 @@ func getCertificateChain(ctx context.Context, certificate keyvault.Certificate, 
 	return rawCertChain, nil
 }
 
-// computeHash computes the digest of the message with the given hash algorithm.
-func computeHash(hash crypto.Hash, message []byte) ([]byte, error) {
+// hashPayload computes the digest of the message with the given hashPayload algorithm.
+func hashPayload(message []byte, hash crypto.Hash) ([]byte, error) {
 	if !hash.Available() {
 		return nil, errors.New("unavailable hash function: " + hash.String())
 	}

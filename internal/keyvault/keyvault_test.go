@@ -81,7 +81,7 @@ func TestSign(t *testing.T) {
 		certificate := certificate{
 			keyClient: &keyVault{err: errors.New("error")},
 		}
-		_, err := certificate.Sign(context.Background(), "", nil)
+		_, err := certificate.Sign(context.Background(), nil, "")
 		if err == nil {
 			t.Fatal("should error")
 		}
@@ -95,7 +95,7 @@ func TestSign(t *testing.T) {
 				},
 			},
 		}
-		_, err := certificate.Sign(context.Background(), "", nil)
+		_, err := certificate.Sign(context.Background(), nil, "")
 		if err == nil {
 			t.Fatal("should error")
 		}
@@ -112,7 +112,7 @@ func TestSign(t *testing.T) {
 				},
 			},
 		}
-		_, err := certificate.Sign(context.Background(), "", nil)
+		_, err := certificate.Sign(context.Background(), nil, "")
 		if err == nil {
 			t.Fatal("should error")
 		}
@@ -130,7 +130,7 @@ func TestSign(t *testing.T) {
 				},
 			},
 		}
-		_, err := certificate.Sign(context.Background(), "", nil)
+		_, err := certificate.Sign(context.Background(), nil, "")
 		if err != nil {
 			t.Fatalf("got error = %s, expect no error", err)
 		}
