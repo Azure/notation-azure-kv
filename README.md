@@ -98,7 +98,7 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
 4. run a local registry and push an image to be signed:
    ```sh
    # run a local registry with Docker
-   docker run --rm -d -p 5000:5000 ghcr.io/oras-project/registry:v1.0.0-rc.3
+   docker run --rm -d -p 5000:5000 ghcr.io/oras-project/registry:v1.0.0-rc.4
    
    # push a hello-world image
    docker pull hello-world
