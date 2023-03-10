@@ -57,7 +57,8 @@ type secretClient interface {
 	GetSecret(ctx context.Context, name string, version string, options *azsecrets.GetSecretOptions) (azsecrets.GetSecretResponse, error)
 }
 
-// Certificate includes Sign, CertificateChain, Certificate methods.
+// Certificate is an abstract of Azure Key Vault Certificate, including Sign,
+// CertificateChain and Certificate methods.
 type Certificate interface {
 	Sign(ctx context.Context, algorithm azkeys.JSONWebKeySignatureAlgorithm, digest []byte) ([]byte, error)
 	CertificateChain(ctx context.Context) ([]*x509.Certificate, error)
