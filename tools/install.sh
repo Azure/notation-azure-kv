@@ -50,18 +50,22 @@ trap cleanup EXIT
 # set install directory
 binDir="${HOME}/bin"
 
+# downloadLatestBinary returns the downloaded target path with shared variable
+# `targetPath`.
 downloadLatestBinary() {
     owner=$1
     repo=$2
 
+    echo "Collecting ${repo} latest release..."
     downloadLink="$(curl -sL \
         -H "Accept: application/vnd.github+json" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
         https://api.github.com/repos/${owner}/${repo}/releases |
         awk "BEGIN{IGNORECASE = 1}/browser_download_url/ && /${osType}/ && /${archType}/;" | grep -v dev | head -1 | awk -F '"' '{print $4}')"
     curl -OL $downloadLink --progress-bar --output-dir $tempDir
+
     # return target path
-    echo "${tempDir}/$(basename ${downloadLink})"
+    targetPath="${tempDir}/$(basename ${downloadLink})"
 }
 
 install() {
@@ -90,14 +94,14 @@ for i in $*; do
     *)
         echo "unknown argument: $i"
         exit 1
+        ;;
     esac
 done
 
 # install notation
 if [ $installNotation = true ]; then
-    echo "Collecting notation latest release..."
-    notationTar=$(downloadLatestBinary notaryproject notation)
-    install $notationTar notation $binDir
+    downloadLatestBinary notaryproject notation
+    install $targetPath notation $binDir
 
     version=$($binDir/notation version | grep Version | awk -F ' ' {'print $2'})
     echo "Sucessfully installed notation-v$version to $binDir"
@@ -109,9 +113,8 @@ fi
 # install notation-akv-plugin
 if [ $installAzureKV = true ]; then
     pluginName=notation-azure-kv
-    echo "Collecting $pluginName latest release..."
-    pluginTar=$(downloadLatestBinary Azure $pluginName)
-    install $pluginTar $pluginName $pluginInstallPath
+    downloadLatestBinary Azure $pluginName
+    install $targetPath $pluginName $pluginInstallPath
 
     # check pluign installation
     if [ -z "$($binDir/notation plugin list | grep azure-kv)" ]; then
