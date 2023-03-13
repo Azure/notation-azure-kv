@@ -88,7 +88,7 @@ func Sign(ctx context.Context, req *proto.GenerateSignatureRequest) (*proto.Gene
 	}, nil
 }
 
-func getCertificateChain(ctx context.Context, kv *keyvault.Certificate, pluginConfig map[string]string) ([][]byte, error) {
+func getCertificateChain(ctx context.Context, kv keyvault.Certificate, pluginConfig map[string]string) ([][]byte, error) {
 	var (
 		certs []*x509.Certificate
 		err   error
