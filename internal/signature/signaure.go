@@ -44,6 +44,10 @@ func Sign(ctx context.Context, certificate keyvault.Certificate, payload []byte,
 	return sig, signatureAlgorithmString, nil
 }
 
+// GetCertificateChain gets the certificates chain from Azure Key Vault.
+//
+// if the `as_secret` is specified in pluginConfig, it gets the certificate
+// chain with
 func GetCertificateChain(ctx context.Context, certificate keyvault.Certificate, pluginConfig map[string]string) ([][]byte, error) {
 	var (
 		certs []*x509.Certificate

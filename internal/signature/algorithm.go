@@ -5,7 +5,7 @@ import (
 	"github.com/notaryproject/notation-go/plugin/proto"
 )
 
-func keySpecToAlg(k proto.KeySpec) azkeys.JSONWebKeySignatureAlgorithm {
+func KeySpecToAlg(k proto.KeySpec) azkeys.JSONWebKeySignatureAlgorithm {
 	switch k {
 	case proto.KeySpecRSA2048:
 		return azkeys.JSONWebKeySignatureAlgorithmPS256
