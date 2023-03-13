@@ -9,35 +9,40 @@ The notation-azure-kv plugin provides the capability to signing the Notation gen
 The plugin supports Azure CLI identity and Managed Identity for accessing AKV.
 
 ## Installation
-Install the latest released Notation CLI and Azure-kv plugin via the command-line with curl
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/install.sh)" -- notation azure-kv
-```
-```
-# example output
-Installing on Linux amd64
-Collecting notation latest release...
-############################################################ 100.0%
-Sucessfully installed notation-v1.0.0-rc.3 to /home/exampleuser/bin
-Run the command to add the notation to PATH:
-  export PATH=$PATH:/home/exampleuser/bin
+Before installing notation azure key vault plugin, please make sure Notation CLI has been installed. If you didn't install it, please follow the [Notation installation guide](https://notaryproject.dev/docs/installation/cli/).
 
-Collecting notation-azure-kv latest release...
-############################################################ 100.0%
-Successfully installed notation-azure-kv-v0.5.0-rc.1 to /home/exampleuser/.config/notation/plugins/azure-kv
-Run the command to show the installed plugins:
-  /home/exampleuser/bin/notation plugin list
-```
-- if you only install Notation CLI, please execute the command:
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/install.sh)" -- notation
-```
+1. Navigate to the [Releases](https://github.com/Azure/notation-azure-kv/releases) page and select the latest release of notation-azure-kv. The notation-azure-kv binaries for each platform are available under the Assets section. Please download it based on your own platform. 
+2. Validate the checksum which should be the same as the one in `checksums.txt` and then install the plugin.
+   
+   For Linux Bash:
+   ```sh
+   # validate checksum
+   sha256sum notation-azure-kv_<version>_linux_amd64.tar.gz
 
-- if you only install Azure-kv plugin, please execute the command:
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/install.sh)" -- azure-kv
-```
-> The installation script only supports Linux and MacOS based on amd64 or arm64 architecture. For Windows amd64 users to install Azure-kv plugin, please download the latest released binary for Windows and extract the `notation-azure-kv.exe` binary from the Zip file to `%AppData%\notation\plugins\azure-kv` directory manually.
+   # install the plugin
+   mkdir -p "$HOME/.config/notation/plugins/azure-kv"
+   tar zxf notation-azure-kv_<version>_linux_amd64.tar.gz -C "$HOME/.config/notation/plugins/azure-kv" notation-azure-kv
+   ```
+   For MacOS Bash:
+   ```sh
+   # validate checksum
+   shasum -a 256 notation-azure-kv_<version>_linux_amd64.tar.gz
+
+   # install the plugin
+   mkdir -p "$HOME/Library/Application Support/notation/plugins/azure-kv"
+   tar zxf notation-azure-kv_<version>_darwin_amd64.tar.gz -C "$HOME/Library/Application Support/notation/plugins/azure-kv" notation-azure-kv
+   ```
+   For Windows Powershell:
+   ```powershell
+   # validate checksum
+   (Get-FileHash .\notation-azure-kv_<version>_windows_amd64.zip).Hash
+
+   # install the plugin
+   mkdir "$env:AppData\notation\plugins\azure-kv"
+   Expand-Archive -Path notation-azure-kv_<version>_windows_amd64.zip -DestinationPath "$env:AppData\notation\plugins\azure-kv"
+   ```
+3. Try to run `notation plugin list` to show the installed plugin.
+
 ## Getting Started with a self-signed Azure Key Vault Certificate
 To demonstrate the basic use case, starting with a self-signed certificate is easier to understand how the Azure-kv plugin works with Notation, however, you **should not** use this in production because the self-signed certificate is not trusted.
 1. install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
@@ -155,21 +160,126 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    Successfully verified signature for localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
 
-## Uninstall
-Uninstall Azure-kv plugin via command-line with curl:
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/uninstall.sh)" -- azure-kv
-```
-- if you uninstall both Notation and Azure-kv plugin, please execute the command:
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/uninstall.sh)" -- notation azure-kv
-```
+## Getting Started with a certificate signed by a trusted CA.
+1. install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+2. login with Azure CLI and set the subscription:
+   ```sh
+   az login
+   az account set --subscription $subscriptionID
+3. create an Azure Key Vault and a Certificate Signing Request (CSR):
+   ```sh
+   resourceGroup=notationResource
+   keyVault=notationKV
+   location=westus
+   certName=notationLeafCert
 
-To clean up Notation configurations, please execute the command:
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Azure/notation-azure-kv/main/tools/uninstall.sh)" -- config
-```
+   # create a resource group
+   az group create -n $resourceGroup -l $location
+   
+   # create a Azure Key Vault
+   az keyvault create -l $location -n $keyVault --resource-group $resourceGroup
 
+   # generate certificate policy
+   cat <<EOF > ./leafCert.json
+   {
+     "issuerParameters": {
+       "certificateTransparency": null,
+       "name": "Unknown"
+     },
+     "keyProperties": {
+       "curve": null,
+       "exportable": false,
+       "keySize": 2048,
+       "keyType": "RSA",
+       "reuseKey": true
+     },
+     "secretProperties": {
+       "contentType": "application/x-pem-file"
+     },
+     "x509CertificateProperties": {
+       "ekus": [
+           "1.3.6.1.5.5.7.3.3"
+       ],
+       "keyUsage": [
+         "digitalSignature"
+       ],
+       "subject": "CN=Test Signer",
+       "validityInMonths": 12
+     }
+   }
+   EOF
+
+   # create the leaf certificate
+   az keyvault certificate create -n $certName --vault-name $keyVault -p @leafCert.json
+
+   # get the CSR
+   CSR=$(az keyvault certificate pending show --vault-name $keyVault --name $certName --query 'csr' -o tsv)
+   CSR_PATH=${certName}.csr
+   printf -- "-----BEGIN CERTIFICATE REQUEST-----\n%s\n-----END CERTIFICATE REQUEST-----\n" $CSR > ${CSR_PATH}
+   ```
+4. please take ${certName}.csr file to a trusted CA to sign and issue your certificate, or you can use `openssl` tool to sign it locally for testing.
+5. after you get the leaf certificate, you can merge the leaf certificate (`$leafCert`) to your Azure Key Vault:
+   ```sh
+   az keyvault certificate pending merge --vault-name $keyVault --name $certName --file $leafCert
+
+   # get the key identifier
+   keyID=$(az keyvault certificate show -n $certName --vault-name $keyVault --query 'kid' -o tsv)
+   ```
+6. run a local registry and push an image to be signed:
+   ```sh
+   # run a local registry with Docker
+   docker run --rm -d -p 5000:5000 ghcr.io/oras-project/registry:v1.0.0-rc.4
+   
+   # push a hello-world image
+   docker pull hello-world
+   docker tag hello-world:latest localhost:5000/hello-world:v1
+   docker push localhost:5000/hello-world:v1
+   ```
+7. notation sign with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official website.
+   ```sh
+   # sign with azure-kv
+   notation sign localhost:5000/hello-world:v1 --id $keyID --plugin azure-kv --plugin-config=ca_certs=$certBundlePath
+   # example output
+   Warning: Always sign the artifact using digest(@sha256:...) rather than a tag(:v1) because tags are mutable and a tag reference can point to a different artifact than the one signed.
+   Successfully signed localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+   ```
+8. notation verify command needs the root certificate of your CA in the trust store:
+   ```sh
+   # add root certificate ($rootCertPath) to notation trust store
+   notation cert add --type ca --store trusted $rootCertPath
+   
+   # add notation trust policy
+   notationConfigDir="${HOME}/.config/notation"                      # for Linux
+   notationConfigDir="${HOME}/Library/Application Support/notation"  # for MacOS
+
+   mkdir -p $notationConfigDir
+   cat <<EOF > $notationConfigDir/trustpolicy.json
+   {
+    "version": "1.0",
+    "trustPolicies": [
+        {
+            "name": "trust-policy-example",
+            "registryScopes": [ "*" ],
+            "signatureVerification": {
+                "level" : "strict" 
+            },
+            "trustStores": [ "ca:trusted" ],
+            "trustedIdentities": [
+                "*"
+            ]
+        }
+    ]
+   }
+   EOF
+   chmod 0600 $notationConfigDir/trustpolicy.json
+
+   # verify signature
+   notation verify localhost:5000/hello-world:v1
+   # example output
+   Warning: Always verify the artifact using digest(@sha256:...) rather than a tag(:v1) because resolved digest may not point to the same signed artifact, as tags are mutable.
+   Successfully verified signature for localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
+   `
+> Please make sure the certificate is in PEM format. PCKS#12 will be supported in the future.
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
