@@ -1,3 +1,4 @@
+# Notation Azure KeyVault Plugin Makefile for Linux
 MODULE         = github.com/Azure/notation-azure-kv
 COMMANDS       = notation-azure-kv
 GIT_TAG        = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
@@ -30,13 +31,9 @@ download: ## download dependencies via go mod
 .PHONY: build
 build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
 
-.PHONY: clean
-clean:
-	git status --ignored --short | grep '^!! ' | sed 's/!! //' | xargs rm -rf
-
 .PHONY: test
-test:
-	go test ./... -coverprofile cover.out
+test: ## run unit test
+	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
 
 .PHONY: install
 install: bin/notation-azure-kv ## installs the plugin
