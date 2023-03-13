@@ -4,7 +4,7 @@
 
 Azure Provider for the [Notation CLI](https://github.com/notaryproject/notation)
 
-The notation-azure-kv plugin provides the capability to signing the Notation generated payload by using Azure Key Vault (AKV). The user's certificate and private key should be stored in AKV and the plugin will request signing and getting the certificate from AKV. 
+The notation-azure-kv plugin provides the capability to sign the Notation generated payload by using Azure Key Vault (AKV). The user's certificate and private key should be stored in AKV and the plugin will request signing and getting the leaf certificate from AKV. 
 
 The plugin supports Azure CLI identity and Managed Identity for accessing AKV.
 
@@ -46,7 +46,7 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
 ## Getting Started with a self-signed Azure Key Vault Certificate
 To demonstrate the basic use case, starting with a self-signed certificate is easier to understand how the Azure-kv plugin works with Notation, however, you **should not** use this in production because the self-signed certificate is not trusted.
 1. install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. login with Azure CLI and set the subscription:
+2. login with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
@@ -162,11 +162,12 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
 
 ## Getting Started with a certificate signed by a trusted CA.
 1. install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. login with Azure CLI and set the subscription:
+2. login with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
-3. create an Azure Key Vault and a Certificate Signing Request (CSR):
+   ```
+4. create an Azure Key Vault and a Certificate Signing Request (CSR):
    ```sh
    resourceGroup=notationResource
    keyVault=notationKV
@@ -217,15 +218,15 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    CSR_PATH=${certName}.csr
    printf -- "-----BEGIN CERTIFICATE REQUEST-----\n%s\n-----END CERTIFICATE REQUEST-----\n" $CSR > ${CSR_PATH}
    ```
-4. please take ${certName}.csr file to a trusted CA to sign and issue your certificate, or you can use `openssl` tool to sign it locally for testing.
-5. after you get the leaf certificate, you can merge the leaf certificate (`$leafCert`) to your Azure Key Vault:
+5. please take ${certName}.csr file to a trusted CA to sign and issue your certificate, or you can use `openssl` tool to sign it locally for testing.
+6. after you get the leaf certificate, you can merge the leaf certificate (`$leafCert`) to your Azure Key Vault:
    ```sh
    az keyvault certificate pending merge --vault-name $keyVault --name $certName --file $leafCert
 
    # get the key identifier
    keyID=$(az keyvault certificate show -n $certName --vault-name $keyVault --query 'kid' -o tsv)
    ```
-6. run a local registry and push an image to be signed:
+7. run a local registry and push an image to be signed:
    ```sh
    # run a local registry with Docker
    docker run --rm -d -p 5000:5000 ghcr.io/oras-project/registry:v1.0.0-rc.4
@@ -235,7 +236,7 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    docker tag hello-world:latest localhost:5000/hello-world:v1
    docker push localhost:5000/hello-world:v1
    ```
-7. notation sign with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official website.
+8. notation sign with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official website.
    ```sh
    # sign with azure-kv
    notation sign localhost:5000/hello-world:v1 --id $keyID --plugin azure-kv --plugin-config=ca_certs=$certBundlePath
@@ -243,7 +244,7 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    Warning: Always sign the artifact using digest(@sha256:...) rather than a tag(:v1) because tags are mutable and a tag reference can point to a different artifact than the one signed.
    Successfully signed localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
-8. notation verify command needs the root certificate of your CA in the trust store:
+9. notation verify command needs the root certificate of your CA in the trust store:
    ```sh
    # add root certificate ($rootCertPath) to notation trust store
    notation cert add --type ca --store trusted $rootCertPath
