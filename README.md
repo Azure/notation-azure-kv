@@ -43,15 +43,15 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
    ```
 3. Try to run `notation plugin list` to show the installed plugin.
 
-## Getting Started with a self-signed Azure Key Vault Certificate
+## Getting started with a self-signed Azure Key Vault Certificate
 To demonstrate the basic use case, starting with a self-signed certificate is easier to understand how the Azure-kv plugin works with Notation, however, you **should not** use this in production because the self-signed certificate is not trusted.
-1. install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. login with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
+1. Install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+2. Login to Azure with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
    ```
-3. create an Azure Key Vault and a self-signed certificate:
+3. Create an Azure Key Vault and a self-signed certificate:
    ```sh
    resourceGroup=notationResource
    keyVault=notationKV
@@ -100,17 +100,8 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    # get the key identifier
    keyID=$(az keyvault certificate show -n $certName --vault-name $keyVault --query 'kid' -o tsv)
    ```
-4. run a local registry and push an image to be signed:
-   ```sh
-   # run a local registry with Docker
-   docker run --rm -d -p 5000:5000 ghcr.io/oras-project/registry:v1.0.0-rc.4
-   
-   # push a hello-world image
-   docker pull hello-world
-   docker tag hello-world:latest localhost:5000/hello-world:v1
-   docker push localhost:5000/hello-world:v1
-   ```
-5. notation sign:
+4. Prepare a container registry. You can follow the [guide](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal?tabs=azure-cli) to create an Azure Container Registry which is recommended. 
+5. Sign the container image with Notation:
    ```sh
    # sign with azure-kv
    notation sign localhost:5000/hello-world:v1 --id $keyID --plugin azure-kv
@@ -118,7 +109,7 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    Warning: Always sign the artifact using digest(@sha256:...) rather than a tag(:v1) because tags are mutable and a tag reference can point to a different artifact than the one signed.
    Successfully signed localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
-6. notation verify:
+6. Verify the signature associated with the image:
    ```sh
    # add self-signed certificate to notation trust store
    cat <<EOF > ./selfSignedCert.crt
@@ -130,7 +121,7 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    
    # add notation trust policy
    notationConfigDir="${HOME}/.config/notation"                      # for Linux
-   notationConfigDir="${HOME}/Library/Application Support/notation"  # for MacOS
+   notationConfigDir="${HOME}/Library/Application Support/notation"  # for macOS
 
    mkdir -p $notationConfigDir
    cat <<EOF > $notationConfigDir/trustpolicy.json
@@ -160,14 +151,14 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    Successfully verified signature for localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
 
-## Getting Started with a certificate signed by a trusted CA.
-1. install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. login with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
+## Getting started with a certificate signed by a trusted CA.
+1. Install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+2. Login to Azure with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
    ```
-4. create an Azure Key Vault and a Certificate Signing Request (CSR):
+3. Create an Azure Key Vault and a Certificate Signing Request (CSR):
    ```sh
    resourceGroup=notationResource
    keyVault=notationKV
@@ -218,25 +209,16 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    CSR_PATH=${certName}.csr
    printf -- "-----BEGIN CERTIFICATE REQUEST-----\n%s\n-----END CERTIFICATE REQUEST-----\n" $CSR > ${CSR_PATH}
    ```
-5. please take ${certName}.csr file to a trusted CA to sign and issue your certificate, or you can use `openssl` tool to sign it locally for testing.
-6. after you get the leaf certificate, you can merge the leaf certificate (`$leafCert`) to your Azure Key Vault:
+4. Please take ${certName}.csr file to a trusted CA to sign and issue your certificate, or you can use `openssl` tool to sign it locally for testing.
+5. After you get the leaf certificate, you can merge the leaf certificate (`$leafCert`) to your Azure Key Vault:
    ```sh
    az keyvault certificate pending merge --vault-name $keyVault --name $certName --file $leafCert
 
    # get the key identifier
    keyID=$(az keyvault certificate show -n $certName --vault-name $keyVault --query 'kid' -o tsv)
    ```
-7. run a local registry and push an image to be signed:
-   ```sh
-   # run a local registry with Docker
-   docker run --rm -d -p 5000:5000 ghcr.io/oras-project/registry:v1.0.0-rc.4
-   
-   # push a hello-world image
-   docker pull hello-world
-   docker tag hello-world:latest localhost:5000/hello-world:v1
-   docker push localhost:5000/hello-world:v1
-   ```
-8. notation sign with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official website.
+6. Prepare a container registry. You can follow the [guide](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-get-started-portal?tabs=azure-cli) to create an Azure Container Registry which is recommended. 
+7. Sign the image with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official website.
    ```sh
    # sign with azure-kv
    notation sign localhost:5000/hello-world:v1 --id $keyID --plugin azure-kv --plugin-config=ca_certs=$certBundlePath
@@ -244,14 +226,14 @@ To demonstrate the basic use case, starting with a self-signed certificate is ea
    Warning: Always sign the artifact using digest(@sha256:...) rather than a tag(:v1) because tags are mutable and a tag reference can point to a different artifact than the one signed.
    Successfully signed localhost:5000/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
-9. notation verify command needs the root certificate of your CA in the trust store:
+8. Signature verification with Notation needs the root certificate of your CA in the trust store:
    ```sh
    # add root certificate ($rootCertPath) to notation trust store
    notation cert add --type ca --store trusted $rootCertPath
    
    # add notation trust policy
    notationConfigDir="${HOME}/.config/notation"                      # for Linux
-   notationConfigDir="${HOME}/Library/Application Support/notation"  # for MacOS
+   notationConfigDir="${HOME}/Library/Application Support/notation"  # for macOS
 
    mkdir -p $notationConfigDir
    cat <<EOF > $notationConfigDir/trustpolicy.json
@@ -302,3 +284,4 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
+~~~~
