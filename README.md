@@ -275,7 +275,6 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
    ```
    notation verify notation.azurecr.io/hello-world:v1
    ```
-
    example output
    ```
    Warning: Always verify the artifact using digest(@sha256:...) rather than a tag(:v1) because resolved digest may not point to the same signed artifact, as tags are mutable.
