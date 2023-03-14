@@ -50,7 +50,7 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
 3. Try to run `notation plugin list` to show the installed plugin.
 
 ## Getting started with a self-signed Azure Key Vault Certificate
-**Note** It is suggested to get a certificate from a trusted CA since a self-signed certificate is not publicly trusted.
+> **Note** It is suggested to get a certificate from a trusted CA since a self-signed certificate is not publicly trusted.
 1. Install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 2. Login to Azure with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
