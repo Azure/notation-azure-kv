@@ -6,7 +6,7 @@ Azure Provider for the [Notation CLI](https://github.com/notaryproject/notation)
 
 The `notation-azure-kv` plugin provides the capability to sign the Notation generated payload by using Azure Key Vault (AKV). The user's certificate and private key should be stored in AKV and the plugin will request signing and getting the leaf certificate from AKV. 
 
-The plugin supports Azure CLI identity and Managed Identity for accessing AKV.
+The plugin supports authentication by [Azure CLI](https://learn.microsoft.com/cli/azure/authenticate-azure-cli) or [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview). To enable `Managed Identity` authentication, the `AKV_AUTH_METHOD=AKV_AUTH_FROM_MI` should be set in the environment variable.
 
 ## Installation
 Before installing notation azure key vault plugin, please make sure Notation CLI has been installed. If you didn't install it, please follow the [Notation installation guide](https://notaryproject.dev/docs/installation/cli/).
@@ -19,18 +19,18 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
    version=0.6.0
 
    # validate checksum
-   sha256sum notation-azure-kv_${version}_linux_amd64.tar.gz
+   cat checksums.txt | grep notation-azure-kv_${version}_linux_amd64.tar.gz | sha256sum -c
 
    # install the plugin
    mkdir -p "$HOME/.config/notation/plugins/azure-kv"
    tar zxf notation-azure-kv_<version>_linux_amd64.tar.gz -C "$HOME/.config/notation/plugins/azure-kv" notation-azure-kv
    ```
-   For MacOS Zsh:
+   For macOS Zsh:
    ```sh
    version=0.6.0
 
    # validate checksum
-   shasum -a 256 notation-azure-kv_${version}_linux_amd64.tar.gz
+   cat checksums.txt | grep notation-azure-kv_${version}_darwin_amd64.tar.gz | shasum -a 256 -c
 
    # install the plugin
    mkdir -p "$HOME/Library/Application Support/notation/plugins/azure-kv"
@@ -128,7 +128,7 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
    notation cert add --type ca --store selfSigned ./selfSignedCert.crt
    
    # add notation trust policy
-   notationConfigDir="${HOME}/.config/notation"                      # for Linux
+   notationConfigDir="${HOME}/.config/notation"                        # for Linux
    # notationConfigDir="${HOME}/Library/Application Support/notation"  # for macOS
 
    mkdir -p $notationConfigDir
@@ -246,7 +246,7 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
    notation cert add --type ca --store trusted $rootCertPath
    
    # add notation trust policy
-   notationConfigDir="${HOME}/.config/notation"                      # for Linux
+   notationConfigDir="${HOME}/.config/notation"                        # for Linux
    # notationConfigDir="${HOME}/Library/Application Support/notation"  # for macOS
 
    mkdir -p $notationConfigDir
