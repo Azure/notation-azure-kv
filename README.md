@@ -23,7 +23,7 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
 
    # install the plugin
    mkdir -p "$HOME/.config/notation/plugins/azure-kv"
-   tar zxf notation-azure-kv_<version>_linux_amd64.tar.gz -C "$HOME/.config/notation/plugins/azure-kv" notation-azure-kv
+   tar zxf notation-azure-kv_${version}_linux_amd64.tar.gz -C "$HOME/.config/notation/plugins/azure-kv" notation-azure-kv
    ```
    For macOS Zsh:
    ```sh
@@ -34,18 +34,18 @@ Before installing notation azure key vault plugin, please make sure Notation CLI
 
    # install the plugin
    mkdir -p "$HOME/Library/Application Support/notation/plugins/azure-kv"
-   tar zxf notation-azure-kv_<version>_darwin_amd64.tar.gz -C "$HOME/Library/Application Support/notation/plugins/azure-kv" notation-azure-kv
+   tar zxf notation-azure-kv_${version}_darwin_amd64.tar.gz -C "$HOME/Library/Application Support/notation/plugins/azure-kv" notation-azure-kv
    ```
    For Windows Powershell:
    ```powershell
-   $version = 0.6.0
+   $version = "0.6.0"
 
    # validate checksum
-   (Get-FileHash .\notation-azure-kv_$version_windows_amd64.zip).Hash
+   (Get-FileHash .\notation-azure-kv_${version}_windows_amd64.zip).Hash
 
    # install the plugin
    mkdir "$env:AppData\notation\plugins\azure-kv"
-   Expand-Archive -Path notation-azure-kv_<version>_windows_amd64.zip -DestinationPath "$env:AppData\notation\plugins\azure-kv"
+   Expand-Archive -Path notation-azure-kv_${version}_windows_amd64.zip -DestinationPath "$env:AppData\notation\plugins\azure-kv"
    ```
 3. Try to run `notation plugin list` to show the installed plugin.
 
