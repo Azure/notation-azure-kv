@@ -72,7 +72,7 @@ type keyVault struct {
 	err  error
 }
 
-func (s *keyVault) Sign(_ context.Context, name string, version string, parameters azkeys.SignParameters, options *azkeys.SignOptions) (azkeys.SignResponse, error) {
+func (s *keyVault) Sign(_ context.Context, _ string, _ string, _ azkeys.SignParameters, _ *azkeys.SignOptions) (azkeys.SignResponse, error) {
 	return s.resp, s.err
 }
 
