@@ -142,7 +142,7 @@ type certificateVault struct {
 	err  error
 }
 
-func (s *certificateVault) GetCertificate(ctx context.Context, certificateName string, certificateVersion string, options *azcertificates.GetCertificateOptions) (azcertificates.GetCertificateResponse, error) {
+func (s *certificateVault) GetCertificate(_ context.Context, _ string, _ string, _ *azcertificates.GetCertificateOptions) (azcertificates.GetCertificateResponse, error) {
 	return s.resp, s.err
 }
 
@@ -191,7 +191,7 @@ type secretVault struct {
 	err  error
 }
 
-func (s *secretVault) GetSecret(_ context.Context, name string, version string, options *azsecrets.GetSecretOptions) (azsecrets.GetSecretResponse, error) {
+func (s *secretVault) GetSecret(_ context.Context, _ string, _ string, _ *azsecrets.GetSecretOptions) (azsecrets.GetSecretResponse, error) {
 	return s.resp, s.err
 }
 
