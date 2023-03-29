@@ -51,7 +51,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
 ## Getting started
 1. [Sign and verify an artifact with a self-signed Azure Key Vault certificate](docs/self-signed-workflow.md)
-2. [Sign and verify an artifact with a with a certificate signed by a trusted CA](docs/ca-signed-workflow.md)
+2. [Sign and verify an artifact with a certificate signed by a trusted CA](docs/ca-signed-workflow.md)
 
 > **Note** Please make sure the certificate is in PEM format. PCKS#12 will be supported in the future.
 ## Contributing

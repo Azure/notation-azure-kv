@@ -1,7 +1,7 @@
 # Sign and verify an artifact with a self-signed Azure Key Vault certificate
 > **Important** Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
 
-> **Note** The follow guide can be executed on Linux bash, macOS Zsh and Windows WSL
+> **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
@@ -84,7 +84,7 @@
    Warning: Always sign the artifact using digest(@sha256:...) rather than a tag(:v1) because tags are mutable and a tag reference can point to a different artifact than the one signed.
    Successfully signed notation.azurecr.io/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
-8. Add the certificate to your trust store and add `trustpolicy.json`:
+8. Add the certificate to your trust store and the `trustpolicy.json` to Notation configuration directory:
    ```sh
    cat <<EOF > ./selfSignedCert.crt
    -----BEGIN CERTIFICATE-----

@@ -1,6 +1,6 @@
-# Sign and verify an artifact with a with a certificate signed by a trusted CA
-> **Note** The follow guide can be executed on Linux bash, macOS Zsh and Windows WSL
-1. Install Azure CLI by following the [guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+# Sign and verify an artifact with a certificate signed by a trusted CA
+> **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
+1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 2. Log in to Azure with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
    az login
@@ -92,7 +92,7 @@
    Warning: Always sign the artifact using digest(@sha256:...) rather than a tag(:v1) because tags are mutable and a tag reference can point to a different artifact than the one signed.
    Successfully signed notation.azurecr.io/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
-10. Signature verification with Notation needs the root certificate of your CA in the trust store and a `trustpolicy.json` file:
+10. Signature verification with Notation needs the root certificate of your CA in the trust store and a `trustpolicy.json` file in Notation configuration directory:
    ```sh
    # add root certificate ($rootCertPath) to notation trust store
    notation cert add --type ca --store trusted $rootCertPath
