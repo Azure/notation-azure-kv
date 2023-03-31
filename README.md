@@ -11,41 +11,70 @@ The plugin supports authentication by [Azure CLI](https://learn.microsoft.com/cl
 ## Installation the AKV plugin
 Before you begin, make sure the latest version of the [Notation CLI has been installed](https://notaryproject.dev/docs/installation/cli/). 
 
-1. Navigate to the [Releases](https://github.com/Azure/notation-azure-kv/releases) page and select the latest release of `notation-azure-kv`. Under the *Assets* section, select the `notation-azure-kv` binary for your platform.
-2. Validate the checksum using the values in `checksums.txt` and then install the plugin.
+1. Navigate to the [Releases](https://github.com/Azure/notation-azure-kv/releases) page and choose a release of `notation-azure-kv`.
+2. Download, verify, and then install the specified version of the plugin.
 
    For Linux Bash:
-   ```sh
+   ```bash
    version=0.6.0
+   arch=amd64
+   install_path="${HOME}/.config/notation/plugins/azure-kv"
+
+   # download tarball and checksum
+   checksum_file="notation-azure-kv_${version}_checksums.txt"
+   tar_file="notation-azure-kv_${version}_linux_${arch}.tar.gz"
+   curl -Lo ${checksum_file} "https://github.com/Azure/notation-azure-kv/releases/download/v${version}/${checksum_file}"
+   curl -Lo ${tar_file} "https://github.com/Azure/notation-azure-kv/releases/download/v${version}/${tar_file}"
 
    # validate checksum
-   cat checksums.txt | grep notation-azure-kv_${version}_linux_amd64.tar.gz | sha256sum -c
+   grep ${tar_file} ${checksum_file} | sha256sum -c
 
    # install the plugin
-   mkdir -p "$HOME/.config/notation/plugins/azure-kv"
-   tar zxf notation-azure-kv_${version}_linux_amd64.tar.gz -C "$HOME/.config/notation/plugins/azure-kv" notation-azure-kv
+   mkdir -p ${install_path}
+   tar xvzf ${tar_file} -C ${install_path} notation-azure-kv
    ```
+
    For macOS Zsh:
-   ```sh
+   ```zsh
    version=0.6.0
+   arch=arm64
+   install_path="${HOME}/Library/Application Support/notation/plugins/azure-kv"
+
+   # download tarball and checksum
+   checksum_file="notation-azure-kv_${version}_checksums.txt"
+   tar_file="notation-azure-kv_${version}_darwin_${arch}.tar.gz"
+   curl -Lo ${checksum_file} "https://github.com/Azure/notation-azure-kv/releases/download/v${version}/${checksum_file}"
+   curl -Lo ${tar_file} "https://github.com/Azure/notation-azure-kv/releases/download/v${version}/${tar_file}"
 
    # validate checksum
-   cat checksums.txt | grep notation-azure-kv_${version}_darwin_amd64.tar.gz | shasum -a 256 -c
+   grep ${tar_file} ${checksum_file} | shasum -a 256 -c
 
    # install the plugin
-   mkdir -p "$HOME/Library/Application Support/notation/plugins/azure-kv"
-   tar zxf notation-azure-kv_${version}_darwin_amd64.tar.gz -C "$HOME/Library/Application Support/notation/plugins/azure-kv" notation-azure-kv
+   mkdir -p ${install_path}
+   tar xvzf ${tar_file} -C ${install_path} notation-azure-kv
    ```
+
    For Windows Powershell:
    ```powershell
    $version = "0.6.0"
+   $arch = "amd64"
+   $install_path = "${env:AppData}\notation\plugins\azure-kv"
+
+   # download zip file and checksum
+   $checksum_file = "notation-azure-kv_${version}_checksums.txt"
+   $zip_file = "notation-azure-kv_${version}_windows_${arch}.zip"
+   Invoke-WebRequest -OutFile ${checksum_file} "https://github.com/Azure/notation-azure-kv/releases/download/v${version}/${checksum_file}"
+   Invoke-WebRequest -OutFile ${zip_file} "https://github.com/Azure/notation-azure-kv/releases/download/v${version}/${zip_file}"
 
    # validate checksum
-   (Get-FileHash .\notation-azure-kv_${version}_windows_amd64.zip).Hash
+   $checksum = (Get-Content ${checksum_file} | Select-String -List ${zip_file}).Line.Split() | Where-Object {$_}
+   If ($checksum[0] -ne (Get-FileHash -Algorithm SHA256 $checksum[1]).Hash) {
+      throw "$($checksum[1]): Failed"
+   }
 
    # install the plugin
-   mkdir "$env:AppData\notation\plugins\azure-kv"
-   Expand-Archive -Path notation-azure-kv_${version}_windows_amd64.zip -DestinationPath "$env:AppData\notation\plugins\azure-kv"
+   mkdir ${install_path}
+   Expand-Archive -Path ${zip_file} -DestinationPath ${install_path}
    ```
 3. Run `notation plugin list` and confirm the `azure-kv` plugin is installed.
 
