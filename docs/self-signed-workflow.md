@@ -1,5 +1,5 @@
 # Sign and verify an artifact with a self-signed Azure Key Vault certificate
-> **Important** Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
+> **Warning** Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
 
 > **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
