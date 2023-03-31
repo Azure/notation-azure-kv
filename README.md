@@ -2,38 +2,58 @@
 
 [![codecov](https://codecov.io/gh/Azure/notation-azure-kv/branch/main/graph/badge.svg)](https://codecov.io/gh/Azure/notation-azure-kv)
 
-Azure Provider for the Notary v2 [Notation CLI](https://github.com/notaryproject/notation)
+Azure Provider for the [Notation CLI](https://github.com/notaryproject/notation)
 
-## Getting Started:
-The following summarizes the steps to configure the Azure Key Vault notation plugin, configure gatekeeper, sign and verify a container image to Azure Kubernetes Service
+The `notation-azure-kv` plugin allows you to sign the Notation-generated payload with a certificate in Azure Key Vault (AKV). The certificate and private key are stored in AKV and the plugin will request signing and obtain the leaf certificate from AKV. 
 
-```bash
-# Sign in with Azure CLI.
-# Other authorization methods are also available.
-# See https://docs.microsoft.com/en-us/azure/developer/go/azure-sdk-authorizatio
-az login
+The plugin supports authentication by [Azure CLI](https://learn.microsoft.com/cli/azure/authenticate-azure-cli) or [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview). Azure CLI authenticate is used by default. To enable `Managed Identity` authentication, set the `AKV_AUTH_METHOD` environment variable to `AKV_AUTH_FROM_MI`.
 
-# Add signing and verification keys to the notation configuration policy
-notation key add --name $KEY_NAME --plugin azure-kv --id $KEY_ID
-notation cert add --name $KEY_NAME $CERT_PATH
+## Installation the AKV plugin
+Before you begin, make sure the latest version of the [Notation CLI has been installed](https://notaryproject.dev/docs/installation/cli/). 
 
-# Install ratify, with the verification key
-helm install ratify ratify/charts/ratify \
-        --set registryCredsSecret=regcred \
-        --set ratifyTestCert=$PUBLIC_KEY
-kubectl apply -f ./ratify/charts/ratify-gatekeeper/templates/constraint.yaml
+1. Navigate to the [Releases](https://github.com/Azure/notation-azure-kv/releases) page and select the latest release of `notation-azure-kv`. Under the *Assets* section, select the `notation-azure-kv` binary for your platform.
+2. Validate the checksum using the values in `checksums.txt` and then install the plugin.
 
-# Remotely sign with Azure Key Vault
-notation sign --key $KEY_NAME $IMAGE 
+   For Linux Bash:
+   ```sh
+   version=0.6.0
 
-# Deploy the image, with Gatekeeper, Ratify and Notary v2 validation of the signed image
-kubectl run net-monitor --image=$IMAGE -n demo
-```
+   # validate checksum
+   cat checksums.txt | grep notation-azure-kv_${version}_linux_amd64.tar.gz | sha256sum -c
 
-See [documentation for details on remote signing with Azure Key Vault, validating a deployment to AKS with Notation and Ratify, using a simple setup script.](docs/nv2-bicep.md).
+   # install the plugin
+   mkdir -p "$HOME/.config/notation/plugins/azure-kv"
+   tar zxf notation-azure-kv_${version}_linux_amd64.tar.gz -C "$HOME/.config/notation/plugins/azure-kv" notation-azure-kv
+   ```
+   For macOS Zsh:
+   ```sh
+   version=0.6.0
 
+   # validate checksum
+   cat checksums.txt | grep notation-azure-kv_${version}_darwin_amd64.tar.gz | shasum -a 256 -c
 
+   # install the plugin
+   mkdir -p "$HOME/Library/Application Support/notation/plugins/azure-kv"
+   tar zxf notation-azure-kv_${version}_darwin_amd64.tar.gz -C "$HOME/Library/Application Support/notation/plugins/azure-kv" notation-azure-kv
+   ```
+   For Windows Powershell:
+   ```powershell
+   $version = "0.6.0"
 
+   # validate checksum
+   (Get-FileHash .\notation-azure-kv_${version}_windows_amd64.zip).Hash
+
+   # install the plugin
+   mkdir "$env:AppData\notation\plugins\azure-kv"
+   Expand-Archive -Path notation-azure-kv_${version}_windows_amd64.zip -DestinationPath "$env:AppData\notation\plugins\azure-kv"
+   ```
+3. Run `notation plugin list` and confirm the `azure-kv` plugin is installed.
+
+## Getting started
+1. [Sign and verify an artifact with a self-signed Azure Key Vault certificate](docs/self-signed-workflow.md)
+2. [Sign and verify an artifact with a certificate signed by a trusted CA in Azure Key Vault](docs/ca-signed-workflow.md)
+
+> **Note** Please make sure the certificate is in PEM format. PCKS#12 will be supported in the future.
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
