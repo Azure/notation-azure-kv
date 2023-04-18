@@ -17,7 +17,7 @@ namespace Notation.Plugin.Proto
             // the errorMessage may has 
             // "Path: $ | LineNumber: 0 | BytePositionInLine: 0." suffix for
             // exception's Message, so remove it.
-            errorMessage = errorMessage.Split("Path: $ | LineNumber: 0 | BytePositionInLine: 0.")[0];
+            errorMessage = errorMessage.Split("Path: $ |")[0];
             var errorResponse = new
             {
                 errorCode = errorCode,

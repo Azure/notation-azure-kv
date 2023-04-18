@@ -22,10 +22,11 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
                 throw new ValidationException(invalidInputError);
             }
 
+            // example uri: https://notationakvtest.vault.azure.net/keys/notationev10leafcert/847956cbd58c4937ab04d8ab8622000c
             var uri = new Uri(request.KeyId);
-            // example: https://notationakvtest.vault.azure.net/keys/notationev10leafcert/847956cbd58c4937ab04d8ab8622000c
-            // extract keys|certificates name from the uri
-            if (uri.Segments.Length < 4)
+
+            // validate uri
+            if (uri.Segments.Length != 4)
             {
                 throw new ValidationException(invalidInputError);
             }
@@ -33,6 +34,11 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
             {
                 throw new ValidationException(invalidInputError);
             }
+            if (uri.Scheme != "https")
+            {
+                throw new ValidationException(invalidInputError);
+            }
+            // extract keys|certificates name from the uri
             var name = uri.Segments[2].TrimEnd('/');
             var version = uri.Segments[3].TrimEnd('/');
 
@@ -53,7 +59,7 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
 
             // Serialize DescribeKeyResponse object to JSON string
             return new DescribeKeyResponse(
-                keyId: request.KeyId, 
+                keyId: request.KeyId,
                 keySpec: encodedKeySpec);
         }
     }
