@@ -1,0 +1,62 @@
+﻿using System.Text.Json;
+using Notation.Plugin.AzureKeyVault.Cmd;
+using Notation.Plugin.Proto;
+
+namespace Notation.Plugin.AzureKeyVault
+{
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            try
+            {
+                await ExecuteAsync(args);
+            }
+            catch (PluginException e)
+            {
+                Error.PrintError(e.Code, e.Message);
+                Environment.Exit(1);
+            }
+            catch (Exception e)
+            {
+                Error.PrintError(Error.ERROR, e.Message);
+                Environment.Exit(1);
+            }
+        }
+
+        static async Task ExecuteAsync(string[] args)
+        {
+            if (args.Length < 1)
+            {
+                throw new ValidationException("Missing command.");
+            }
+
+            IPluginCommand? cmd = null;
+            switch (args[0])
+            {
+                case "get-plugin-metadata":
+                    cmd = new GetPluginMetadata();
+                    break;
+                case "describe-key":
+                    cmd = new DescribeKey();
+                    break;
+                default:
+                    throw new ValidationException("Invalid command.");
+            }
+
+            // read the input
+            string? inputJson = Console.ReadLine();
+            if (inputJson == null)
+            {
+                throw new ValidationException("Invalid input. Input is empty.");
+            }
+
+            // execute the command
+            var resp = await cmd.RunAsync(inputJson);
+
+            // print the output
+            string jsonString = JsonSerializer.Serialize(resp, new JsonSerializerOptions { });
+            Console.WriteLine(jsonString);
+        }
+    }
+}
