@@ -52,7 +52,9 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
             var encodedKeySpec = KeySpecUtils.EncodeKeySpec(keySpec);
 
             // Serialize DescribeKeyResponse object to JSON string
-            return new DescribeKeyResponse(request.KeyId, encodedKeySpec);
+            return new DescribeKeyResponse(
+                keyId: request.KeyId, 
+                keySpec: encodedKeySpec);
         }
     }
 }

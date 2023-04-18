@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Notation.Plugin.Proto
 {
     /// <summary>
@@ -16,14 +14,16 @@ namespace Notation.Plugin.Proto
 
         public static void PrintError(string errorCode, string errorMessage)
         {
+            // the errorMessage may has 
+            // "Path: $ | LineNumber: 0 | BytePositionInLine: 0." suffix for
+            // exception's Message, so remove it.
+            errorMessage = errorMessage.Split("Path: $ | LineNumber: 0 | BytePositionInLine: 0.")[0];
             var errorResponse = new
             {
-                errorCode,
-                errorMessage
+                errorCode = errorCode,
+                errorMessage = errorMessage
             };
-
-            string jsonString = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions { });
-            Console.Error.WriteLine(jsonString);
+            PluginIO.WriteOutput(errorResponse, stderr: true);
         }
     }
 

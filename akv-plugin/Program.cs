@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Notation.Plugin.AzureKeyVault.Cmd;
+﻿using Notation.Plugin.AzureKeyVault.Cmd;
 using Notation.Plugin.Proto;
 
 namespace Notation.Plugin.AzureKeyVault
@@ -28,7 +27,7 @@ namespace Notation.Plugin.AzureKeyVault
         {
             if (args.Length < 1)
             {
-                throw new ValidationException("Missing command.");
+                throw new ValidationException("Missing command");
             }
 
             IPluginCommand? cmd = null;
@@ -41,22 +40,17 @@ namespace Notation.Plugin.AzureKeyVault
                     cmd = new DescribeKey();
                     break;
                 default:
-                    throw new ValidationException("Invalid command.");
+                    throw new ValidationException($"Invalid command: {args[0]}");
             }
 
             // read the input
-            string? inputJson = Console.ReadLine();
-            if (inputJson == null)
-            {
-                throw new ValidationException("Invalid input. Input is empty.");
-            }
+            var inputJson = PluginIO.ReadInput();
 
             // execute the command
             var resp = await cmd.RunAsync(inputJson);
 
             // print the output
-            string jsonString = JsonSerializer.Serialize(resp, new JsonSerializerOptions { });
-            Console.WriteLine(jsonString);
+            PluginIO.WriteOutput(resp);
         }
     }
 }
