@@ -22,42 +22,14 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
                 throw new ValidationException(invalidInputError);
             }
 
-            // example uri: https://notationakvtest.vault.azure.net/keys/notationev10leafcert/847956cbd58c4937ab04d8ab8622000c
-            var uri = new Uri(request.KeyId);
-
-            // validate uri
-            if (uri.Segments.Length != 4)
-            {
-                throw new ValidationException(invalidInputError);
-            }
-            if (uri.Segments[1] != "keys/" && uri.Segments[1] != "certificates/")
-            {
-                throw new ValidationException(invalidInputError);
-            }
-            if (uri.Scheme != "https")
-            {
-                throw new ValidationException(invalidInputError);
-            }
-            // extract keys|certificates name from the uri
-            var name = uri.Segments[2].TrimEnd('/');
-            var version = uri.Segments[3].TrimEnd('/');
-
-            // generate a certificate client
-            // TODO - This will be refactored when generate-signature command is
-            // implemented.
-            var credential = new AzureCliCredential();
-            var dnsUri = new Uri($"{uri.Scheme}://{uri.Host}");
-            var certificateClient = new CertificateClient(dnsUri, credential);
-
-            // parse the certificate to be X509Certificate2
-            var cert = await certificateClient.GetCertificateVersionAsync(name, version);
-            var x509 = new X509Certificate2(cert.Value.Cer);
+            // get certificate from Azure Key Vault
+            var akvClient = new AzureKeyVault(request.KeyId);
+            var cert = await akvClient.GetCertificate();
 
             // extract key spec from the certificate
-            var keySpec = KeySpecUtils.ExtractKeySpec(x509);
+            var keySpec = KeySpecUtils.ExtractKeySpec(cert);
             var encodedKeySpec = KeySpecUtils.EncodeKeySpec(keySpec);
 
-            // Serialize DescribeKeyResponse object to JSON string
             return new DescribeKeyResponse(
                 keyId: request.KeyId,
                 keySpec: encodedKeySpec);

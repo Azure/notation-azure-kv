@@ -4,19 +4,25 @@ using System.Security.Cryptography.X509Certificates;
 namespace Notation.Plugin.Proto
 {
     /// <summary>
+    /// KeyType class.
+    /// </summary>
+    public enum KeyType
+    {
+        // EC is Elliptic Curve Cryptography
+        EC,
+        // RSA is Rivest–Shamir–Adleman Cryptography
+        RSA
+    }
+
+    /// <summary>
     /// KeySpec class.
     /// </summary>
     public class KeySpec
     {
-        public string Type { get; }
+        public KeyType Type { get; }
         public int Size { get; }
-        public KeySpec(string type, int size)
+        public KeySpec(KeyType type, int size)
         {
-            if (string.IsNullOrEmpty(type))
-            {
-                throw new ArgumentNullException(nameof(type), "Type must not be null or empty");
-            }
-
             Type = type;
             Size = size;
         }
@@ -44,7 +50,7 @@ namespace Notation.Plugin.Proto
             {
                 if (rsaKey.KeySize is 2048 or 3072 or 4096)
                 {
-                    return new KeySpec("RSA", rsaKey.KeySize);
+                    return new KeySpec(KeyType.RSA, rsaKey.KeySize);
                 }
 
                 throw new ValidationException($"RSA key size {rsaKey.KeySize} bits is not supported");
@@ -55,7 +61,7 @@ namespace Notation.Plugin.Proto
             {
                 if (ecdsaKey.KeySize is 256 or 384 or 521)
                 {
-                    return new KeySpec("EC", ecdsaKey.KeySize);
+                    return new KeySpec(KeyType.EC, ecdsaKey.KeySize);
                 }
 
                 throw new ValidationException($"ECDSA key size {ecdsaKey.KeySize} bits is not supported");
@@ -71,19 +77,7 @@ namespace Notation.Plugin.Proto
         {
             switch (keySpec.Type)
             {
-                case "EC":
-                    switch (keySpec.Size)
-                    {
-                        case 256:
-                            return EC256;
-                        case 384:
-                            return EC384;
-                        case 521:
-                            return EC521;
-                        default:
-                            throw new ArgumentException($"Invalid KeySpec {keySpec}");
-                    }
-                case "RSA":
+                case KeyType.RSA:
                     switch (keySpec.Size)
                     {
                         case 2048:
@@ -92,6 +86,18 @@ namespace Notation.Plugin.Proto
                             return RSA3072;
                         case 4096:
                             return RSA4096;
+                        default:
+                            throw new ArgumentException($"Invalid KeySpec {keySpec}");
+                    }
+                case KeyType.EC:
+                    switch (keySpec.Size)
+                    {
+                        case 256:
+                            return EC256;
+                        case 384:
+                            return EC384;
+                        case 521:
+                            return EC521;
                         default:
                             throw new ArgumentException($"Invalid KeySpec {keySpec}");
                     }
