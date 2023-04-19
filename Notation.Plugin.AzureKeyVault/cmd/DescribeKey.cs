@@ -11,7 +11,7 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
     /// </summary>
     public class DescribeKey : IPluginCommand
     {
-        private const string invalidInputError = "Invalid input. Usage: akv-plugin describe-key '{\"keyId\":\"https://<vaultname>.vault.azure.net/keys|certificate/<name>/<version>\"}'";
+        private const string invalidInputError = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
         public async Task<object> RunAsync(string inputJson)
         {

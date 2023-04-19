@@ -35,11 +35,13 @@ namespace Notation.Plugin.Proto
             string jsonString = JsonSerializer.Serialize(resp, options);
 
             if (stderr)
+            {
                 Console.Error.WriteLine(jsonString);
+            }
             else
+            {
                 Console.WriteLine(jsonString);
+            }
         }
-
-
     }
 }

@@ -41,5 +41,4 @@ namespace Notation.Plugin.Proto
             Capabilities = capabilities;
         }
     }
-
 }

@@ -40,29 +40,25 @@ namespace Notation.Plugin.Proto
         public static KeySpec ExtractKeySpec(X509Certificate2 signingCert)
         {
             RSA? rsaKey = signingCert.GetRSAPublicKey();
-            ECDsa? ecdsaKey = signingCert.GetECDsaPublicKey();
-
             if (rsaKey != null)
             {
-                int bitSize = rsaKey.KeySize;
-
-                if (bitSize == 2048 || bitSize == 3072 || bitSize == 4096)
+                if (rsaKey.KeySize is 2048 or 3072 or 4096)
                 {
-                    return new KeySpec("RSA", bitSize);
+                    return new KeySpec("RSA", rsaKey.KeySize);
                 }
 
-                throw new ValidationException($"RSA key size {bitSize} bits is not supported");
+                throw new ValidationException($"RSA key size {rsaKey.KeySize} bits is not supported");
             }
-            else if (ecdsaKey != null)
-            {
-                int bitSize = ecdsaKey.KeySize;
 
-                if (bitSize == 256 || bitSize == 384 || bitSize == 521)
+            ECDsa? ecdsaKey = signingCert.GetECDsaPublicKey();
+            if (ecdsaKey != null)
+            {
+                if (ecdsaKey.KeySize is 256 or 384 or 521)
                 {
-                    return new KeySpec("EC", bitSize);
+                    return new KeySpec("EC", ecdsaKey.KeySize);
                 }
 
-                throw new ValidationException($"ECDSA key size {bitSize} bits is not supported");
+                throw new ValidationException($"ECDSA key size {ecdsaKey.KeySize} bits is not supported");
             }
 
             throw new ValidationException("Unsupported public key type");

@@ -13,7 +13,7 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
                 name: "akv-plugin",
                 description: "Notation Azure Key Vault plugin",
                 version: "1.0.0",
-                url: "https://github.com/Azure/notation-azure-kv/",
+                url: "https://github.com/Azure/notation-azure-kv",
                 supportedContractVersions: new[] { "1.0.0" },
                 capabilities: new[] { "SIGNATURE_GENERATOR.RAW" }
             ));
