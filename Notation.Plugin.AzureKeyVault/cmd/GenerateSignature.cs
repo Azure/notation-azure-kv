@@ -1,8 +1,6 @@
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using Azure.Identity;
-using Azure.Security.KeyVault.Certificates;
 using Notation.Plugin.Proto;
+using Azure.Security.KeyVault.Keys.Cryptography;
 
 namespace Notation.Plugin.AzureKeyVault.Cmd
 {
@@ -11,7 +9,7 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
     /// </summary>
     public class GenerateSignature : IPluginCommand
     {
-        public Task<object> RunAsync(string inputJson)
+        public async Task<object> RunAsync(string inputJson)
         {
             // parse the input
             GenerateSignatureRequest? input = JsonSerializer.Deserialize<GenerateSignatureRequest>(inputJson);
@@ -20,7 +18,22 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
                 throw new ValidationException("Invalid input");
             }
 
-            throw new NotImplementedException();
+            var akvClient = new AzureKeyVault(input.KeyId);
+
+            // extract signature algorithm from the certificate
+            var cert = await akvClient.GetCertificate();
+            var keySpec = KeySpecUtils.ExtractKeySpec(cert);
+            var signatureAlgorithm = SignatureAlgorithmHelper.FromKeySpec(keySpec);
+
+            // sign
+            var signature = await akvClient.Sign(signatureAlgorithm, input.Payload);
+            // TODO - get the certificate chain
+
+            return new GenerateSignatureResponse(
+                keyId: input.KeyId,
+                signature: signature,
+                signingAlgorithm: KeySpecUtils.ToSigningAlgorithm(keySpec),
+                certificateChain: new List<byte[]> { cert.RawData });
         }
     }
 }

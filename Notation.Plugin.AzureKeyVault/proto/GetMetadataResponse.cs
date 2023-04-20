@@ -2,6 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace Notation.Plugin.Proto
 {
+    public static class ProtoConstants
+    {
+        public const string ContractVersion = "1.0";
+    }
     /// <summary>
     /// Response class for get-plugin-metadata command.
     /// </summary>

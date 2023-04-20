@@ -2,6 +2,7 @@ using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
+using Azure.Security.KeyVault.Keys;
 using Notation.Plugin.Proto;
 
 namespace Notation.Plugin.AzureKeyVault
@@ -11,7 +12,7 @@ namespace Notation.Plugin.AzureKeyVault
         private string keyVaultUrl;
         private string name;
         private string version;
-        private string id;
+        private string keyId;
 
         private const string invalidInputError = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
@@ -39,7 +40,7 @@ namespace Notation.Plugin.AzureKeyVault
             this.keyVaultUrl = keyVaultUrl;
             this.name = name;
             this.version = version;
-            this.id = $"{keyVaultUrl}/keys/{name}/{version}";
+            this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
         }
 
         /// <summary>
@@ -73,18 +74,30 @@ namespace Notation.Plugin.AzureKeyVault
             this.keyVaultUrl = $"{uri.Scheme}://{uri.Host}";
             this.name = uri.Segments[2].TrimEnd('/');
             this.version = uri.Segments[3].TrimEnd('/');
-            this.id = id;
+            this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
         }
 
 
         /// <summary>
         /// Sign the payload and return the signature.
         /// </summary>
-        public async Task<byte[]> Sign(byte[] payload, SignatureAlgorithm algorithm)
+        public async Task<byte[]> Sign(SignatureAlgorithm algorithm, byte[] payload)
         {
-            var cryptoClient = new CryptographyClient(new Uri(id), new DefaultAzureCredential());
-            var signature = await cryptoClient.SignDataAsync(SignatureAlgorithm.RS256, payload);
-            return signature.Signature;
+            var keyClient = new KeyClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
+            var cryptoClient = keyClient.GetCryptographyClient(name, version);
+            var signResult = await cryptoClient.SignDataAsync(algorithm, payload);
+
+            if (signResult.KeyId != keyId)
+            {
+                throw new PluginException("Invalid keys or certificates identifier.");
+            }
+
+            if (signResult.Algorithm != algorithm)
+            {
+                throw new PluginException("Invalid signature algorithm.");
+            }
+
+            return signResult.Signature;
         }
 
 
@@ -95,13 +108,14 @@ namespace Notation.Plugin.AzureKeyVault
         {
             var certificateClient = new CertificateClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
             var cert = await certificateClient.GetCertificateVersionAsync(name, version);
-            
+
             // if the version is invalid, the cert will be fallback to 
             // the latest. So if the version is not the same as the
             // requested version, it means the version is invalid.
-            if (cert.Value.Properties.Version != version){
+            if (cert.Value.Properties.Version != version)
+            {
                 throw new ValidationException("Invalid certificate version.");
-            } 
+            }
             return new X509Certificate2(cert.Value.Cer);
         }
     }

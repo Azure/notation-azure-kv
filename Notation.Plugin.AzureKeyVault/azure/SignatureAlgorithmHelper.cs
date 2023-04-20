@@ -6,6 +6,9 @@ namespace Notation.Plugin.AzureKeyVault
 {
     class SignatureAlgorithmHelper
     {
+        /// <summary>
+        /// Get SignatureAlgorithm from KeySpec for Azure Key Vault signing.
+        /// </summary>
         public static SignatureAlgorithm FromKeySpec(KeySpec keySpec) => keySpec.Type switch
         {
             KeyType.RSA => keySpec.Size switch

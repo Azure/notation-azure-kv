@@ -23,9 +23,9 @@ namespace Notation.Plugin.Proto
         public string HashAlgorithm { get; }
 
         [JsonPropertyName("payload")]
-        public string Payload { get; }
+        public byte[] Payload { get; }
 
-        public GenerateSignatureRequest(string contractVersion, string keyId, Dictionary<string, string>? pluginConfig, string keySpec, string hashAlgorithm, string payload)
+        public GenerateSignatureRequest(string contractVersion, string keyId, Dictionary<string, string>? pluginConfig, string keySpec, string hashAlgorithm, byte[] payload)
         {
             if (string.IsNullOrEmpty(contractVersion))
             {
@@ -47,12 +47,12 @@ namespace Notation.Plugin.Proto
                 throw new ArgumentNullException(nameof(hashAlgorithm), "HashAlgorithm must not be null or empty");
             }
 
-            if (string.IsNullOrEmpty(payload))
+            if (payload == null || payload.Length == 0)
             {
                 throw new ArgumentNullException(nameof(payload), "Payload must not be null or empty");
             }
 
-            if (contractVersion != "1.0")
+            if (contractVersion != ProtoConstants.ContractVersion)
             {
                 throw new ValidationException($"Unsupported contract version: {contractVersion}");
             }
@@ -75,22 +75,22 @@ namespace Notation.Plugin.Proto
         public string KeyId { get; }
 
         [JsonPropertyName("signature")]
-        public string Signature { get; }
+        public byte[] Signature { get; }
 
         [JsonPropertyName("signingAlgorithm")]
         public string SigningAlgorithm { get; }
 
         [JsonPropertyName("certificateChain")]
-        public List<string> CertificateChain { get; }
+        public List<byte[]> CertificateChain { get; }
 
-        public GenerateSignatureResponse(string keyId, string signature, string signingAlgorithm, List<string> certificateChain)
+        public GenerateSignatureResponse(string keyId, byte[] signature, string signingAlgorithm, List<byte[]> certificateChain)
         {
             if (string.IsNullOrEmpty(keyId))
             {
                 throw new ArgumentNullException(nameof(keyId), "KeyId must not be null or empty");
             }
 
-            if (string.IsNullOrEmpty(signature))
+            if (signature == null || signature.Length == 0)
             {
                 throw new ArgumentNullException(nameof(signature), "Signature must not be null or empty");
             }
@@ -100,9 +100,9 @@ namespace Notation.Plugin.Proto
                 throw new ArgumentNullException(nameof(signingAlgorithm), "SigningAlgorithm must not be null or empty");
             }
 
-            if (certificateChain == null)
+            if (certificateChain == null || certificateChain.Count == 0)
             {
-                throw new ArgumentNullException(nameof(certificateChain), "CertificateChain must not be null");
+                throw new ArgumentNullException(nameof(certificateChain), "CertificateChain must not be null or empty");
             }
 
             KeyId = keyId;

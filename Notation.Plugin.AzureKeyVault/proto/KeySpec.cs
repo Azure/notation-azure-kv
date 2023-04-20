@@ -4,6 +4,32 @@ using System.Security.Cryptography.X509Certificates;
 namespace Notation.Plugin.Proto
 {
     /// <summary>
+    /// KeySpec encoded values.
+    /// </summary>
+    public static class KeySpecConstants
+    {
+        public const string RSA2048 = "RSA-2048";
+        public const string RSA3072 = "RSA-3072";
+        public const string RSA4096 = "RSA-4096";
+        public const string EC256 = "EC-256";
+        public const string EC384 = "EC-384";
+        public const string EC521 = "EC-521";
+    }
+
+    /// <summary>
+    /// defines the SigningAlgorithm constants.
+    /// </summary>
+    public static class SigningAlgorithms
+    {
+        public const string RSASSA_PSS_SHA_256 = "RSASSA-PSS-SHA-256";
+        public const string RSASSA_PSS_SHA_384 = "RSASSA-PSS-SHA-384";
+        public const string RSASSA_PSS_SHA_512 = "RSASSA-PSS-SHA-512";
+        public const string ECDSA_SHA_256 = "ECDSA-SHA-256";
+        public const string ECDSA_SHA_384 = "ECDSA-SHA-384";
+        public const string ECDSA_SHA_512 = "ECDSA-SHA-512";
+    }
+
+    /// <summary>
     /// KeyType class.
     /// </summary>
     public enum KeyType
@@ -33,13 +59,6 @@ namespace Notation.Plugin.Proto
     /// </summary>
     public static class KeySpecUtils
     {
-        public const string RSA2048 = "RSA-2048";
-        public const string RSA3072 = "RSA-3072";
-        public const string RSA4096 = "RSA-4096";
-        public const string EC256 = "EC-256";
-        public const string EC384 = "EC-384";
-        public const string EC521 = "EC-521";
-
         /// <summary>
         /// Extracts the key spec from the certificate.
         /// </summary>
@@ -73,37 +92,43 @@ namespace Notation.Plugin.Proto
         /// <summary>
         /// Encodes the key spec to be string.
         /// </summary>
-        public static string EncodeKeySpec(KeySpec keySpec)
+        public static string EncodeKeySpec(KeySpec keySpec) => keySpec.Type switch
         {
-            switch (keySpec.Type)
+            KeyType.RSA => keySpec.Size switch
             {
-                case KeyType.RSA:
-                    switch (keySpec.Size)
-                    {
-                        case 2048:
-                            return RSA2048;
-                        case 3072:
-                            return RSA3072;
-                        case 4096:
-                            return RSA4096;
-                        default:
-                            throw new ArgumentException($"Invalid KeySpec {keySpec}");
-                    }
-                case KeyType.EC:
-                    switch (keySpec.Size)
-                    {
-                        case 256:
-                            return EC256;
-                        case 384:
-                            return EC384;
-                        case 521:
-                            return EC521;
-                        default:
-                            throw new ArgumentException($"Invalid KeySpec {keySpec}");
-                    }
-                default:
-                    throw new ArgumentException($"Invalid KeySpec {keySpec}");
-            }
-        }
+                2048 => KeySpecConstants.RSA2048,
+                3072 => KeySpecConstants.RSA3072,
+                4096 => KeySpecConstants.RSA4096,
+                _ => throw new ArgumentException($"Invalid RSA KeySpec size {keySpec.Size}")
+            },
+            KeyType.EC => keySpec.Size switch
+            {
+                256 => KeySpecConstants.EC256,
+                384 => KeySpecConstants.EC384,
+                521 => KeySpecConstants.EC521,
+                _ => throw new ArgumentException($"Invalid EC KeySpec size {keySpec.Size}")
+            },
+            _ => throw new ArgumentException($"Invalid KeySpec {keySpec}")
+        };
+
+
+        public static string ToSigningAlgorithm(KeySpec keySpec) => keySpec.Type switch
+        {
+            KeyType.RSA => keySpec.Size switch
+            {
+                2048 => SigningAlgorithms.RSASSA_PSS_SHA_256,
+                3072 => SigningAlgorithms.RSASSA_PSS_SHA_384,
+                4096 => SigningAlgorithms.RSASSA_PSS_SHA_512,
+                _ => throw new ArgumentException($"Invalid RSA KeySpec size {keySpec.Size}")
+            },
+            KeyType.EC => keySpec.Size switch
+            {
+                256 => SigningAlgorithms.ECDSA_SHA_256,
+                384 => SigningAlgorithms.ECDSA_SHA_384,
+                521 => SigningAlgorithms.ECDSA_SHA_512,
+                _ => throw new ArgumentException($"Invalid EC KeySpec size {keySpec.Size}")
+            },
+            _ => throw new ArgumentException($"Invalid KeySpec {keySpec}")
+        };
     }
 }

@@ -28,7 +28,7 @@ namespace Notation.Plugin.Proto
                 throw new ArgumentNullException(nameof(keyId), "KeyId must not be null or empty");
             }
 
-            if (contractVersion != "1.0")
+            if (contractVersion != ProtoConstants.ContractVersion)
             {
                 throw new ValidationException($"Unsupported contract version: {contractVersion}");
             }
