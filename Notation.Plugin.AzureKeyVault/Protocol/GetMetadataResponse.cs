@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 namespace Notation.Plugin.Protocol
 {
     /// <summary>
-    /// Response class for get-plugin-metadata command.
+    /// Response class for get-plugin-metadata command which returns the information about the plugin.
+    /// This class implements the <a href="https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#plugin-metadata">get-plugin-metadata</a> response.
     /// </summary>
     public class GetMetadataResponse
     {
