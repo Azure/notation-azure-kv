@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Notation.Plugin.Proto;
 using Azure.Security.KeyVault.Keys.Cryptography;
+using Notation.Plugin.AzureKeyVault.Certificate;
 
 namespace Notation.Plugin.AzureKeyVault.Cmd
 {
@@ -27,13 +28,31 @@ namespace Notation.Plugin.AzureKeyVault.Cmd
 
             // sign
             var signature = await akvClient.Sign(signatureAlgorithm, input.Payload);
-            // TODO - get the certificate chain
+
+            List<byte[]> certificateChain = new List<byte[]>();
+            if (input.PluginConfig != null && input.PluginConfig.ContainsKey("ca_certs"))
+            {
+                // build the entire certificate chain from the certificate 
+                // bundle (including the intermediate and root certificates).
+                var caCertsPath = input.PluginConfig["ca_certs"];
+                certificateChain = CertificateChain.Build(CustomX509Store.Create(caCertsPath), cert);
+            }
+            else if (input.PluginConfig != null && input.PluginConfig.ContainsKey("as_secert"))
+            {
+                // read the entire certificate chain from the Azure Key Vault secret.
+                throw new NotImplementedException("as_secret is not implemented yet");
+            }
+            else
+            {
+                // self-signed leaf certificate
+                certificateChain.Add(cert.RawData);
+            }
 
             return new GenerateSignatureResponse(
                 keyId: input.KeyId,
                 signature: signature,
                 signingAlgorithm: KeySpecUtils.ToSigningAlgorithm(keySpec),
-                certificateChain: new List<byte[]> { cert.RawData });
+                certificateChain: certificateChain);
         }
     }
 }
