@@ -32,3 +32,6 @@ bin/
 
 # .terraform.lock.hcl
 .terraform.lock.hcl
+
+# dotnet output directory
+obj/
