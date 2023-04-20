@@ -11,7 +11,7 @@ namespace Notation.Plugin.Protocol
         /// request payloads. This method reads the input from standard input.
         ///
         /// <returns>
-        ///     The input string from standard input.
+        /// The input string from standard input.
         /// </returns>
         /// </summary>
         public static string ReadInput()
@@ -28,11 +28,11 @@ namespace Notation.Plugin.Protocol
         /// Writes the output to standard input/output.
         /// 
         /// <param name="resp">
-        ///     The response object to be written to standard output.
+        /// The response object to be written to standard output.
         /// </param>
         /// <param name="stderr">
-        ///     If true, the output will be written to standard error, 
-        ///     otherwise, the output will be written to standard output.
+        /// If true, the output will be written to standard error, 
+        /// otherwise, the output will be written to standard output.
         /// </param>
         /// </summary>
         public static void WriteOutput(object resp, bool stderr=false)

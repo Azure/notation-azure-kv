@@ -4,7 +4,7 @@ namespace Notation.Plugin.Protocol
 {
     /// <summary>
     /// Request class for describe-key command which is used to get metadata for a given key.
-    /// The class implement the <a href="https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#describe-key">describe-key</a> request .
+    /// The class implement the <a href="https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#describe-key">describe-key</a> request.
     /// </summary>
     public class DescribeKeyRequest
     {
