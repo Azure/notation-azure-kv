@@ -13,9 +13,9 @@ namespace Notation.Plugin.AzureKeyVault
         {
             KeyType.RSA => keySpec.Size switch
             {
-                2048 => SignatureAlgorithm.RS256,
-                3072 => SignatureAlgorithm.RS384,
-                4096 => SignatureAlgorithm.RS512,
+                2048 => SignatureAlgorithm.PS256,
+                3072 => SignatureAlgorithm.PS384,
+                4096 => SignatureAlgorithm.PS512,
                 _ => throw new ArgumentException($"Invalid KeySpec for RSA with size {keySpec.Size}")
             },
             KeyType.EC => keySpec.Size switch

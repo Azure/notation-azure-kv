@@ -2,7 +2,6 @@ using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
-using Azure.Security.KeyVault.Keys;
 using Notation.Plugin.Proto;
 
 namespace Notation.Plugin.AzureKeyVault
@@ -83,8 +82,7 @@ namespace Notation.Plugin.AzureKeyVault
         /// </summary>
         public async Task<byte[]> Sign(SignatureAlgorithm algorithm, byte[] payload)
         {
-            var keyClient = new KeyClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
-            var cryptoClient = keyClient.GetCryptographyClient(name, version);
+            var cryptoClient = new CryptographyClient(new Uri(keyId), new DefaultAzureCredential());
             var signResult = await cryptoClient.SignDataAsync(algorithm, payload);
 
             if (signResult.KeyId != keyId)
