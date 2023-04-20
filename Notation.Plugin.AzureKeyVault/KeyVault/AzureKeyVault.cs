@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
@@ -12,6 +13,7 @@ namespace Notation.Plugin.AzureKeyVault
         private string name;
         private string version;
         private string keyId;
+        private TokenCredential credential;
 
         private const string invalidInputError = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
@@ -40,6 +42,7 @@ namespace Notation.Plugin.AzureKeyVault
             this.name = name;
             this.version = version;
             this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
+            this.credential = new DefaultAzureCredential();
         }
 
         /// <summary>
@@ -74,6 +77,7 @@ namespace Notation.Plugin.AzureKeyVault
             this.name = uri.Segments[2].TrimEnd('/');
             this.version = uri.Segments[3].TrimEnd('/');
             this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
+            this.credential = new DefaultAzureCredential();
         }
 
 
@@ -82,7 +86,7 @@ namespace Notation.Plugin.AzureKeyVault
         /// </summary>
         public async Task<byte[]> Sign(SignatureAlgorithm algorithm, byte[] payload)
         {
-            var cryptoClient = new CryptographyClient(new Uri(keyId), new DefaultAzureCredential());
+            var cryptoClient = new CryptographyClient(new Uri(keyId), credential);
             var signResult = await cryptoClient.SignDataAsync(algorithm, payload);
 
             if (signResult.KeyId != keyId)
@@ -104,7 +108,7 @@ namespace Notation.Plugin.AzureKeyVault
         /// </summary>
         public async Task<X509Certificate2> GetCertificate()
         {
-            var certificateClient = new CertificateClient(new Uri(keyVaultUrl), new DefaultAzureCredential());
+            var certificateClient = new CertificateClient(new Uri(keyVaultUrl), credential);
             var cert = await certificateClient.GetCertificateVersionAsync(name, version);
 
             // if the version is invalid, the cert will be fallback to 

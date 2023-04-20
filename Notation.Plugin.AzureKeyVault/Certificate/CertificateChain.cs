@@ -16,7 +16,6 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
 
-
             bool isValid = chain.Build(leafCert);
             if (!isValid)
             {

@@ -1,5 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Notation.Plugin.Proto;
 
 namespace Notation.Plugin.AzureKeyVault.Certificate
 {
@@ -14,7 +15,6 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             store.Open(OpenFlags.ReadWrite);
             // TODO - check is it correct
             store.RemoveRange(store.Certificates);
-            Console.WriteLine("Yes    {0,4}  {1}, {2}", store.Certificates.Count, store.Name, store.Location);
 
             // Load the certificates from PEM file.
             string pemContent = File.ReadAllText(pemFilePath);
@@ -26,6 +26,10 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             {
                 string certContent = $"{pemCertificate}-----END CERTIFICATE-----";
                 byte[] certBytes = ConvertPemToDer(certContent);
+                if (certBytes == null || certBytes.Length == 0)
+                {
+                    continue;
+                }
                 X509Certificate2 cert = new X509Certificate2(certBytes);
                 store.Add(cert);
             }
@@ -42,7 +46,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
 
             foreach (string line in lines)
             {
-                if (!line.StartsWith("-----"))
+                if (!line.StartsWith("-----") && !string.IsNullOrWhiteSpace(line))
                 {
                     builder.Append(line);
                 }
