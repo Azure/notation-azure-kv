@@ -17,8 +17,6 @@ namespace Notation.Plugin.AzureKeyVault.Client
         private string version;
         // Key identifier (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
         private string keyId;
-        // Azure credential
-        private TokenCredential credential;
         // Certificate client (lazy initialization)
         private Lazy<CertificateClient> _certificateClient;
         // Cryptography client (lazy initialization)
@@ -53,12 +51,15 @@ namespace Notation.Plugin.AzureKeyVault.Client
             {
                 throw new ValidationException(invalidInputErrorMessage);
             }
+
             // Extract keys|certificates name from the uri
             this.keyVaultUrl = $"{uri.Scheme}://{uri.Host}";
             this.name = uri.Segments[2].TrimEnd('/');
             this.version = uri.Segments[3].TrimEnd('/');
             this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
-            this.credential = new DefaultAzureCredential();
+
+            // initialize credential and lazy clients
+            var credential = new DefaultAzureCredential();
             this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
             this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(keyId), credential));
         }
