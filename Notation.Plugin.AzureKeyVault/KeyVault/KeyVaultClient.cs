@@ -9,14 +9,12 @@ namespace Notation.Plugin.AzureKeyVault.Client
 {
     class KeyVaultClient
     {
-        // Azure Key Vault URL (e.g. https://<vaultname>.vault.azure.net)
-        private string keyVaultUrl;
         // Key name or certificate name
-        private string name;
+        private string _name;
         // Key version or certificate version
-        private string version;
+        private string _version;
         // Key identifier (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
-        private string keyId;
+        private string _keyId;
         // Certificate client (lazy initialization)
         private Lazy<CertificateClient> _certificateClient;
         // Cryptography client (lazy initialization)
@@ -53,15 +51,15 @@ namespace Notation.Plugin.AzureKeyVault.Client
             }
 
             // Extract keys|certificates name from the uri
-            this.keyVaultUrl = $"{uri.Scheme}://{uri.Host}";
-            this.name = uri.Segments[2].TrimEnd('/');
-            this.version = uri.Segments[3].TrimEnd('/');
-            this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
+            this._name = uri.Segments[2].TrimEnd('/');
+            this._version = uri.Segments[3].TrimEnd('/');
+            var keyVaultUrl = $"{uri.Scheme}://{uri.Host}";
+            this._keyId = $"{keyVaultUrl}/keys/{_name}/{_version}";
 
             // initialize credential and lazy clients
             var credential = new DefaultAzureCredential();
             this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
-            this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(keyId), credential));
+            this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(_keyId), credential));
         }
 
         /// <summary>
@@ -77,7 +75,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         {
             var signResult = await _cryptoClient.Value.SignDataAsync(algorithm, payload);
 
-            if (signResult.KeyId != keyId)
+            if (signResult.KeyId != _keyId)
             {
                 throw new PluginException("Invalid keys or certificates identifier.");
             }
@@ -95,12 +93,12 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// </summary>
         public async Task<X509Certificate2> GetCertificate()
         {
-            var cert = await _certificateClient.Value.GetCertificateVersionAsync(name, version);
+            var cert = await _certificateClient.Value.GetCertificateVersionAsync(_name, _version);
 
             // If the version is invalid, the cert will be fallback to 
             // the latest. So if the version is not the same as the
             // requested version, it means the version is invalid.
-            if (cert.Value.Properties.Version != version)
+            if (cert.Value.Properties.Version != _version)
             {
                 throw new ValidationException("Invalid certificate version.");
             }
