@@ -53,7 +53,7 @@ namespace Notation.Plugin.Protocol
                 throw new ArgumentNullException(nameof(payload), "Payload must not be null or empty");
             }
 
-            if (contractVersion != ProtoConstants.ContractVersion)
+            if (contractVersion != Protocol.ContractVersion)
             {
                 throw new ValidationException($"Unsupported contract version: {contractVersion}");
             }

@@ -2,8 +2,14 @@ using System.Security.Cryptography;
 
 namespace Notation.Plugin.Protocol
 {
+    /// <summary>
+    /// The helper class to get the HashAlgorithm from KeySpec.
+    /// </summary>
     public static class HashAlgorithmHelper
     {
+        /// <summary>
+        /// Get HashAlgorithm from KeySpec for Azure Key Vault signing.
+        /// </summary>
         public static HashAlgorithm FromKeySpec(KeySpec keySpec) => keySpec.Type switch
         {
             KeyType.EC => keySpec.Size switch

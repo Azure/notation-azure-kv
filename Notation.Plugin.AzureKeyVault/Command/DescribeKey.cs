@@ -20,11 +20,11 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 throw new ValidationException(invalidInputError);
             }
 
-            // get certificate from Azure Key Vault
+            // Get certificate from Azure Key Vault
             var akvClient = new KeyVaultClient(request.KeyId);
             var cert = await akvClient.GetCertificate();
 
-            // extract key spec from the certificate
+            // Extract key spec from the certificate
             var keySpec = KeySpecUtils.ExtractKeySpec(cert);
             var encodedKeySpec = KeySpecUtils.EncodeKeySpec(keySpec);
 

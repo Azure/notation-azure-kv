@@ -14,7 +14,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 description: "Notation Azure Key Vault plugin",
                 version: "1.0.0",
                 url: "https://github.com/Azure/notation-azure-kv",
-                supportedContractVersions: new[] { ProtoConstants.ContractVersion },
+                supportedContractVersions: new[] { Protocol.Protocol.ContractVersion },
                 capabilities: new[] { "SIGNATURE_GENERATOR.RAW" }
             ));
         }

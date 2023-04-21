@@ -14,7 +14,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// 
         /// <param name="certificateBundle">The certificate bundle.</param>
         /// <param name="leafCert">The leaf certificate.</param>
-        /// <returns>a list of raw certificates in a chain.</returns>
+        /// <returns>A list of raw certificates in a chain.</returns>
         /// </summary>
         public static List<byte[]> Build(X509Certificate2Collection certificateBundle, X509Certificate2 leafCert)
         {

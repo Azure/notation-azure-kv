@@ -67,10 +67,10 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 throw new ArgumentNullException(nameof(id), "Id must not be null or empty");
             }
 
-            // example uri: https://notationakvtest.vault.azure.net/keys/notationev10leafcert/847956cbd58c4937ab04d8ab8622000c
+            // Example uri: https://notationakvtest.vault.azure.net/keys/notationev10leafcert/847956cbd58c4937ab04d8ab8622000c
             var uri = new Uri(id);
 
-            // validate uri
+            // Validate uri
             if (uri.Segments.Length != 4)
             {
                 throw new ValidationException(invalidInputErrorMessage);
@@ -83,7 +83,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             {
                 throw new ValidationException(invalidInputErrorMessage);
             }
-            // extract keys|certificates name from the uri
+            // Extract keys|certificates name from the uri
             this.keyVaultUrl = $"{uri.Scheme}://{uri.Host}";
             this.name = uri.Segments[2].TrimEnd('/');
             this.version = uri.Segments[3].TrimEnd('/');
@@ -120,7 +120,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         {
             var cert = await _certificateClient.Value.GetCertificateVersionAsync(name, version);
 
-            // if the version is invalid, the cert will be fallback to 
+            // If the version is invalid, the cert will be fallback to 
             // the latest. So if the version is not the same as the
             // requested version, it means the version is invalid.
             if (cert.Value.Properties.Version != version)

@@ -12,7 +12,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// </summary>
         public static X509Certificate2Collection Create(string pemFilePath)
         {
-            // split the PEM file into certificates.
+            // Split the PEM file into certificates.
             string pemContent = File.ReadAllText(pemFilePath);
             string[] pemCertificates = pemContent.Split("-----END CERTIFICATE-----", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
 
@@ -29,11 +29,11 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// </summary>
         private static byte[] ConvertPemToDer(string pem)
         {
-            // remove the header and footer of the PEM file.
+            // Remove the header and footer of the PEM file.
             var lines = pem.Split('\n', StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries)
                            .Where(x => !x.StartsWith("-----"));
 
-            // merge multiple lines into one.
+            // Merge multiple lines into one.
             return Convert.FromBase64String(String.Join("", lines));
         }
     }

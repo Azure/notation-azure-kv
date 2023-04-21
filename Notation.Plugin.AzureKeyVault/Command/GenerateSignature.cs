@@ -12,7 +12,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
     {
         public async Task<object> RunAsync(string inputJson)
         {
-            // parse the input
+            // Parse the input
             GenerateSignatureRequest? input = JsonSerializer.Deserialize<GenerateSignatureRequest>(inputJson);
             if (input == null)
             {
@@ -21,30 +21,31 @@ namespace Notation.Plugin.AzureKeyVault.Command
 
             var akvClient = new KeyVaultClient(input.KeyId);
 
-            // extract signature algorithm from the certificate
+            // Extract signature algorithm from the certificate
             var leafCert = await akvClient.GetCertificate();
             var keySpec = KeySpecUtils.ExtractKeySpec(leafCert);
             var signatureAlgorithm = SignatureAlgorithmHelper.FromKeySpec(keySpec);
 
-            // sign
+            // Sign
             var signature = await akvClient.Sign(signatureAlgorithm, input.Payload);
 
+            // Build the certificate chain
             List<byte[]> certificateChain = new List<byte[]>();
             if (input.PluginConfig != null && input.PluginConfig.ContainsKey("ca_certs"))
             {
-                // build the entire certificate chain from the certificate 
+                // Build the entire certificate chain from the certificate 
                 // bundle (including the intermediate and root certificates).
                 var caCertsPath = input.PluginConfig["ca_certs"];
                 certificateChain = CertificateChain.Build(CertificateBundle.Create(caCertsPath), leafCert);
             }
             else if (input.PluginConfig != null && input.PluginConfig.ContainsKey("as_secret"))
             {
-                // read the entire certificate chain from the Azure Key Vault with GetSecret permission.
+                // Read the entire certificate chain from the Azure Key Vault with GetSecret permission.
                 throw new NotImplementedException("as_secret is not implemented yet");
             }
             else
             {
-                // self-signed leaf certificate
+                // Self-signed leaf certificate
                 certificateChain.Add(leafCert.RawData);
             }
 
