@@ -1,6 +1,6 @@
-using Notation.Plugin.Proto;
+using Notation.Plugin.Protocol;
 
-namespace Notation.Plugin.AzureKeyVault.Cmd
+namespace Notation.Plugin.AzureKeyVault.Command
 {
     /// <summary>
     /// Implementation of get-plugin-metadata command.

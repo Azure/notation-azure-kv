@@ -1,4 +1,4 @@
-namespace Notation.Plugin.AzureKeyVault.Cmd
+namespace Notation.Plugin.AzureKeyVault.Command
 {
     /// <summary>
     /// Interface for plugin commands.

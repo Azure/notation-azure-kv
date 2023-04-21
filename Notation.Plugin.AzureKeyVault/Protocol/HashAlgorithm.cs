@@ -1,6 +1,6 @@
 using System.Security.Cryptography;  
 
-namespace Notation.Plugin.Proto
+namespace Notation.Plugin.Protocol
 {
     public static class HashAlgorithmHelper
     {

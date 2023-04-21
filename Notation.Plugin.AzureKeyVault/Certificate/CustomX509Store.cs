@@ -1,6 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Notation.Plugin.Proto;
 
 namespace Notation.Plugin.AzureKeyVault.Certificate
 {

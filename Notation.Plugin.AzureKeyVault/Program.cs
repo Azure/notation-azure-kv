@@ -1,5 +1,5 @@
-﻿using Notation.Plugin.AzureKeyVault.Cmd;
-using Notation.Plugin.Proto;
+﻿using Notation.Plugin.AzureKeyVault.Command;
+using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault
 {

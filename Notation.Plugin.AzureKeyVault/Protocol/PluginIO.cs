@@ -1,12 +1,18 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
-namespace Notation.Plugin.Proto
+namespace Notation.Plugin.Protocol
 {
     class PluginIO
     {
         /// <summary>
-        /// Reads the input from standard input.
+        /// Notation will invoke plugins as executable, pass parameters using 
+        /// command line arguments, and use standard IO streams to pass 
+        /// request payloads. This method reads the input from standard input.
+        ///
+        /// <returns>
+        /// The input string from standard input.
+        /// </returns>
         /// </summary>
         public static string ReadInput()
         {
@@ -19,9 +25,15 @@ namespace Notation.Plugin.Proto
         }
 
         /// <summary>
-        /// Writes the output to standard output.
-        /// If the stderr is true, the output will be written to standard error.
-        /// else, the output will be written to standard output.
+        /// Writes the output to standard input/output.
+        /// 
+        /// <param name="resp">
+        /// The response object to be written to standard output.
+        /// </param>
+        /// <param name="stderr">
+        /// If true, the output will be written to standard error, 
+        /// otherwise, the output will be written to standard output.
+        /// </param>
         /// </summary>
         public static void WriteOutput(object resp, bool stderr=false)
         {

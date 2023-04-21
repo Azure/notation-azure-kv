@@ -1,9 +1,10 @@
 using System.Text.Json.Serialization;
 
-namespace Notation.Plugin.Proto
+namespace Notation.Plugin.Protocol
 {
     /// <summary>
-    /// Request class for generate-signature command.
+    /// Request class for generate-signature command which is used to generate the raw signature for a given payload.
+    /// This class implements the <a href="https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#generate-signature">generate-signature</a> request.
     /// </summary>
     public class GenerateSignatureRequest
     {
@@ -68,6 +69,7 @@ namespace Notation.Plugin.Proto
 
     /// <summary>
     /// Response class for generate-signature command.
+    /// This class implements the <a href="https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#generate-signature">generate-signature</a> response.
     /// </summary>
     public class GenerateSignatureResponse
     {

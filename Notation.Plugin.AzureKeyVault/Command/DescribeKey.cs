@@ -1,10 +1,7 @@
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using Azure.Identity;
-using Azure.Security.KeyVault.Certificates;
-using Notation.Plugin.Proto;
+using Notation.Plugin.Protocol;
 
-namespace Notation.Plugin.AzureKeyVault.Cmd
+namespace Notation.Plugin.AzureKeyVault.Command
 {
     /// <summary>
     /// Implementation of describe-key command.

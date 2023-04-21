@@ -1,9 +1,8 @@
 using System.Text.Json;
-using Notation.Plugin.Proto;
-using Azure.Security.KeyVault.Keys.Cryptography;
+using Notation.Plugin.Protocol;
 using Notation.Plugin.AzureKeyVault.Certificate;
 
-namespace Notation.Plugin.AzureKeyVault.Cmd
+namespace Notation.Plugin.AzureKeyVault.Command
 {
     /// <summary>
     /// Implementation of describe-key command.

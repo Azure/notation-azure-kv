@@ -3,7 +3,7 @@ using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
-using Notation.Plugin.Proto;
+using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault
 {
