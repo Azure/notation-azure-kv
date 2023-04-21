@@ -1,8 +1,10 @@
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 
 namespace Notation.Plugin.AzureKeyVault.Certificate
 {
+    /// <summary>
+    /// Helper class to create a certificate bundle from a PEM file.
+    /// </summary>
     class CertificateBundle
     {
         /// <summary>
@@ -12,19 +14,13 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         {
             // split the PEM file into certificates.
             string pemContent = File.ReadAllText(pemFilePath);
-            string[] pemCertificates = pemContent.Split("-----END CERTIFICATE-----", StringSplitOptions.RemoveEmptyEntries);
+            string[] pemCertificates = pemContent.Split("-----END CERTIFICATE-----", StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries);
 
             // Add the certificates to the bundle.
-            X509Certificate2Collection certBundle = new X509Certificate2Collection();
-            foreach (string pemCertificate in pemCertificates)
-            {
-                byte[] rawCert = ConvertPemToDer(pemCertificate);
-                if (rawCert != null && rawCert.Length > 0)
-                {
-                    certBundle.Add(new X509Certificate2(rawCert));
-                }
-            }
-            return certBundle;
+            var certs = pemCertificates.Select(x => ConvertPemToDer(x))
+                                       .Where(x => x != null && x.Length > 0)
+                                       .Select(x => new X509Certificate2(x));
+            return new X509Certificate2Collection(certs.ToArray());
         }
 
         /// <summary>
@@ -33,10 +29,9 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// </summary>
         private static byte[] ConvertPemToDer(string pem)
         {
-            StringBuilder builder = new StringBuilder();
-
             // remove the header and footer of the PEM file.
-            var lines = pem.Split('\n').Where(x => !x.StartsWith("-----") && !string.IsNullOrWhiteSpace(x));
+            var lines = pem.Split('\n', StringSplitOptions.RemoveEmptyEntries & StringSplitOptions.TrimEntries)
+                           .Where(x => !x.StartsWith("-----"));
 
             // merge multiple lines into one.
             return Convert.FromBase64String(String.Join("", lines));

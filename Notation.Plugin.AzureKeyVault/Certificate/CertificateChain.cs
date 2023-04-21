@@ -3,6 +3,9 @@ using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault.Certificate
 {
+    /// <summary>
+    /// Helper class to build certificate chain.
+    /// </summary>
     class CertificateChain
     {
         /// <summary>
