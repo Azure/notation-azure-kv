@@ -25,6 +25,10 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Constructor to create AzureKeyVault object from key identifier or
         /// certificate identifier.
+        ///
+        /// <param name="id">
+        /// Key identifier or certificate identifier. (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
+        /// </param>
         /// </summary>
         public KeyVaultClient(string id)
         {
@@ -33,9 +37,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 throw new ArgumentNullException(nameof(id), "Id must not be null or empty");
             }
 
-            // Example uri: https://notationakvtest.vault.azure.net/keys/notationev10leafcert/847956cbd58c4937ab04d8ab8622000c
             var uri = new Uri(id);
-
             // Validate uri
             if (uri.Segments.Length != 4)
             {
