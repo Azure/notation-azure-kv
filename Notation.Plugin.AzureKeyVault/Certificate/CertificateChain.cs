@@ -16,9 +16,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         public static List<byte[]> Build(X509Certificate2Collection certificateBundle, X509Certificate2 leafCert)
         {
             X509Chain chain = new X509Chain();
-            // clean all trust certificate from the chain
-            chain.ChainPolicy.ExtraStore.Clear();
-            
+            chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
             chain.ChainPolicy.CustomTrustStore.AddRange(certificateBundle);
             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
@@ -29,12 +27,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
                 throw new ValidationException("Certificate is invalid");
             }
 
-            List<byte[]> chainBytesList = new List<byte[]>();
-            foreach (X509ChainElement chainElement in chain.ChainElements)
-            {
-                chainBytesList.Add(chainElement.Certificate.RawData);
-            }
-            return chainBytesList;
+            return chain.ChainElements.Select(x => x.Certificate.RawData).ToList();
         }
     }
 }

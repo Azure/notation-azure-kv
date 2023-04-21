@@ -34,16 +34,12 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         private static byte[] ConvertPemToDer(string pem)
         {
             StringBuilder builder = new StringBuilder();
-            string[] lines = pem.Split('\n');
 
-            foreach (string line in lines)
-            {
-                if (!line.StartsWith("-----") && !string.IsNullOrWhiteSpace(line))
-                {
-                    builder.Append(line);
-                }
-            }
-            return Convert.FromBase64String(builder.ToString());
+            // remove the header and footer of the PEM file.
+            var lines = pem.Split('\n').Where(x => !x.StartsWith("-----") && !string.IsNullOrWhiteSpace(x));
+
+            // merge multiple lines into one.
+            return Convert.FromBase64String(String.Join("", lines));
         }
     }
 }
