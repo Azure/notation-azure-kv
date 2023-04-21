@@ -27,36 +27,6 @@ namespace Notation.Plugin.AzureKeyVault.Client
         private const string invalidInputErrorMessage = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
         /// <summary>
-        /// Constructor to create AzureKeyVault object from keyVaultUrl, name 
-        /// and version.
-        /// </summary>
-        public KeyVaultClient(string keyVaultUrl, string name, string version)
-        {
-            if (string.IsNullOrEmpty(keyVaultUrl))
-            {
-                throw new ArgumentNullException(nameof(keyVaultUrl), "KeyVaultUrl must not be null or empty");
-            }
-
-            if (string.IsNullOrEmpty(name))
-            {
-                throw new ArgumentNullException(nameof(name), "KeyName must not be null or empty");
-            }
-
-            if (string.IsNullOrEmpty(version))
-            {
-                throw new ArgumentNullException(nameof(version), "KeyVersion must not be null or empty");
-            }
-
-            this.keyVaultUrl = keyVaultUrl;
-            this.name = name;
-            this.version = version;
-            this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
-            this.credential = new DefaultAzureCredential();
-            this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
-            this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(keyId), credential));
-        }
-
-        /// <summary>
         /// Constructor to create AzureKeyVault object from key identifier or
         /// certificate identifier.
         /// </summary>
@@ -92,6 +62,12 @@ namespace Notation.Plugin.AzureKeyVault.Client
             this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
             this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(keyId), credential));
         }
+
+        /// <summary>
+        /// Constructor to create AzureKeyVault object from keyVaultUrl, name 
+        /// and version.
+        /// </summary>
+        public KeyVaultClient(string keyVaultUrl, string name, string version) : this($"{keyVaultUrl}/keys/{name}/{version}") { }
 
         /// <summary>
         /// Sign the payload and return the signature.
