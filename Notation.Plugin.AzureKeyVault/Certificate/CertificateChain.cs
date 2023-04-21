@@ -6,13 +6,20 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
     class CertificateChain
     {
         /// <summary>
-        /// Build a certificate chain from a leaf certificate and a custom X509 
-        /// store.
+        /// Build a certificate chain from a leaf certificate and a 
+        /// certificate bundle.
+        /// 
+        /// <param name="certificateBundle">The certificate bundle.</param>
+        /// <param name="leafCert">The leaf certificate.</param>
+        /// <returns>a list of raw certificates in a chain.</returns>
         /// </summary>
-        public static List<byte[]> Build(X509Store store, X509Certificate2 leafCert)
+        public static List<byte[]> Build(X509Certificate2Collection certificateBundle, X509Certificate2 leafCert)
         {
             X509Chain chain = new X509Chain();
-            chain.ChainPolicy.ExtraStore.AddRange(store.Certificates);
+            // clean all trust certificate from the chain
+            chain.ChainPolicy.ExtraStore.Clear();
+            
+            chain.ChainPolicy.CustomTrustStore.AddRange(certificateBundle);
             chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
             chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
 
@@ -27,9 +34,6 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             {
                 chainBytesList.Add(chainElement.Certificate.RawData);
             }
-
-            // TODO - Clean up and close the custom store
-            store.Close();
             return chainBytesList;
         }
     }

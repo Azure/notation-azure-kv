@@ -2,8 +2,11 @@ using Notation.Plugin.Protocol;
 using KeyType = Notation.Plugin.Protocol.KeyType;
 using Azure.Security.KeyVault.Keys.Cryptography;
 
-namespace Notation.Plugin.AzureKeyVault
+namespace Notation.Plugin.AzureKeyVault.Client
 {
+    /// <summary>
+    /// Helper class to get SignatureAlgorithm from KeySpec.
+    /// </summary>
     class SignatureAlgorithmHelper
     {
         /// <summary>

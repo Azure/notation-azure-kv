@@ -5,23 +5,32 @@ using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Notation.Plugin.Protocol;
 
-namespace Notation.Plugin.AzureKeyVault
+namespace Notation.Plugin.AzureKeyVault.Client
 {
-    class AzureKeyVault
+    class KeyVaultClient
     {
+        // Azure Key Vault URL (e.g. https://<vaultname>.vault.azure.net)
         private string keyVaultUrl;
+        // Key name or certificate name
         private string name;
+        // Key version or certificate version
         private string version;
+        // Key identifier (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
         private string keyId;
+        // Azure credential
         private TokenCredential credential;
+        // Certificate client (lazy initialization)
+        private Lazy<CertificateClient> _certificateClient;
+        // Cryptography client (lazy initialization)
+        private Lazy<CryptographyClient> _cryptoClient;
 
-        private const string invalidInputError = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
+        private const string invalidInputErrorMessage = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
         /// <summary>
         /// Constructor to create AzureKeyVault object from keyVaultUrl, name 
         /// and version.
         /// </summary>
-        public AzureKeyVault(string keyVaultUrl, string name, string version)
+        public KeyVaultClient(string keyVaultUrl, string name, string version)
         {
             if (string.IsNullOrEmpty(keyVaultUrl))
             {
@@ -43,13 +52,15 @@ namespace Notation.Plugin.AzureKeyVault
             this.version = version;
             this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
             this.credential = new DefaultAzureCredential();
+            this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
+            this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(keyId), credential));
         }
 
         /// <summary>
         /// Constructor to create AzureKeyVault object from key identifier or
         /// certificate identifier.
         /// </summary>
-        public AzureKeyVault(string id)
+        public KeyVaultClient(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -62,15 +73,15 @@ namespace Notation.Plugin.AzureKeyVault
             // validate uri
             if (uri.Segments.Length != 4)
             {
-                throw new ValidationException(invalidInputError);
+                throw new ValidationException(invalidInputErrorMessage);
             }
             if (uri.Segments[1] != "keys/" && uri.Segments[1] != "certificates/")
             {
-                throw new ValidationException(invalidInputError);
+                throw new ValidationException(invalidInputErrorMessage);
             }
             if (uri.Scheme != "https")
             {
-                throw new ValidationException(invalidInputError);
+                throw new ValidationException(invalidInputErrorMessage);
             }
             // extract keys|certificates name from the uri
             this.keyVaultUrl = $"{uri.Scheme}://{uri.Host}";
@@ -78,16 +89,16 @@ namespace Notation.Plugin.AzureKeyVault
             this.version = uri.Segments[3].TrimEnd('/');
             this.keyId = $"{keyVaultUrl}/keys/{name}/{version}";
             this.credential = new DefaultAzureCredential();
+            this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
+            this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(keyId), credential));
         }
-
 
         /// <summary>
         /// Sign the payload and return the signature.
         /// </summary>
         public async Task<byte[]> Sign(SignatureAlgorithm algorithm, byte[] payload)
         {
-            var cryptoClient = new CryptographyClient(new Uri(keyId), credential);
-            var signResult = await cryptoClient.SignDataAsync(algorithm, payload);
+            var signResult = await _cryptoClient.Value.SignDataAsync(algorithm, payload);
 
             if (signResult.KeyId != keyId)
             {
@@ -102,14 +113,12 @@ namespace Notation.Plugin.AzureKeyVault
             return signResult.Signature;
         }
 
-
         /// <summary>
         /// Get the certificate from the key vault.
         /// </summary>
         public async Task<X509Certificate2> GetCertificate()
         {
-            var certificateClient = new CertificateClient(new Uri(keyVaultUrl), credential);
-            var cert = await certificateClient.GetCertificateVersionAsync(name, version);
+            var cert = await _certificateClient.Value.GetCertificateVersionAsync(name, version);
 
             // if the version is invalid, the cert will be fallback to 
             // the latest. So if the version is not the same as the
@@ -118,6 +127,7 @@ namespace Notation.Plugin.AzureKeyVault
             {
                 throw new ValidationException("Invalid certificate version.");
             }
+
             return new X509Certificate2(cert.Value.Cer);
         }
     }

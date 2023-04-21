@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Notation.Plugin.Protocol;
+using Notation.Plugin.AzureKeyVault.Client;
 
 namespace Notation.Plugin.AzureKeyVault.Command
 {
@@ -20,7 +21,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             }
 
             // get certificate from Azure Key Vault
-            var akvClient = new AzureKeyVault(request.KeyId);
+            var akvClient = new KeyVaultClient(request.KeyId);
             var cert = await akvClient.GetCertificate();
 
             // extract key spec from the certificate

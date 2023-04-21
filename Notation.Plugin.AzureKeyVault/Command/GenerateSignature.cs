@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Notation.Plugin.Protocol;
 using Notation.Plugin.AzureKeyVault.Certificate;
+using Notation.Plugin.AzureKeyVault.Client;
 
 namespace Notation.Plugin.AzureKeyVault.Command
 {
@@ -18,11 +19,11 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 throw new ValidationException("Invalid input");
             }
 
-            var akvClient = new AzureKeyVault(input.KeyId);
+            var akvClient = new KeyVaultClient(input.KeyId);
 
             // extract signature algorithm from the certificate
-            var cert = await akvClient.GetCertificate();
-            var keySpec = KeySpecUtils.ExtractKeySpec(cert);
+            var leafCert = await akvClient.GetCertificate();
+            var keySpec = KeySpecUtils.ExtractKeySpec(leafCert);
             var signatureAlgorithm = SignatureAlgorithmHelper.FromKeySpec(keySpec);
 
             // sign
@@ -34,17 +35,17 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 // build the entire certificate chain from the certificate 
                 // bundle (including the intermediate and root certificates).
                 var caCertsPath = input.PluginConfig["ca_certs"];
-                certificateChain = CertificateChain.Build(CustomX509Store.Create(caCertsPath), cert);
+                certificateChain = CertificateChain.Build(CertificateBundle.Create(caCertsPath), leafCert);
             }
-            else if (input.PluginConfig != null && input.PluginConfig.ContainsKey("as_secert"))
+            else if (input.PluginConfig != null && input.PluginConfig.ContainsKey("as_secret"))
             {
-                // read the entire certificate chain from the Azure Key Vault secret.
+                // read the entire certificate chain from the Azure Key Vault with GetSecret permission.
                 throw new NotImplementedException("as_secret is not implemented yet");
             }
             else
             {
                 // self-signed leaf certificate
-                certificateChain.Add(cert.RawData);
+                certificateChain.Add(leafCert.RawData);
             }
 
             return new GenerateSignatureResponse(
