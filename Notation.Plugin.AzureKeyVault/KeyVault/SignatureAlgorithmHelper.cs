@@ -1,6 +1,6 @@
-using Notation.Plugin.Protocol;
-using KeyType = Notation.Plugin.Protocol.KeyType;
 using Azure.Security.KeyVault.Keys.Cryptography;
+using KeyType = Notation.Plugin.Protocol.KeyType;
+using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault.Client
 {
