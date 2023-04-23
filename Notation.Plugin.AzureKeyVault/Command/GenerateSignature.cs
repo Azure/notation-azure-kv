@@ -32,29 +32,28 @@ namespace Notation.Plugin.AzureKeyVault.Command
 
             // Build the certificate chain
             List<byte[]> certificateChain = new List<byte[]>();
+            X509Certificate2Collection certBundle = new X509Certificate2Collection();
             if (input.PluginConfig?.ContainsKey("ca_certs") ?? false)
             {
-                // Build the entire certificate chain from the certificate 
+                // Build the certificate chain from the certificate 
                 // bundle (including the intermediate and root certificates).
-                var caCertsPath = input.PluginConfig["ca_certs"];
-                certificateChain = CertificateChain.Build(leafCert, CertificateBundle.Create(caCertsPath));
+                certBundle = CertificateBundle.Create(input.PluginConfig["ca_certs"]);
             }
-            else if (input.PluginConfig?.ContainsKey("as_secret") ?? false)
+            else if (input.PluginConfig?.GetValueOrDefault("as_secret")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false)
             {
-                // Read the entire certificate chain from the Azure Key Vault with GetSecret permission.
-                throw new NotImplementedException("as_secret is not implemented yet");
-            }
-            else
-            {
-                // validate the self-signed leaf certificate
-                certificateChain = CertificateChain.Build(leafCert, new X509Certificate2Collection());
+                // Obtain the certificate chain from Azure Key Vault using 
+                // GetSecret permission. Ensure intermediate and root 
+                // certificates are merged into the Key Vault certificate to 
+                // retrieve the full chain.
+                // reference: https://learn.microsoft.com//azure/key-vault/certificates/create-certificate-signing-request
+                certBundle = await akvClient.GetCertificateChain();
             }
 
             return new GenerateSignatureResponse(
                 keyId: input.KeyId,
                 signature: signature,
                 signingAlgorithm: keySpec.ToSigningAlgorithm(),
-                certificateChain: certificateChain);
+                certificateChain: CertificateChain.Build(leafCert, certBundle));
         }
     }
 }
