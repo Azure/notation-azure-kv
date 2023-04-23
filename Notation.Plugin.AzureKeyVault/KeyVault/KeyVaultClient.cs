@@ -8,18 +8,55 @@ namespace Notation.Plugin.AzureKeyVault.Client
 {
     class KeyVaultClient
     {
-        // Key name or certificate name
-        private string _name;
-        // Key version or certificate version
-        private string _version;
-        // Key identifier (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
-        private string _keyId;
+        /// <summary>
+        /// A helper record to store KeyVault metadata.
+        /// </summary>
+        private record KeyVaultMetadata(string KeyVaultUrl, string Name, string Version);
+
         // Certificate client (lazy initialization)
         private Lazy<CertificateClient> _certificateClient;
         // Cryptography client (lazy initialization)
         private Lazy<CryptographyClient> _cryptoClient;
+        // Error message for invalid input
+        private const string INVALID_INPUT_ERROR_MSG = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
-        private const string invalidInputErrorMessage = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
+        // Key name or certificate name
+        public string _name;
+        // Key version or certificate version
+        public string _version;
+        // Key identifier (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
+        public string _keyId;
+
+        /// <summary>
+        /// Constructor to create AzureKeyVault object from keyVaultUrl, name 
+        /// and version.
+        /// </summary>
+        public KeyVaultClient(string keyVaultUrl, string name, string version)
+        {
+            if (string.IsNullOrEmpty(keyVaultUrl))
+            {
+                throw new ArgumentNullException(nameof(keyVaultUrl), "KeyVaultUrl must not be null or empty");
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException(nameof(name), "KeyName must not be null or empty");
+            }
+
+            if (string.IsNullOrEmpty(version))
+            {
+                throw new ArgumentNullException(nameof(version), "KeyVersion must not be null or empty");
+            }
+
+            this._name = name;
+            this._version = version;
+            this._keyId = $"{keyVaultUrl}/keys/{name}/{version}";
+
+            // initialize credential and lazy clients
+            var credential = new DefaultAzureCredential();
+            this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
+            this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(_keyId), credential));
+        }
 
         /// <summary>
         /// Constructor to create AzureKeyVault object from key identifier or
@@ -29,7 +66,19 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// Key identifier or certificate identifier. (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
         /// </param>
         /// </summary>
-        public KeyVaultClient(string id)
+        public KeyVaultClient(string id) : this(ParseId(id)) { }
+
+        /// <summary>
+        /// A helper constructor to create KeyVaultClient from KeyVaultMetadata.
+        /// </summary>
+        private KeyVaultClient(KeyVaultMetadata metadata)
+            : this(metadata.KeyVaultUrl, metadata.Name, metadata.Version) { }
+
+        /// <summary>
+        /// A helper function to parse key identifier or certificate identifier
+        /// and return KeyVaultMetadata.
+        /// </summary>
+        private static KeyVaultMetadata ParseId(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -40,34 +89,25 @@ namespace Notation.Plugin.AzureKeyVault.Client
             // Validate uri
             if (uri.Segments.Length != 4)
             {
-                throw new ValidationException(invalidInputErrorMessage);
+                throw new ValidationException(INVALID_INPUT_ERROR_MSG);
             }
+
             if (uri.Segments[1] != "keys/" && uri.Segments[1] != "certificates/")
             {
-                throw new ValidationException(invalidInputErrorMessage);
+                throw new ValidationException(INVALID_INPUT_ERROR_MSG);
             }
+
             if (uri.Scheme != "https")
             {
-                throw new ValidationException(invalidInputErrorMessage);
+                throw new ValidationException(INVALID_INPUT_ERROR_MSG);
             }
 
-            // Extract keys|certificates name from the uri
-            this._name = uri.Segments[2].TrimEnd('/');
-            this._version = uri.Segments[3].TrimEnd('/');
-            var keyVaultUrl = $"{uri.Scheme}://{uri.Host}";
-            this._keyId = $"{keyVaultUrl}/keys/{_name}/{_version}";
-
-            // initialize credential and lazy clients
-            var credential = new DefaultAzureCredential();
-            this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
-            this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(_keyId), credential));
+            return new KeyVaultMetadata(
+                KeyVaultUrl: $"{uri.Scheme}://{uri.Host}",
+                Name: uri.Segments[2].TrimEnd('/'),
+                Version: uri.Segments[3].TrimEnd('/')
+            );
         }
-
-        /// <summary>
-        /// Constructor to create AzureKeyVault object from keyVaultUrl, name 
-        /// and version.
-        /// </summary>
-        public KeyVaultClient(string keyVaultUrl, string name, string version) : this($"{keyVaultUrl}/keys/{name}/{version}") { }
 
         /// <summary>
         /// Sign the payload and return the signature.
@@ -75,15 +115,14 @@ namespace Notation.Plugin.AzureKeyVault.Client
         public async Task<byte[]> Sign(SignatureAlgorithm algorithm, byte[] payload)
         {
             var signResult = await _cryptoClient.Value.SignDataAsync(algorithm, payload);
-
             if (signResult.KeyId != _keyId)
             {
-                throw new PluginException("Invalid keys or certificates identifier.");
+                throw new PluginException($"Invalid keys identifier. The user provides {_keyId} but the response contains {signResult.KeyId} as the keys");
             }
 
             if (signResult.Algorithm != algorithm)
             {
-                throw new PluginException("Invalid signature algorithm.");
+                throw new PluginException($"Invalid signature algorithm. The user provides {algorithm} but the response contains {signResult.Algorithm} as the algorithm");
             }
 
             return signResult.Signature;
@@ -101,7 +140,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             // requested version, it means the version is invalid.
             if (cert.Value.Properties.Version != _version)
             {
-                throw new ValidationException("Invalid certificate version.");
+                throw new ValidationException($"Invalid certificate version. The user provides {_version} but the response contains {cert.Value.Properties.Version} as the version");
             }
 
             return new X509Certificate2(cert.Value.Cer);

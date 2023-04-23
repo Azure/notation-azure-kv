@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using Notation.Plugin.AzureKeyVault.Certificate;
 using Notation.Plugin.AzureKeyVault.Client;
@@ -6,7 +7,7 @@ using Notation.Plugin.Protocol;
 namespace Notation.Plugin.AzureKeyVault.Command
 {
     /// <summary>
-    /// Implementation of describe-key command.
+    /// Implementation of generate-signature command.
     /// </summary>
     public class GenerateSignature : IPluginCommand
     {
@@ -23,36 +24,36 @@ namespace Notation.Plugin.AzureKeyVault.Command
 
             // Extract signature algorithm from the certificate
             var leafCert = await akvClient.GetCertificate();
-            var keySpec = KeySpecUtils.ExtractKeySpec(leafCert);
-            var signatureAlgorithm = SignatureAlgorithmHelper.FromKeySpec(keySpec);
+            var keySpec = leafCert.KeySpec();
+            var signatureAlgorithm = keySpec.ToSignatureAlgorithm();
 
             // Sign
             var signature = await akvClient.Sign(signatureAlgorithm, input.Payload);
 
             // Build the certificate chain
             List<byte[]> certificateChain = new List<byte[]>();
-            if (input.PluginConfig != null && input.PluginConfig.ContainsKey("ca_certs"))
+            if (input.PluginConfig?.ContainsKey("ca_certs") ?? false)
             {
                 // Build the entire certificate chain from the certificate 
                 // bundle (including the intermediate and root certificates).
                 var caCertsPath = input.PluginConfig["ca_certs"];
-                certificateChain = CertificateChain.Build(CertificateBundle.Create(caCertsPath), leafCert);
+                certificateChain = CertificateChain.Build(leafCert, CertificateBundle.Create(caCertsPath));
             }
-            else if (input.PluginConfig != null && input.PluginConfig.ContainsKey("as_secret"))
+            else if (input.PluginConfig?.ContainsKey("as_secret") ?? false)
             {
                 // Read the entire certificate chain from the Azure Key Vault with GetSecret permission.
                 throw new NotImplementedException("as_secret is not implemented yet");
             }
             else
             {
-                // Self-signed leaf certificate
-                certificateChain.Add(leafCert.RawData);
+                // validate the self-signed leaf certificate
+                certificateChain = CertificateChain.Build(leafCert, new X509Certificate2Collection());
             }
 
             return new GenerateSignatureResponse(
                 keyId: input.KeyId,
                 signature: signature,
-                signingAlgorithm: KeySpecUtils.ToSigningAlgorithm(keySpec),
+                signingAlgorithm: keySpec.ToSigningAlgorithm(),
                 certificateChain: certificateChain);
         }
     }

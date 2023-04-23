@@ -24,13 +24,9 @@ namespace Notation.Plugin.AzureKeyVault.Command
             var akvClient = new KeyVaultClient(request.KeyId);
             var cert = await akvClient.GetCertificate();
 
-            // Extract key spec from the certificate
-            var keySpec = KeySpecUtils.ExtractKeySpec(cert);
-            var encodedKeySpec = KeySpecUtils.EncodeKeySpec(keySpec);
-
             return new DescribeKeyResponse(
                 keyId: request.KeyId,
-                keySpec: encodedKeySpec);
+                keySpec: cert.KeySpec().EncodeKeySpec());
         }
     }
 }
