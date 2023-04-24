@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 # Check if the tag name is provided
 if [ -z "$1" ]; then
