@@ -43,8 +43,8 @@ for runtime in "${runtimes[@]}"; do
     binary_dir="$output_dir/$runtime"
 
     if [[ $ext == "zip" ]]; then
-        # to have flat structured zip file, zip the binary and then update zip to
-        # include the LICENSE file
+        # To have flat structured zip file, zip the binary and then update zip 
+        # to include the LICENSE file
         (cd $binary_dir && zip -x '*.pdb' -r $artifact_name .) && zip -ur $artifact_name LICENSE
     else
         tar czvf $artifact_name --exclude='*.pdb' -C ${binary_dir} . -C ../.. LICENSE
@@ -52,11 +52,9 @@ for runtime in "${runtimes[@]}"; do
 
     (cd $artifacts_dir && sha256sum $(basename $artifact_name) >>${checksum_name})
 
-    # add the artifact to the list
+    # Add the artifact to the list
     artifacts+=($artifact_name)
 done
-echo ${artifacts[@]}
 
-# Authenticate and create a pre-release using GitHub CLI
-gh auth login --with-token <(echo $GITHUB_TOKEN)
-gh release create --title "$tag_name" --prerelease $tag_name ${artifacts[@]} ${checksum_name}
+# Create a pre-release using GitHub CLI
+gh release create --title "Release $tag_name" --prerelease $tag_name ${artifacts[@]} ${checksum_name}
