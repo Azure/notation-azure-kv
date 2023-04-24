@@ -56,7 +56,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 leafCert = await akvClient.GetCertificateAsync();
             }
 
-            // Extract signature algorithm from the certificate
+            // Extract KeySpec from the certificate
             var keySpec = leafCert.KeySpec();
 
             // Sign
