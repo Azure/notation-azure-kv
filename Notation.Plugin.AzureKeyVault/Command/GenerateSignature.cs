@@ -23,23 +23,23 @@ namespace Notation.Plugin.AzureKeyVault.Command
             var akvClient = new KeyVaultClient(input.KeyId);
 
             // Extract signature algorithm from the certificate
-            var leafCert = await akvClient.GetCertificate();
+            var leafCert = await akvClient.GetCertificateAsync();
             var keySpec = leafCert.KeySpec();
             var signatureAlgorithm = keySpec.ToSignatureAlgorithm();
 
             // Sign
-            var signature = await akvClient.Sign(signatureAlgorithm, input.Payload);
+            var signature = await akvClient.SignAsync(signatureAlgorithm, input.Payload);
 
             // Build the certificate chain
             List<byte[]> certificateChain = new List<byte[]>();
-            if (input.PluginConfig?.ContainsKey("ca_certs") ?? false)
+            if (input.PluginConfig?.ContainsKey("ca_certs") == true)
             {
                 // Build the entire certificate chain from the certificate 
                 // bundle (including the intermediate and root certificates).
                 var caCertsPath = input.PluginConfig["ca_certs"];
                 certificateChain = CertificateChain.Build(leafCert, CertificateBundle.Create(caCertsPath));
             }
-            else if (input.PluginConfig?.ContainsKey("as_secret") ?? false)
+            else if (input.PluginConfig?.ContainsKey("as_secret") == true)
             {
                 // Read the entire certificate chain from the Azure Key Vault with GetSecret permission.
                 throw new NotImplementedException("as_secret is not implemented yet");
