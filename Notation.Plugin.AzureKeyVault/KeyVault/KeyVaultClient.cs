@@ -153,7 +153,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Get the certificate chain from the key vault with GetSecret permission.
         /// </summary>
-        public async Task<X509Certificate2Collection> GetCertificateChain()
+        public async Task<X509Certificate2Collection> GetCertificateChainAsync()
         {
             var secret = await _secretClient.Value.GetSecretAsync(_name, _version);
 

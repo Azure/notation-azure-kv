@@ -28,7 +28,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             var signatureAlgorithm = keySpec.ToSignatureAlgorithm();
 
             // Sign
-            var signature = await akvClient.Sign(signatureAlgorithm, input.Payload);
+            var signature = await akvClient.SignAsync(signatureAlgorithm, input.Payload);
 
             // Build the certificate chain
             List<byte[]> certificateChain = new List<byte[]>();
@@ -46,7 +46,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 // certificates are merged into the Key Vault certificate to 
                 // retrieve the full chain.
                 // reference: https://learn.microsoft.com//azure/key-vault/certificates/create-certificate-signing-request
-                certBundle = await akvClient.GetCertificateChain();
+                certBundle = await akvClient.GetCertificateChainAsync();
             }
 
             return new GenerateSignatureResponse(
