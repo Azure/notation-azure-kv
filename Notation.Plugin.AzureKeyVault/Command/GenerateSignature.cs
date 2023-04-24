@@ -33,13 +33,13 @@ namespace Notation.Plugin.AzureKeyVault.Command
             // Build the certificate chain
             List<byte[]> certificateChain = new List<byte[]>();
             X509Certificate2Collection certBundle = new X509Certificate2Collection();
-            if (input.PluginConfig?.ContainsKey("ca_certs") ?? false)
+            if (input.PluginConfig?.ContainsKey("ca_certs") == true)
             {
                 // Build the certificate chain from the certificate 
                 // bundle (including the intermediate and root certificates).
                 certBundle = CertificateBundle.Create(input.PluginConfig["ca_certs"]);
             }
-            else if (input.PluginConfig?.GetValueOrDefault("as_secret")?.Equals("true", StringComparison.OrdinalIgnoreCase) ?? false)
+            else if (input.PluginConfig?.GetValueOrDefault("as_secret")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
             {
                 // Obtain the certificate chain from Azure Key Vault using 
                 // GetSecret permission. Ensure intermediate and root 
