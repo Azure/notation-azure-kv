@@ -1,15 +1,7 @@
 # Notation Azure KeyVault Plugin Makefile for Linux
-MODULE         = github.com/Azure/notation-azure-kv
-COMMANDS       = notation-azure-kv
-GIT_TAG        = $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
-BUILD_METADATA =
-ifeq ($(GIT_TAG),) # unreleased build
-	GIT_COMMIT     = $(shell git rev-parse HEAD)
-	GIT_STATUS     = $(shell test -n "`git status --porcelain`" && echo "dirty" || echo "unreleased")
-	BUILD_METADATA = $(GIT_COMMIT).$(GIT_STATUS)
-endif
-LDFLAGS        = -X $(MODULE)/internal/version.BuildMetadata=$(BUILD_METADATA)
-GO_BUILD_FLAGS = --ldflags="$(LDFLAGS)"
+BUILD_DIR = ./bin
+PROJECT_DIR = ./Notation.Plugin.AzureKeyVault
+TEST_PROJECT_DIR = ./Notation.Plugin.AzureKeyVault.Tests
 
 .PHONY: help
 help:
@@ -21,19 +13,13 @@ all: build
 .PHONY: FORCE
 FORCE:
 
-bin/%: cmd/% FORCE
-	go build $(GO_BUILD_FLAGS) -o $@ ./$<
-
-.PHONY: download
-download: ## download dependencies via go mod
-	go mod download
-
 .PHONY: build
-build: $(addprefix bin/,$(COMMANDS)) ## builds binaries
+build: ## builds binaries
+	dotnet build $(PROJECT_DIR) -c Release -o $(BUILD_DIR) --self-contained true /p:PublishSingleFile=true
 
 .PHONY: test
 test: ## run unit test
-	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
+	dotnet test $(TEST_PROJECT_DIR) --collect:"XPlat Code Coverage" --logger trx --results-directory $(BUILD_DIR)/TestResults
 
 .PHONY: install
 install: bin/notation-azure-kv ## installs the plugin
