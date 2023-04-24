@@ -15,7 +15,7 @@ namespace Notation.Plugin.AzureKeyVault.Tests
 
             // Act
             var result = await getPluginMetadata.RunAsync("");
-            
+
             // Assert
             Assert.IsType<GetMetadataResponse>(result);
 
