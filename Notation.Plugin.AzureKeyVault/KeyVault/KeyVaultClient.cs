@@ -1,5 +1,4 @@
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
@@ -117,7 +116,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Sign the payload and return the signature.
         /// </summary>
-        public async Task<byte[]> Sign(SignatureAlgorithm algorithm, byte[] payload)
+        public async Task<byte[]> SignAsync(SignatureAlgorithm algorithm, byte[] payload)
         {
             var signResult = await _cryptoClient.Value.SignDataAsync(algorithm, payload);
             if (signResult.KeyId != _keyId)
@@ -136,7 +135,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Get the certificate from the key vault.
         /// </summary>
-        public async Task<X509Certificate2> GetCertificate()
+        public async Task<X509Certificate2> GetCertificateAsync()
         {
             var cert = await _certificateClient.Value.GetCertificateVersionAsync(_name, _version);
 

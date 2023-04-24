@@ -22,7 +22,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
 
             // Get certificate from Azure Key Vault
             var akvClient = new KeyVaultClient(request.KeyId);
-            var cert = await akvClient.GetCertificate();
+            var cert = await akvClient.GetCertificateAsync();
 
             return new DescribeKeyResponse(
                 keyId: request.KeyId,
