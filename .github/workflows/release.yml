@@ -11,10 +11,6 @@ permissions:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        go-version: ['1.20']
-
     name: Build
     runs-on: ubuntu-latest
     steps:
@@ -29,4 +25,4 @@ jobs:
       - name: Release .NET project
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash ./scripts/release.sh ${{ github.ref }}
+        run: bash ./scripts/release.sh ${{ GITHUB_REF_NAME }}
