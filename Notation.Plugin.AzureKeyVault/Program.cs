@@ -39,6 +39,9 @@ namespace Notation.Plugin.AzureKeyVault
                 case "describe-key":
                     cmd = new DescribeKey();
                     break;
+                case "generate-signature":
+                    cmd = new GenerateSignature();
+                    break;
                 default:
                     throw new ValidationException($"Invalid command: {args[0]}");
             }

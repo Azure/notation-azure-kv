@@ -29,6 +29,11 @@ namespace Notation.Plugin.Protocol
                 throw new ArgumentNullException(nameof(keyId), "KeyId must not be null or empty");
             }
 
+            if (contractVersion != Protocol.ContractVersion)
+            {
+                throw new ValidationException($"Unsupported contract version: {contractVersion}");
+            }
+
             ContractVersion = contractVersion;
             KeyId = keyId;
         }

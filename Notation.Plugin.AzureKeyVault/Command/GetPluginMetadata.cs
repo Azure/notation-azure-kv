@@ -10,11 +10,11 @@ namespace Notation.Plugin.AzureKeyVault.Command
         public async Task<object> RunAsync(string _)
         {
             return await Task.FromResult<object>(new GetMetadataResponse(
-                name: "akv-plugin",
+                name: "azure-kv",
                 description: "Notation Azure Key Vault plugin",
                 version: "1.0.0",
                 url: "https://github.com/Azure/notation-azure-kv",
-                supportedContractVersions: new[] { "1.0.0" },
+                supportedContractVersions: new[] { Protocol.Protocol.ContractVersion },
                 capabilities: new[] { "SIGNATURE_GENERATOR.RAW" }
             ));
         }
