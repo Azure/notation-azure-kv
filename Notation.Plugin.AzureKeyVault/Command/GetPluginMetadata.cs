@@ -8,7 +8,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
     public class GetPluginMetadata : IPluginCommand
     {
         public const string Version = "1.0.0";
-        public async Task<object> RunAsync(string _)
+        public async Task<object> RunAsync()
         {
             return await Task.FromResult<object>(new GetMetadataResponse(
                 name: "azure-kv",

@@ -1,9 +1,8 @@
-using Xunit;
 using System.Threading.Tasks;
+using Xunit;
 using Notation.Plugin.Protocol;
-using Notation.Plugin.AzureKeyVault.Command;
 
-namespace Notation.Plugin.AzureKeyVault.Tests
+namespace Notation.Plugin.AzureKeyVault.Command.Tests
 {
     public class GetPluginMetadataTests
     {
@@ -14,7 +13,7 @@ namespace Notation.Plugin.AzureKeyVault.Tests
             var getPluginMetadata = new GetPluginMetadata();
 
             // Act
-            var result = await getPluginMetadata.RunAsync("");
+            var result = await getPluginMetadata.RunAsync();
 
             // Assert
             Assert.IsType<GetMetadataResponse>(result);

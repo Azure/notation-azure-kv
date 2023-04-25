@@ -11,35 +11,53 @@ namespace Notation.Plugin.AzureKeyVault.Command
     /// </summary>
     public class GenerateSignature : IPluginCommand
     {
-        public async Task<object> RunAsync(string inputJson)
+        private GenerateSignatureRequest _request;
+        private IKeyVaultClient _keyVaultClient;
+
+        /// <summary>
+        /// Constructor to create GenerateSignature object from JSON string.
+        /// </summary>
+        public GenerateSignature(string inputJson)
         {
             // Parse the input
-            GenerateSignatureRequest? input = JsonSerializer.Deserialize<GenerateSignatureRequest>(inputJson);
-            if (input == null)
+            var request = JsonSerializer.Deserialize<GenerateSignatureRequest>(inputJson);
+            if (request == null)
             {
                 throw new ValidationException("Invalid input");
             }
+            this._request = request;
+            this._keyVaultClient = new KeyVaultClient(request.KeyId);
+        }
 
-            var akvClient = new KeyVaultClient(input.KeyId);
+        /// <summary>
+        /// Constructor for unit test.
+        /// </summary>
+        public GenerateSignature(GenerateSignatureRequest request, IKeyVaultClient keyVaultClient)
+        {
+            this._request = request;
+            this._keyVaultClient = keyVaultClient;
+        }
 
+        public async Task<object> RunAsync()
+        {
             // Extract signature algorithm from the certificate
-            var leafCert = await akvClient.GetCertificateAsync();
+            var leafCert = await _keyVaultClient.GetCertificateAsync();
             var keySpec = leafCert.KeySpec();
             var signatureAlgorithm = keySpec.ToSignatureAlgorithm();
 
             // Sign
-            var signature = await akvClient.SignAsync(signatureAlgorithm, input.Payload);
+            var signature = await _keyVaultClient.SignAsync(signatureAlgorithm, _request.Payload);
 
             // Build the certificate chain
             List<byte[]> certificateChain = new List<byte[]>();
-            if (input.PluginConfig?.ContainsKey("ca_certs") == true)
+            if (_request.PluginConfig?.ContainsKey("ca_certs") == true)
             {
                 // Build the entire certificate chain from the certificate 
                 // bundle (including the intermediate and root certificates).
-                var caCertsPath = input.PluginConfig["ca_certs"];
+                var caCertsPath = _request.PluginConfig["ca_certs"];
                 certificateChain = CertificateChain.Build(leafCert, CertificateBundle.Create(caCertsPath));
             }
-            else if (input.PluginConfig?.ContainsKey("as_secret") == true)
+            else if (_request.PluginConfig?.ContainsKey("as_secret") == true)
             {
                 // Read the entire certificate chain from the Azure Key Vault with GetSecret permission.
                 throw new NotImplementedException("as_secret is not implemented yet");
@@ -51,7 +69,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             }
 
             return new GenerateSignatureResponse(
-                keyId: input.KeyId,
+                keyId: _request.KeyId,
                 signature: signature,
                 signingAlgorithm: keySpec.ToSigningAlgorithm(),
                 certificateChain: certificateChain);

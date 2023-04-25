@@ -30,6 +30,9 @@ namespace Notation.Plugin.AzureKeyVault
                 throw new ValidationException("Missing command");
             }
 
+            // read the input
+            var inputJson = PluginIO.ReadInput();
+
             IPluginCommand? cmd = null;
             switch (args[0])
             {
@@ -37,20 +40,17 @@ namespace Notation.Plugin.AzureKeyVault
                     cmd = new GetPluginMetadata();
                     break;
                 case "describe-key":
-                    cmd = new DescribeKey();
+                    cmd = new DescribeKey(inputJson);
                     break;
                 case "generate-signature":
-                    cmd = new GenerateSignature();
+                    cmd = new GenerateSignature(inputJson);
                     break;
                 default:
                     throw new ValidationException($"Invalid command: {args[0]}");
             }
 
-            // read the input
-            var inputJson = PluginIO.ReadInput();
-
             // execute the command
-            var resp = await cmd.RunAsync(inputJson);
+            var resp = await cmd.RunAsync();
 
             // print the output
             PluginIO.WriteOutput(resp);
