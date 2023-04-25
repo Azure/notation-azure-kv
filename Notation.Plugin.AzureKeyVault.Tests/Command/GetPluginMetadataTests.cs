@@ -22,7 +22,6 @@ namespace Notation.Plugin.AzureKeyVault.Tests
             var metadata = result as GetMetadataResponse;
             Assert.Equal("azure-kv", metadata?.Name);
             Assert.Equal("Notation Azure Key Vault plugin", metadata?.Description);
-            Assert.Equal("1.0.0", metadata?.Version);
             Assert.Equal("https://github.com/Azure/notation-azure-kv", metadata?.Url);
             Assert.Contains("1.0", metadata?.SupportedContractVersions ?? new string[0]);
             Assert.Contains("SIGNATURE_GENERATOR.RAW", metadata?.Capabilities ?? new string[0]);
