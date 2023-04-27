@@ -22,39 +22,51 @@ namespace Notation.Plugin.AzureKeyVault.Command
 
             var akvClient = new KeyVaultClient(input.KeyId);
 
-            // Extract signature algorithm from the certificate
-            var leafCert = await akvClient.GetCertificateAsync();
-            var keySpec = leafCert.KeySpec();
-            var signatureAlgorithm = keySpec.ToSignatureAlgorithm();
-
-            // Sign
-            var signature = await akvClient.SignAsync(signatureAlgorithm, input.Payload);
-
-            // Build the certificate chain
-            List<byte[]> certificateChain = new List<byte[]>();
-            if (input.PluginConfig?.ContainsKey("ca_certs") == true)
+            // Obtain the certificate chain
+            X509Certificate2Collection certBundle;
+            X509Certificate2 leafCert;
+            if (input.PluginConfig?.TryGetValue("ca_certs", out var certBundlePath) == true)
             {
-                // Build the entire certificate chain from the certificate 
-                // bundle (including the intermediate and root certificates).
-                var caCertsPath = input.PluginConfig["ca_certs"];
-                certificateChain = CertificateChain.Build(leafCert, CertificateBundle.Create(caCertsPath));
+                // Obtain the certificate bundle from file 
+                // (including the intermediate and root certificates).
+                certBundle = CertificateBundle.Create(certBundlePath);
+
+                // obtain the leaf certificate from Azure Key Vault
+                leafCert = await akvClient.GetCertificateAsync();
             }
-            else if (input.PluginConfig?.ContainsKey("as_secret") == true)
+            else if (input.PluginConfig?.TryGetValue("as_secret", out var asSecret) == true && asSecret.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
-                // Read the entire certificate chain from the Azure Key Vault with GetSecret permission.
-                throw new NotImplementedException("as_secret is not implemented yet");
+                // Obtain the certificate chain from Azure Key Vault using 
+                // GetSecret permission. Ensure intermediate and root 
+                // certificates are merged into the Key Vault certificate to 
+                // retrieve the full chain.
+                // reference: https://learn.microsoft.com//azure/key-vault/certificates/create-certificate-signing-request
+                var certificateChain = await akvClient.GetCertificateChainAsync();
+
+                // the certBundle is the certificates start from the second one of certificateChain
+                certBundle = new X509Certificate2Collection(certificateChain.Skip(1).ToArray());
+
+                // the leafCert is the first certificate in the certBundle
+                leafCert = certificateChain[0];
             }
             else
             {
-                // validate the self-signed leaf certificate
-                certificateChain = CertificateChain.Build(leafCert, new X509Certificate2Collection());
+                // only have the leaf certificate
+                certBundle = new X509Certificate2Collection();
+                leafCert = await akvClient.GetCertificateAsync();
             }
+
+            // Extract KeySpec from the certificate
+            var keySpec = leafCert.KeySpec();
+
+            // Sign
+            var signature = await akvClient.SignAsync(keySpec.ToKeyVaultSignatureAlgorithm(), input.Payload);
 
             return new GenerateSignatureResponse(
                 keyId: input.KeyId,
                 signature: signature,
                 signingAlgorithm: keySpec.ToSigningAlgorithm(),
-                certificateChain: certificateChain);
+                certificateChain: CertificateChain.Build(leafCert, certBundle));
         }
     }
 }
