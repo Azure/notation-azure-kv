@@ -25,16 +25,16 @@ namespace Notation.Plugin.AzureKeyVault.Command
             // Obtain the certificate chain
             X509Certificate2Collection certBundle;
             X509Certificate2 leafCert;
-            if (input.PluginConfig?.ContainsKey("ca_certs") == true)
+            if (input.PluginConfig?.TryGetValue("ca_certs", out var certBundlePath) == true)
             {
                 // Obtain the certificate bundle from file 
                 // (including the intermediate and root certificates).
-                certBundle = CertificateBundle.Create(input.PluginConfig["ca_certs"]);
+                certBundle = CertificateBundle.Create(certBundlePath);
 
                 // obtain the leaf certificate from Azure Key Vault
                 leafCert = await akvClient.GetCertificateAsync();
             }
-            else if (input.PluginConfig?.GetValueOrDefault("as_secret")?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
+            else if (input.PluginConfig?.TryGetValue("as_secret", out var asSecret) == true && asSecret.Equals("true", StringComparison.OrdinalIgnoreCase))
             {
                 // Obtain the certificate chain from Azure Key Vault using 
                 // GetSecret permission. Ensure intermediate and root 
@@ -60,7 +60,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             var keySpec = leafCert.KeySpec();
 
             // Sign
-            var signature = await akvClient.SignAsync(keySpec.ToSignatureAlgorithm(), input.Payload);
+            var signature = await akvClient.SignAsync(keySpec.ToKeyVaultSignatureAlgorithm(), input.Payload);
 
             return new GenerateSignatureResponse(
                 keyId: input.KeyId,
