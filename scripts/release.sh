@@ -55,7 +55,7 @@ for runtime in "${runtimes[@]}"; do
         tar czvf "${artifact_name}" --exclude='*.pdb' -C "${binary_dir}" . -C ../.. LICENSE
     fi
 
-    (cd "${artifacts_dir}" && sha256sum $(basename "${artifact_name}") >>"${checksum_name}")
+    (cd "${artifacts_dir}" && sha256sum "$(basename ${artifact_name})" >>"${checksum_name}")
 
     # Add the artifact to the list
     artifacts+=("${artifact_name}")
