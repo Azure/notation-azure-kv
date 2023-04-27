@@ -23,8 +23,6 @@ for runtime in "${runtimes[@]}"; do
         --configuration Release \
         --self-contained true \
         -p:PublishSingleFile=true \
-        -p:PublishTrimmed=true \
-        -p:TrimmerDefaultAction=link \
         -r "${runtime}" \
         -o "${output_dir}/${runtime}"
 done
