@@ -25,13 +25,13 @@ for runtime in "${runtimes[@]}"; do
         -p:PublishSingleFile=true \
         -p:PublishTrimmed=true \
         -p:TrimmerDefaultAction=link \
-        -r $runtime \
-        -o $output_dir/$runtime
+        -r "${runtime}" \
+        -o "${output_dir}/${runtime}"
 done
 
 # Package the artifacts and create checksums
 declare -a artifacts=()
-mkdir -p $artifacts_dir
+mkdir -p "${artifacts_dir}"
 for runtime in "${runtimes[@]}"; do
     if [[ $runtime == *"win"* ]]; then
         ext="zip"
@@ -50,16 +50,16 @@ for runtime in "${runtimes[@]}"; do
     if [[ $ext == "zip" ]]; then
         # To have flat structured zip file, zip the binary and then update zip 
         # to include the LICENSE file
-        (cd $binary_dir && zip -x '*.pdb' -r $artifact_name .) && zip -ur $artifact_name LICENSE
+        (cd "${binary_dir}" && zip -x '*.pdb' -r "${artifact_name}" .) && zip -ur "${artifact_name}" LICENSE
     else
-        tar czvf $artifact_name --exclude='*.pdb' -C ${binary_dir} . -C ../.. LICENSE
+        tar czvf "${artifact_name}" --exclude='*.pdb' -C "${binary_dir}" . -C ../.. LICENSE
     fi
 
-    (cd $artifacts_dir && sha256sum $(basename $artifact_name) >>${checksum_name})
+    (cd "${artifacts_dir}" && sha256sum $(basename "${artifact_name}") >>"${checksum_name}")
 
     # Add the artifact to the list
-    artifacts+=($artifact_name)
+    artifacts+=("${artifact_name}")
 done
 
 # Create a pre-release using GitHub CLI
-gh release create --title "$tag_name" --draft $tag_name ${artifacts[@]} ${checksum_name}
+gh release create --title "${tag_name}" --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
