@@ -17,12 +17,17 @@ checksum_name=$artifacts_dir/${project_name}_${version}_checksums.txt
 
 declare -a runtimes=("linux-x64" "linux-arm64" "osx-x64" "osx-arm64" "win-x64")
 
-cd ./Notation.Plugin.AzureKeyVault
 # Publish for each runtime
 for runtime in "${runtimes[@]}"; do
-    dotnet publish --configuration Release --self-contained true -r $runtime -o $output_dir/$runtime
+    dotnet publish ./Notation.Plugin.AzureKeyVault \
+        --configuration Release \
+        --self-contained true \
+        -p:PublishSingleFile=true \
+        -p:PublishTrimmed=true \
+        -p:TrimmerDefaultAction=link \
+        -r $runtime \
+        -o $output_dir/$runtime
 done
-cd -
 
 # Package the artifacts and create checksums
 declare -a artifacts=()
@@ -57,4 +62,4 @@ for runtime in "${runtimes[@]}"; do
 done
 
 # Create a pre-release using GitHub CLI
-gh release create --title "Release $tag_name" --prerelease $tag_name ${artifacts[@]} ${checksum_name}
+gh release create --title "$tag_name" --draft $tag_name ${artifacts[@]} ${checksum_name}
