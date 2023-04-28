@@ -18,7 +18,6 @@ checksum_name=$artifacts_dir/${project_name}_${version}_checksums.txt
 declare -a runtimes=("linux-x64" "linux-arm64" "osx-x64" "osx-arm64" "win-x64")
 
 # Publish for each runtime
-commitTime="$(git log --pretty=format:'%ai' -n 1)"
 commitHash="$(git log --pretty=format:'%h' -n 1)"
 for runtime in "${runtimes[@]}"; do
     dotnet publish ./Notation.Plugin.AzureKeyVault \
