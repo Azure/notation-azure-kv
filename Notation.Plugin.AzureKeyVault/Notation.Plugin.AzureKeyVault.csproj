@@ -10,7 +10,7 @@
 
     <!-- Build metadata -->
     <Version Condition="'$(Version)' == ''">$(Version)</Version>
-    <BuildTime Condition="'$(CommitTime)' != ''">$(CommitTime)</BuildTime>
+    <CommitTime Condition="'$(CommitTime)' != ''">$(CommitTime)</CommitTime>
     <CommitHash Condition="'$(CommitHash)' != ''">$(CommitHash)</CommitHash>
   </PropertyGroup>
 
