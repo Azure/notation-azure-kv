@@ -7,6 +7,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>notation-azure-kv</AssemblyName>
+
+    <!-- Build metadata -->
+    <Version Condition="'$(Version)' == ''">$(Version)</Version>
+    <BuildTime Condition="'$(CommitTime)' != ''">$(CommitTime)</BuildTime>
+    <CommitHash Condition="'$(CommitHash)' != ''">$(CommitHash)</CommitHash>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,4 +21,26 @@
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.5.0" />
   </ItemGroup>
 
+  <Target Name="GenerateBuildMetadata" BeforeTargets="CoreCompile">
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)\GetPluginMetadta.g.cs"
+      Lines='
+        namespace Notation.Plugin.AzureKeyVault.Command
+        {
+            public partial class GetPluginMetadata
+            {
+                static GetPluginMetadata()
+                {
+                    Version = "$(Version)"%3b
+                    CommitTime = "$(CommitTime)"%3b
+                    CommitHash = "$(CommitHash)"%3b
+                }
+            }
+        }'
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)\GetPluginMetadta.g.cs" />
+    </ItemGroup>
+  </Target>
 </Project>

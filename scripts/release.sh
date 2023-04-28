@@ -18,13 +18,18 @@ checksum_name=$artifacts_dir/${project_name}_${version}_checksums.txt
 declare -a runtimes=("linux-x64" "linux-arm64" "osx-x64" "osx-arm64" "win-x64")
 
 # Publish for each runtime
+commitTime="$(git log --pretty=format:'%ai' -n 1)"
+commitHash="$(git log --pretty=format:'%h' -n 1)"
 for runtime in "${runtimes[@]}"; do
     dotnet publish ./Notation.Plugin.AzureKeyVault \
         --configuration Release \
         --self-contained true \
         -p:PublishSingleFile=true \
-        -r "${runtime}" \
-        -o "${output_dir}/${runtime}"
+        -p:CommitTime="$commitTime" \
+        -p:CommitHash="$commitHash" \
+        -p:Version=$version \
+        -r "$runtime" \
+        -o "$output_dir/$runtime"
 done
 
 # Package the artifacts and create checksums
@@ -59,5 +64,11 @@ for runtime in "${runtimes[@]}"; do
     artifacts+=("${artifact_name}")
 done
 
-# Create a pre-release using GitHub CLI
-gh release create --title "${tag_name}" --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+# Create a release using GitHub CLI
+if [[ "$tag_name" == "-" ]]; then
+    # v1.0.0-rc.1 is a pre-release
+    gh release create --title "${tag_name}" --prerelease "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+else
+    # v1.0.0 is a release
+    gh release create --title "${tag_name}" --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+fi
