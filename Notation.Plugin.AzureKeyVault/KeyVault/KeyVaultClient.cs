@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
+using Azure.Security.KeyVault.Secrets;
 using Notation.Plugin.Protocol;
 
 [assembly: InternalsVisibleTo("Notation.Plugin.AzureKeyVault.Tests")]
@@ -19,6 +20,11 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// Get the certificate from KeyVault.
         /// </summary>
         public Task<X509Certificate2> GetCertificateAsync();
+
+        /// <summary>
+        /// Get the certificate chain from KeyVault.
+        /// </summary>
+        public Task<X509Certificate2Collection> GetCertificateChainAsync();
     }
 
     public class KeyVaultClient: IKeyVaultClient
@@ -32,9 +38,9 @@ namespace Notation.Plugin.AzureKeyVault.Client
         // Protected for unit test
         protected Lazy<CertificateClient> _certificateClient;
         // Cryptography client (lazy initialization)
-        // Protected for unit test
-        protected Lazy<CryptographyClient> _cryptoClient;
-
+        private Lazy<CryptographyClient> _cryptoClient;
+        // Secret client (lazy initialization)
+        private Lazy<SecretClient> _secretClient;
         // Error message for invalid input
         private const string INVALID_INPUT_ERROR_MSG = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
@@ -79,6 +85,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             var credential = new DefaultAzureCredential();
             this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
             this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(_keyId), credential));
+            this._secretClient = new Lazy<SecretClient>(() => new SecretClient(new Uri(keyVaultUrl), credential));
         }
 
         /// <summary>
@@ -167,6 +174,32 @@ namespace Notation.Plugin.AzureKeyVault.Client
             }
 
             return new X509Certificate2(cert.Value.Cer);
+        }
+
+        /// <summary>
+        /// Get the certificate chain from the key vault with GetSecret permission.
+        /// </summary>
+        public async Task<X509Certificate2Collection> GetCertificateChainAsync()
+        {
+            var secret = await _secretClient.Value.GetSecretAsync(_name, _version);
+
+            var chain = new X509Certificate2Collection();
+            var contentType = secret.Value.Properties.ContentType;
+            var secretValue = secret.Value.Value;
+            switch (contentType)
+            {
+                case "application/x-pkcs12":
+                    // If the secret is a PKCS12 file, decode the base64 encoding
+                    chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.EphemeralKeySet);
+                    break;
+                case "application/x-pem-file":
+                    // If the secret is a PEM file, parse the PEM content directly
+                    chain.ImportFromPem(secretValue.ToCharArray());
+                    break;
+                default:
+                    throw new ValidationException($"Unsupported secret content type: {contentType}");
+            }
+            return chain;
         }
     }
 }
