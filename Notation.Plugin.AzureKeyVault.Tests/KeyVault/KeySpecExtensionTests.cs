@@ -18,7 +18,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             // Arrange
             var keySpec = new KeySpec(keyType, keySize);
             // Act
-            var signatureAlgorithm = keySpec.ToSignatureAlgorithm();
+            var signatureAlgorithm = keySpec.ToKeyVaultSignatureAlgorithm();
 
             // Assert
             Assert.Equal(expectedAlgorithm, signatureAlgorithm);
@@ -33,7 +33,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             var keySpec = new KeySpec(keyType, keySize);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => keySpec.ToSignatureAlgorithm());
+            Assert.Throws<ArgumentException>(() => keySpec.ToKeyVaultSignatureAlgorithm());
         }
     }
 }

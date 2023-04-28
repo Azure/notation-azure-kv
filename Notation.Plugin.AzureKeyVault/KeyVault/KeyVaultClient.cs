@@ -38,9 +38,9 @@ namespace Notation.Plugin.AzureKeyVault.Client
         // Protected for unit test
         protected Lazy<CertificateClient> _certificateClient;
         // Cryptography client (lazy initialization)
-        private Lazy<CryptographyClient> _cryptoClient;
+        protected Lazy<CryptographyClient> _cryptoClient;
         // Secret client (lazy initialization)
-        private Lazy<SecretClient> _secretClient;
+        protected Lazy<SecretClient> _secretClient;
         // Error message for invalid input
         private const string INVALID_INPUT_ERROR_MSG = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
