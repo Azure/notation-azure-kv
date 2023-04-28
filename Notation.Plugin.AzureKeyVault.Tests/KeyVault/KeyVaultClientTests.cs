@@ -8,9 +8,11 @@ using Azure.Core;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
+using Azure.Security.KeyVault.Secrets;
 using Moq;
 using Xunit;
 using Notation.Plugin.Protocol;
+using System.Text;
 
 namespace Notation.Plugin.AzureKeyVault.Client.Tests
 {
@@ -73,6 +75,12 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             {
                 this._certificateClient = new Lazy<CertificateClient>(() => certificateClient);
             }
+
+            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, SecretClient secretClient)
+                : base(keyVaultUrl, name, version)
+            {
+                this._secretClient = new Lazy<SecretClient>(() => secretClient);
+            }
         }
 
         private TestableKeyVaultClient CreateMockedKeyVaultClient(SignResult signResult)
@@ -91,6 +99,14 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
                 .ReturnsAsync(Response.FromValue(certificate, new Mock<Response>().Object));
 
             return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", "123", mockCertificateClient.Object);
+        }
+
+        private TestableKeyVaultClient CreateMockedKeyVaultClient(KeyVaultSecret secret)
+        {
+            var mockSecretClient = new Mock<SecretClient>(new Uri("https://fake.vault.azure.net/secrets/fake-secret/123"), new Mock<TokenCredential>().Object);
+            mockSecretClient.Setup(c => c.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Response.FromValue(secret, new Mock<Response>().Object));
+            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", "123", mockSecretClient.Object);
         }
 
         [Fact]
@@ -174,6 +190,52 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             var keyVaultClient = CreateMockedKeyVaultClient(keyVaultCertificate);
 
             await Assert.ThrowsAsync<ValidationException>(async () => await keyVaultClient.GetCertificateAsync());
+        }
+
+        [Fact]
+        public async Task GetCertificateChainAsync_PKCS12()
+        {
+            var certChainBytes = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pfx"));
+            var testCertificateChain = new X509Certificate2Collection();
+            testCertificateChain.Import(certChainBytes, "", X509KeyStorageFlags.Exportable);
+            var properties = SecretModelFactory.SecretProperties();
+            properties.ContentType = "application/x-pkcs12";
+            var secret = SecretModelFactory.KeyVaultSecret(
+                value: Convert.ToBase64String(certChainBytes),
+                properties: properties);
+
+            var keyVaultClient = CreateMockedKeyVaultClient(secret);
+
+            var certificateChain = await keyVaultClient.GetCertificateChainAsync();
+
+            Assert.NotNull(certificateChain);
+            Assert.IsType<X509Certificate2Collection>(certificateChain);
+            Assert.Equal(2, certificateChain.Count);
+            Assert.Equal(testCertificateChain[0].RawData, certificateChain[0].RawData);
+            Assert.Equal(testCertificateChain[1].RawData, certificateChain[1].RawData);
+        }
+
+        [Fact]
+        public async Task GetCertificateChainAsync_PEM()
+        {
+            var certChainBytes = File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pem"));
+            var testCertificateChain = new X509Certificate2Collection();
+            testCertificateChain.ImportFromPemFile(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pem"));
+            var properties = SecretModelFactory.SecretProperties();
+            properties.ContentType = "application/x-pem-file";
+            var secret = SecretModelFactory.KeyVaultSecret(
+                value: Encoding.UTF8.GetString(certChainBytes),
+                properties: properties);
+
+            var keyVaultClient = CreateMockedKeyVaultClient(secret);
+
+            var certificateChain = await keyVaultClient.GetCertificateChainAsync();
+
+            Assert.NotNull(certificateChain);
+            Assert.IsType<X509Certificate2Collection>(certificateChain);
+            Assert.Equal(2, certificateChain.Count);
+            Assert.Equal(testCertificateChain[0].RawData, certificateChain[0].RawData);
+            Assert.Equal(testCertificateChain[1].RawData, certificateChain[1].RawData);
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Moq;
 using Notation.Plugin.AzureKeyVault.Client;
-using Notation.Plugin.AzureKeyVault.Command;
 using Notation.Plugin.Protocol;
 using Xunit;
 
@@ -47,6 +46,16 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
 
             // Act & Assert
             Assert.Throws<ValidationException>(() => new DescribeKey(invalidInputJson));
+        }
+
+        [Fact]
+        public void Constructor_Valid()
+        {
+            // Arrange
+            string invalidInputJson = "{\"contractVersion\":\"1.0\",\"keyId\":\"https://notationakvtest.vault.azure.net/keys/dotnetPluginCertPKCS12/3f06c6eeac0640ea9f93cd0bf69d2f17\"}";
+
+            // Act & Assert
+            Assert.Null(Record.Exception(() => new DescribeKey(invalidInputJson)));
         }
     }
 }

@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Notation.Plugin.Protocol.Tests
 {
+    [Collection(nameof(OutputTestCollectionDefinition))]
     public class ErrorAndExceptionTests
     {
         [Fact]

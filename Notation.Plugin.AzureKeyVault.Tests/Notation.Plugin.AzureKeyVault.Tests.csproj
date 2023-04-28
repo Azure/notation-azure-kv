@@ -21,6 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <Content Include="TestData\*.pem" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="TestData\*.pfx" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

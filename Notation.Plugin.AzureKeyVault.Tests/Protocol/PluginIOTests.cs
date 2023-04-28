@@ -4,8 +4,13 @@ using Xunit;
 
 namespace Notation.Plugin.Protocol.Tests
 {
+    [CollectionDefinition(nameof(OutputTestCollectionDefinition), DisableParallelization = true)]
+    public class OutputTestCollectionDefinition { }
+
+    [Collection(nameof(OutputTestCollectionDefinition))]
     public class PluginIOTests
     {
+
         [Fact]
         public void ReadInput_ReturnsCorrectString()
         {
