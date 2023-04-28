@@ -25,7 +25,6 @@ for runtime in "${runtimes[@]}"; do
         --configuration Release \
         --self-contained true \
         -p:PublishSingleFile=true \
-        -p:CommitTime="$commitTime" \
         -p:CommitHash="$commitHash" \
         -p:Version="$version" \
         -r "$runtime" \
@@ -65,9 +64,9 @@ for runtime in "${runtimes[@]}"; do
 done
 
 # Create a release using GitHub CLI
-if [[ "$tag_name" == "-" ]]; then
+if [[ "$tag_name" == *"-"* ]]; then
     # v1.0.0-rc.1 is a pre-release
-    gh release create --title "${tag_name}" --prerelease "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+    gh release create --title "${tag_name}" --prerelease --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
 else
     # v1.0.0 is a release
     gh release create --title "${tag_name}" --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"

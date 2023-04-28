@@ -68,7 +68,7 @@ Version:
   {GetPluginMetadata.Version} 
 
 Commit Hash:
-  {GetPluginMetadata.CommitHash} ({GetPluginMetadata.CommitTime})
+  {GetPluginMetadata.CommitHash}
 
 Commands:
   describe-key         Azure key description

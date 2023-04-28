@@ -9,9 +9,10 @@
     <AssemblyName>notation-azure-kv</AssemblyName>
 
     <!-- Build metadata -->
-    <Version Condition="'$(Version)' == ''">$(Version)</Version>
-    <CommitTime Condition="'$(CommitTime)' != ''">$(CommitTime)</CommitTime>
+    <Version Condition="'$(Version)' != ''">$(Version)</Version>
     <CommitHash Condition="'$(CommitHash)' != ''">$(CommitHash)</CommitHash>
+    <Version Condition="'$(Version)' == ''">1.0.0+unreleased</Version>
+    <CommitHash Condition="'$(CommitHash)' == ''">Unknown</CommitHash>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,7 +33,6 @@
                 static GetPluginMetadata()
                 {
                     Version = "$(Version)"%3b
-                    CommitTime = "$(CommitTime)"%3b
                     CommitHash = "$(CommitHash)"%3b
                 }
             }

@@ -7,9 +7,8 @@ namespace Notation.Plugin.AzureKeyVault.Command
     /// </summary>
     public partial class GetPluginMetadata : IPluginCommand
     {
-        public static readonly string Version = "Unknown";
-        public static readonly string CommitTime = "Unknown";
-        public static readonly string CommitHash = "Unknown";
+        public static readonly string Version;
+        public static readonly string CommitHash;
 
         public async Task<object> RunAsync(string _)
         {
