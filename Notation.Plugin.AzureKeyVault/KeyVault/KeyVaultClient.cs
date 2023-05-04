@@ -27,7 +27,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         public Task<X509Certificate2Collection> GetCertificateChainAsync();
     }
 
-    public class KeyVaultClient: IKeyVaultClient
+    public class KeyVaultClient : IKeyVaultClient
     {
         /// <summary>
         /// A helper record to store KeyVault metadata.
