@@ -101,6 +101,7 @@
    docker push $server/hello-world:v1
    ```
 9. Sign the image with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official website.
+   > **note** If you generated the certificate with `openssl` the certificate bundle is the root certificate `ca.crt`.
    ```sh
    notation key add --plugin azure-kv --id $keyID akv-key --default
    notation sign $server/hello-world:v1 --plugin-config=ca_certs=$certBundlePath
