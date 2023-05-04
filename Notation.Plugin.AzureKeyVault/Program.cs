@@ -27,7 +27,8 @@ namespace Notation.Plugin.AzureKeyVault
         {
             if (args.Length < 1)
             {
-                throw new ValidationException("Missing command");
+                PrintHelp();
+                return;
             }
 
             IPluginCommand? cmd = null;
@@ -54,6 +55,28 @@ namespace Notation.Plugin.AzureKeyVault
 
             // print the output
             PluginIO.WriteOutput(resp);
+        }
+
+        static void PrintHelp()
+        {
+            Console.WriteLine(@$"notation-azure-kv - Notation - Notary V2 Azure KV plugin
+
+Usage:
+  notation-azure-kv <command>
+
+Version:
+  {GetPluginMetadata.Version} 
+
+Commit Hash:
+  {GetPluginMetadata.CommitHash}
+
+Commands:
+  describe-key         Azure key description
+  generate-signature   Sign artifacts with keys in Azure Key Vault
+  get-plugin-metadata  Get plugin metadata
+
+Documentation:
+  https://github.com/notaryproject/notaryproject/blob/v1.0.0-rc.2/specs/plugin-extensibility.md#plugin-contract");
         }
     }
 }

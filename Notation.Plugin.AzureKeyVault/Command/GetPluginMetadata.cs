@@ -5,9 +5,11 @@ namespace Notation.Plugin.AzureKeyVault.Command
     /// <summary>
     /// Implementation of get-plugin-metadata command.
     /// </summary>
-    public class GetPluginMetadata : IPluginCommand
+    public partial class GetPluginMetadata : IPluginCommand
     {
-        public const string Version = "1.0.0";
+        public static readonly string Version;
+        public static readonly string CommitHash;
+
         public async Task<object> RunAsync(string _)
         {
             return await Task.FromResult<object>(new GetMetadataResponse(

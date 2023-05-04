@@ -5,3 +5,8 @@ coverage:
       default:
         # Set non-blocking status checks
         informational: true
+    patch:
+      default:
+        # Set non-blocking status checks
+        informational: true
+ 
