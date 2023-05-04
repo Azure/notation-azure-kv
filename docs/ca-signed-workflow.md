@@ -55,14 +55,33 @@
    az keyvault certificate create -n $certName --vault-name $keyVault -p @leafCert.json
 
    # get the CSR
-   CSR=$(az keyvault certificate pending show --vault-name $keyVault --name $certName --query 'csr' -o tsv)
-   CSR_PATH=${certName}.csr
-   printf -- "-----BEGIN CERTIFICATE REQUEST-----\n%s\n-----END CERTIFICATE REQUEST-----\n" $CSR > ${CSR_PATH}
+   csr=$(az keyvault certificate pending show --vault-name $keyVault --name $certName --query 'csr' -o tsv)
+   csrPath=${certName}.csr
+   printf -- "-----BEGIN CERTIFICATE REQUEST-----\n%s\n-----END CERTIFICATE REQUEST-----\n" $csr > ${csrPath}
    ```
-5. Please take `${certName}.csr` file to a trusted CA to sign and issue your certificate, or you can use `openssl` tool to sign it locally for testing.
-6. After you get the leaf certificate, you can merge the leaf certificate (`$leafCert`) to your Azure Key Vault:
+5. Please take `${certName}.csr` file to a trusted CA to sign and issue your certificate, or you can use `openssl` tool to sign it locally for testing. Here is an example by using `openssl`:
+   
+   Create a private key and certificate for a root CA with `openssl`:
    ```sh
-   az keyvault certificate pending merge --vault-name $keyVault --name $certName --file $leafCert
+   openssl req -x509 -sha256 -nodes -newkey rsa:2048 -keyout ca.key -out ca.crt -days 365 -subj "/CN=Test CA" -addext "keyUsage=critical,keyCertSign"
+   ```
+   Create a config file for `openssl` to sign the leaf certificate:
+   ```sh
+   cat <<EOF > ./ext.cnf
+   [ v3_ca ]
+   keyUsage = critical,digitalSignature
+   extendedKeyUsage = codeSigning
+   EOF
+   ```
+   Sign the certificate:
+   ```sh
+   signedCertPath=${certName}.crt
+   openssl x509 -CA ca.crt -CAkey ca.key -days 365 -req -in ${csrPath} -set_serial 02 -out ${signedCertPath} -extensions v3_ca -extfile ./ext.cnf
+   ```
+
+6. After you get the leaf certificate, you can merge the signed leaf certificate (`$signedCertPath`) or certificate chain to your Azure Key Vault:
+   ```sh
+   az keyvault certificate pending merge --vault-name $keyVault --name $certName --file $signedCertPath
 
    # get the key identifier
    keyID=$(az keyvault certificate show -n $certName --vault-name $keyVault --query 'kid' -o tsv)
