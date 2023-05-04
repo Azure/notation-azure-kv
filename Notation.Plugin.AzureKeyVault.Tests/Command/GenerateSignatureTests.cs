@@ -20,7 +20,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
             var expectedKeySpec = "RSA-2048";
-            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048_cert.pem"));
+            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
             var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
 
             var mockKeyVaultClient = new Mock<IKeyVaultClient>();
@@ -53,7 +53,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             Assert.Equal(keyId, response.KeyId);
             Assert.Equal("RSASSA-PSS-SHA-256", response.SigningAlgorithm);
             Assert.Equal(mockSignature, response.Signature);
-            Assert.Equal(1, response.CertificateChain.Count);
+            Assert.Single(response.CertificateChain);
             Assert.Equal(mockCert.RawData, response.CertificateChain[0]);
         }
 
@@ -63,8 +63,8 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
             var expectedKeySpec = "RSA-2048";
-            var testRootCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "root_cert.pem"));
-            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf_cert.pem"));
+            var testRootCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "root.crt"));
+            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf.crt"));
             var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
 
             var mockKeyVaultClient = new Mock<IKeyVaultClient>();
@@ -81,7 +81,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
                 keyId: keyId,
                 pluginConfig: new Dictionary<string, string>()
                 {
-                    ["ca_certs"] = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "root_cert.pem")
+                    ["ca_certs"] = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "root.crt")
                 },
                 keySpec: expectedKeySpec,
                 hashAlgorithm: "SHA-256",

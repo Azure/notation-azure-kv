@@ -155,7 +155,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         [Fact]
         public async Task GetCertificateAsync_ReturnsCertificate()
         {
-            var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048_cert.pem"));
+            var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
             var signResult = CryptographyModelFactory.SignResult(
                 keyId: "https://fake.vault.azure.net/keys/fake-key/123",
                 signature: new byte[] { 1, 2, 3 },
@@ -177,7 +177,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         [Fact]
         public async Task GetCertificateAsyncThrowValidationException()
         {
-            var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048_cert.pem"));
+            var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
             var signResult = CryptographyModelFactory.SignResult(
                 keyId: "https://fake.vault.azure.net/keys/fake-key/123",
                 signature: new byte[] { 1, 2, 3 },

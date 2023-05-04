@@ -53,7 +53,7 @@ namespace Notation.Plugin.Protocol.Tests
         // </summary>
         private static X509Certificate2 LoadCertificate(string keyType, int keySize)
         {
-            var certName = $"{keyType.ToLower()}_{keySize}_cert.pem";
+            var certName = $"{keyType.ToLower()}_{keySize}.crt";
             return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", certName));
         }
 

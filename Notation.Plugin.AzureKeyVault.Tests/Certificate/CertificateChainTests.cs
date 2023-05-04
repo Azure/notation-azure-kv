@@ -12,8 +12,8 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         public void Build_WithValidLeafAndCertificateBundle_BuildsCertificateChain()
         {
             // Arrange
-            X509Certificate2 leafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf_cert.pem"));
-            X509Certificate2Collection certificateBundle = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "root_cert.pem"));
+            X509Certificate2 leafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf.crt"));
+            X509Certificate2Collection certificateBundle = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "root.crt"));
 
             // Act
             List<byte[]> certificateChain = CertificateChain.Build(leafCert, certificateBundle);
@@ -27,7 +27,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         public void Build_WithInvalidLeafCertificate_ThrowsValidationException()
         {
             // Arrange
-            X509Certificate2 expiredLeafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "expired_leaf_cert.pem"));
+            X509Certificate2 expiredLeafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "expired_leaf.crt"));
             X509Certificate2Collection certificateBundle = new X509Certificate2Collection();
 
             // Act and Assert
@@ -38,7 +38,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         public void Build_WithIncompleteCertificateBundle_ThrowsValidationException()
         {
             // Arrange
-            X509Certificate2 invalidLeafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf_cert.pem"));
+            X509Certificate2 invalidLeafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf.crt"));
             X509Certificate2Collection certificateBundle = new X509Certificate2Collection();
 
             // Act and Assert

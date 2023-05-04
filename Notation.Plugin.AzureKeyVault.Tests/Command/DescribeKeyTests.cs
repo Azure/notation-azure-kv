@@ -16,7 +16,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
             var expectedKeySpec = "RSA-2048";
-            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048_cert.pem"));
+            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
 
             var mockKeyVaultClient = new Mock<IKeyVaultClient>();
             mockKeyVaultClient.Setup(client => client.GetCertificateAsync()).ReturnsAsync(mockCert);
