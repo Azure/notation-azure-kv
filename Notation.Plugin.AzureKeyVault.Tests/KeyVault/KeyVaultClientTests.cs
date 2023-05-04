@@ -237,5 +237,17 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             Assert.Equal(testCertificateChain[0].RawData, certificateChain[0].RawData);
             Assert.Equal(testCertificateChain[1].RawData, certificateChain[1].RawData);
         }
+
+        [Fact]
+        public async Task GetCertificateChainAsync_UnknownFormat()
+        {
+            var properties = SecretModelFactory.SecretProperties();
+            properties.ContentType = "application/x-unknown";
+            var secret = SecretModelFactory.KeyVaultSecret(
+                properties: properties);
+
+            var keyVaultClient = CreateMockedKeyVaultClient(secret);
+            await Assert.ThrowsAsync<ValidationException>(async () => await keyVaultClient.GetCertificateChainAsync());
+        }
     }
 }
