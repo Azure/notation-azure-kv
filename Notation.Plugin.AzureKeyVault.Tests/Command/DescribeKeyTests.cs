@@ -52,10 +52,10 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         public void Constructor_Valid()
         {
             // Arrange
-            string invalidInputJson = "{\"contractVersion\":\"1.0\",\"keyId\":\"https://notationakvtest.vault.azure.net/keys/dotnetPluginCertPKCS12/3f06c6eeac0640ea9f93cd0bf69d2f17\"}";
+            string validInputJson = "{\"contractVersion\":\"1.0\",\"keyId\":\"https://notationakvtest.vault.azure.net/keys/dotnetPluginCertPKCS12/3f06c6eeac0640ea9f93cd0bf69d2f17\"}";
 
             // Act & Assert
-            Assert.Null(Record.Exception(() => new DescribeKey(invalidInputJson)));
+            Assert.Null(Record.Exception(() => new DescribeKey(validInputJson)));
         }
     }
 }
