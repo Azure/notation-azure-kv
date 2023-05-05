@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
@@ -5,9 +6,28 @@ using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
 using Notation.Plugin.Protocol;
 
+[assembly: InternalsVisibleTo("Notation.Plugin.AzureKeyVault.Tests")]
 namespace Notation.Plugin.AzureKeyVault.Client
 {
-    class KeyVaultClient
+    public interface IKeyVaultClient
+    {
+        /// <summary>
+        /// Sign the payload with the specified algorithm.
+        /// </summary>
+        public Task<byte[]> SignAsync(SignatureAlgorithm algorithm, byte[] payload);
+
+        /// <summary>
+        /// Get the certificate from KeyVault.
+        /// </summary>
+        public Task<X509Certificate2> GetCertificateAsync();
+
+        /// <summary>
+        /// Get the certificate chain from KeyVault.
+        /// </summary>
+        public Task<X509Certificate2Collection> GetCertificateChainAsync();
+    }
+
+    public class KeyVaultClient : IKeyVaultClient
     {
         /// <summary>
         /// A helper record to store KeyVault metadata.
@@ -15,20 +35,26 @@ namespace Notation.Plugin.AzureKeyVault.Client
         private record KeyVaultMetadata(string KeyVaultUrl, string Name, string Version);
 
         // Certificate client (lazy initialization)
-        private Lazy<CertificateClient> _certificateClient;
+        // Protected for unit test
+        protected Lazy<CertificateClient> _certificateClient;
         // Cryptography client (lazy initialization)
-        private Lazy<CryptographyClient> _cryptoClient;
+        protected Lazy<CryptographyClient> _cryptoClient;
         // Secret client (lazy initialization)
-        private Lazy<SecretClient> _secretClient;
+        protected Lazy<SecretClient> _secretClient;
         // Error message for invalid input
         private const string INVALID_INPUT_ERROR_MSG = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
         // Key name or certificate name
-        public string _name;
+        private string _name;
         // Key version or certificate version
-        public string _version;
+        private string _version;
         // Key identifier (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
-        public string _keyId;
+        private string _keyId;
+
+        // Internal getters for unit test
+        internal string Name => _name;
+        internal string Version => _version;
+        internal string KeyId => _keyId;
 
         /// <summary>
         /// Constructor to create AzureKeyVault object from keyVaultUrl, name 

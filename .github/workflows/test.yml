@@ -32,6 +32,7 @@ jobs:
           DEFAULT_BRANCH: main
           DEFAULT_WORKSPACE: ./Notation.Plugin.AzureKeyVault
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILTER_REGEX_EXCLUDE: .*Tests/.*
   build:
     name: "Build"
     runs-on: ubuntu-latest
