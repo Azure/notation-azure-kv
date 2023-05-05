@@ -1,6 +1,6 @@
 using System;
-using Xunit;
 using Notation.Plugin.Protocol;
+using Xunit;
 
 namespace Notation.Plugin.AzureKeyVault.Client.Tests
 {

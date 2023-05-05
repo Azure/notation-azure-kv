@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Notation.Plugin.Protocol;
 using Notation.Plugin.AzureKeyVault.Client;
+using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault.Command
 {
