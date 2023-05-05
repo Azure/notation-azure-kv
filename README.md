@@ -6,7 +6,7 @@ Azure Provider for the [Notation CLI](https://github.com/notaryproject/notation)
 
 The `notation-azure-kv` plugin allows you to sign the Notation-generated payload with a certificate in Azure Key Vault (AKV). The certificate and private key are stored in AKV and the plugin will request signing and obtain the leaf certificate from AKV. 
 
-The plugin supports several [authentication methods](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential). The [Azure CLI](https://learn.microsoft.com/cli/azure/authenticate-azure-cli) or [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) credential is suggested.
+The plugin supports several [authentication methods](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential). The [Azure CLI](https://learn.microsoft.com/cli/azure/authenticate-azure-cli) or the [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) credential is suggested.
 
 ## Installation the AKV plugin
 Before you begin, make sure the latest version of the [Notation CLI has been installed](https://notaryproject.dev/docs/installation/cli/). 
