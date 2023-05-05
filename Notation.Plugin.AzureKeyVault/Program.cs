@@ -59,7 +59,7 @@ namespace Notation.Plugin.AzureKeyVault
 
         static void PrintHelp()
         {
-            Console.WriteLine(@$"notation-azure-kv - Notation - Notary V2 Azure KV plugin
+            Console.WriteLine(@$"notation-azure-kv - Notation - Azure Key Vault plugin
 
 Usage:
   notation-azure-kv <command>
