@@ -64,7 +64,7 @@
    ```sh
    openssl req -x509 -sha256 -nodes -newkey rsa:2048 -keyout ca.key -out ca.crt -days 365 -subj "/CN=Test CA" -addext "keyUsage=critical,keyCertSign"
    ```
-   Create a config file for `openssl` to sign the leaf certificate:
+   Create a configuration file. It will be used for `openssl` to sign the leaf certificate:
    ```sh
    cat <<EOF > ./ext.cnf
    [ v3_ca ]
@@ -100,7 +100,7 @@
    docker push $server/hello-world:v1
    ```
 9. Sign the image with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official site.
-   > **Note** If you generated the certificate with `openssl` the certificate bundle is the root certificate `ca.crt`.
+   > **Note** If you have generated the certificate with `openssl` according to the above steps, the certificate bundle is the root certificate `ca.crt`.
    ```sh
    notation key add --plugin azure-kv --id $keyID akv-key --default
    notation sign $server/hello-world:v1 --plugin-config=ca_certs=$certBundlePath
