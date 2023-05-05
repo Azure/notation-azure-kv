@@ -1,18 +1,22 @@
 using System;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Azure;
 using Azure.Core;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
+
 using Moq;
-using Xunit;
+
 using Notation.Plugin.Protocol;
-using System.Text;
+
+using Xunit;
 
 namespace Notation.Plugin.AzureKeyVault.Client.Tests
 {
