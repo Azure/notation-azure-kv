@@ -4,12 +4,12 @@
 
 Azure Provider for the [Notation CLI](https://github.com/notaryproject/notation)
 
-The `notation-azure-kv` plugin allows you to sign the Notation-generated payload with a certificate in Azure Key Vault (AKV). The certificate and private key are stored in AKV and the plugin will request signing and obtain the leaf certificate from AKV. 
+The `notation-azure-kv` plugin allows you to sign the Notation-generated payload with a certificate in Azure Key Vault (AKV). The certificate and private key are stored in AKV and the plugin will request signing and obtain the leaf certificate from AKV.
 
 The plugin supports several [authentication methods](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential). The [Azure CLI](https://learn.microsoft.com/cli/azure/authenticate-azure-cli) or the [Managed Identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) credential is suggested.
 
 ## Installation the AKV plugin
-Before you begin, make sure the latest version of the [Notation CLI has been installed](https://notaryproject.dev/docs/installation/cli/). 
+Before you begin, make sure the latest version of the [Notation CLI has been installed](https://notaryproject.dev/docs/installation/cli/).
 
 1. Navigate to the [Releases](https://github.com/Azure/notation-azure-kv/releases) page and choose a release of `notation-azure-kv`.
 2. Download, verify, and then install the specified version of the plugin.
@@ -87,7 +87,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+the rights to use your contribution. For details, visit <https://cla.opensource.microsoft.com>.
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
