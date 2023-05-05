@@ -11,28 +11,18 @@ permissions:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        go-version: ['1.20']
-
-    name: Build
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v3
+      - name : Setup .NET
+        uses: actions/setup-dotnet@v3
         with:
-          go-version: ${{ matrix.go-version }}
-          check-latest: true
-
-      - name: Goreleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          version: latest
-          args: release --rm-dist
+          dotnet-version: '6.0.x'
+      - name: Release .NET project
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash ./scripts/release.sh "${GITHUB_REF_NAME}"
