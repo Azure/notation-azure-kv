@@ -16,7 +16,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For Linux Bash:
    ```bash
-   version=0.6.0
+   version=1.0.0.rc.1
    arch=amd64
    install_path="${HOME}/.config/notation/plugins/azure-kv"
 
@@ -36,7 +36,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For macOS Zsh:
    ```zsh
-   version=0.6.0
+   version=1.0.0.rc.1
    arch=arm64
    install_path="${HOME}/Library/Application Support/notation/plugins/azure-kv"
 
@@ -56,7 +56,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For Windows Powershell:
    ```powershell
-   $version = "0.6.0"
+   $version = "1.0.0.rc.1"
    $arch = "amd64"
    $install_path = "${env:AppData}\notation\plugins\azure-kv"
 
