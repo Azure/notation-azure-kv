@@ -44,6 +44,7 @@ for runtime in "${runtimes[@]}"; do
     mapped_runtime="${runtime/x64/amd64}"
     mapped_runtime="${mapped_runtime/win/windows}"
     mapped_runtime="${mapped_runtime/osx/darwin}"
+    mapped_runtime="${mapped_runtime/-/_}"
 
     artifact_name="${artifacts_dir}/${project_name}_${version}_${mapped_runtime}.${ext}"
     binary_dir="$output_dir/$runtime"
