@@ -26,6 +26,7 @@ for runtime in "${runtimes[@]}"; do
         -p:PublishSingleFile=true \
         -p:CommitHash="$commitHash" \
         -p:Version="$version" \
+        -p:UseAppHost=true \
         -r "$runtime" \
         -o "$output_dir/$runtime"
 done
