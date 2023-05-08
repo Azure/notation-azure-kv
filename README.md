@@ -36,7 +36,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For macOS Zsh:
    ```zsh
-   version=0.6.0
+   version=1.0.0-rc.1
    arch=arm64
    install_path="${HOME}/Library/Application Support/notation/plugins/azure-kv"
 
@@ -52,6 +52,9 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
    # install the plugin
    mkdir -p ${install_path}
    tar xvzf ${tar_file} -C ${install_path} notation-azure-kv
+
+   # ad-hoc sign the binary
+   codesign -s - ${install_path}/notation-azure-kv
    ```
 
    For Windows Powershell:
