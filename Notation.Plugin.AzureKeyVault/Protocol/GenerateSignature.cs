@@ -1,4 +1,6 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Notation.Plugin.Protocol
 {
@@ -68,10 +70,16 @@ namespace Notation.Plugin.Protocol
     }
 
     /// <summary>
+    /// The context class for serializing/deserializing.
+    /// </summary>
+    [JsonSerializable(typeof(GenerateSignatureRequest))]
+    internal partial class GenerateSignatureRequestContext : JsonSerializerContext { }
+
+    /// <summary>
     /// Response class for generate-signature command.
     /// This class implements the <a href="https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#generate-signature">generate-signature</a> response.
     /// </summary>
-    public class GenerateSignatureResponse
+    public class GenerateSignatureResponse : IPluginResponse
     {
         [JsonPropertyName("keyId")]
         public string KeyId { get; }
@@ -85,7 +93,11 @@ namespace Notation.Plugin.Protocol
         [JsonPropertyName("certificateChain")]
         public List<byte[]> CertificateChain { get; }
 
-        public GenerateSignatureResponse(string keyId, byte[] signature, string signingAlgorithm, List<byte[]> certificateChain)
+        public GenerateSignatureResponse(
+            string keyId,
+            byte[] signature,
+            string signingAlgorithm,
+            List<byte[]> certificateChain)
         {
             if (string.IsNullOrEmpty(keyId))
             {
@@ -112,5 +124,21 @@ namespace Notation.Plugin.Protocol
             SigningAlgorithm = signingAlgorithm;
             CertificateChain = certificateChain;
         }
+
+        /// <summary>
+        /// Serializes the response object to JSON string.
+        /// </summary>
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(
+                value: this,
+                jsonTypeInfo: new GenerateSignatureResponseContext(PluginIO.GetRelaxedJsonSerializerOptions()).GenerateSignatureResponse);
+        }
     }
+
+    /// <summary>
+    /// The context class for serializing/deserializing.
+    /// </summary>
+    [JsonSerializable(typeof(GenerateSignatureResponse))]
+    internal partial class GenerateSignatureResponseContext : JsonSerializerContext { }
 }

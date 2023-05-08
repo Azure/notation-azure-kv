@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
@@ -36,11 +37,17 @@ namespace Notation.Plugin.AzureKeyVault.Client
 
         // Certificate client (lazy initialization)
         // Protected for unit test
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         protected Lazy<CertificateClient> _certificateClient;
+
         // Cryptography client (lazy initialization)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         protected Lazy<CryptographyClient> _cryptoClient;
+
         // Secret client (lazy initialization)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         protected Lazy<SecretClient> _secretClient;
+
         // Error message for invalid input
         private const string INVALID_INPUT_ERROR_MSG = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
@@ -60,6 +67,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// Constructor to create AzureKeyVault object from keyVaultUrl, name 
         /// and version.
         /// </summary>
+        [RequiresUnreferencedCode("Azure SDK types might be trimmed")]
         public KeyVaultClient(string keyVaultUrl, string name, string version)
         {
             if (string.IsNullOrEmpty(keyVaultUrl))
@@ -96,11 +104,13 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// Key identifier or certificate identifier. (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
         /// </param>
         /// </summary>
+        [RequiresUnreferencedCode("Azure SDK types might be trimmed")]
         public KeyVaultClient(string id) : this(ParseId(id)) { }
 
         /// <summary>
         /// A helper constructor to create KeyVaultClient from KeyVaultMetadata.
         /// </summary>
+        [RequiresUnreferencedCode("Azure SDK types might be trimmed")]
         private KeyVaultClient(KeyVaultMetadata metadata)
             : this(metadata.KeyVaultUrl, metadata.Name, metadata.Version) { }
 
@@ -142,6 +152,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Sign the payload and return the signature.
         /// </summary>
+        [RequiresUnreferencedCode("Azure SDK types might be trimmed")]
         public async Task<byte[]> SignAsync(SignatureAlgorithm algorithm, byte[] payload)
         {
             var signResult = await _cryptoClient.Value.SignDataAsync(algorithm, payload);
@@ -161,6 +172,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Get the certificate from the key vault.
         /// </summary>
+        [RequiresUnreferencedCode("Azure SDK types might be trimmed")]
         public async Task<X509Certificate2> GetCertificateAsync()
         {
             var cert = await _certificateClient.Value.GetCertificateVersionAsync(_name, _version);
@@ -179,6 +191,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Get the certificate chain from the key vault with GetSecret permission.
         /// </summary>
+        [RequiresUnreferencedCode("Azure SDK types might be trimmed")]
         public async Task<X509Certificate2Collection> GetCertificateChainAsync()
         {
             var secret = await _secretClient.Value.GetSecretAsync(_name, _version);

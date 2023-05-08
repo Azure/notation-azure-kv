@@ -51,10 +51,10 @@ namespace Notation.Plugin.AzureKeyVault
             }
 
             // execute the command
-            var resp = await cmd.RunAsync();
+            var response = await cmd.RunAsync();
 
-            // print the output
-            PluginIO.WriteOutput(resp);
+            // write output
+            Console.WriteLine(response.ToJson());
         }
 
         static void PrintHelp()

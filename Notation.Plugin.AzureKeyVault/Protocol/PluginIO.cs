@@ -3,8 +3,30 @@ using System.Text.Json;
 
 namespace Notation.Plugin.Protocol
 {
+    public interface IPluginResponse
+    {
+        /// <summary>
+        /// Serializes the response object to JSON string.
+        /// </summary>
+        public string ToJson();
+    }
+
     class PluginIO
     {
+        /// <summary>
+        /// The <see cref="JsonSerializerOptions"/> is used by subclass.
+        /// </summary>
+        public static JsonSerializerOptions GetRelaxedJsonSerializerOptions()
+        {
+            return new JsonSerializerOptions
+            {
+                // The Notation reads the output as UTF-8 encoded and 
+                // the JSON text will not be used in HTML, so skip the strict
+                // escaping rule for readability.
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+        }
+
         /// <summary>
         /// Notation will invoke plugins as executable, pass parameters using 
         /// command line arguments, and use standard IO streams to pass 
@@ -22,38 +44,6 @@ namespace Notation.Plugin.Protocol
                 throw new ValidationException("Standard input is empty");
             }
             return inputJson;
-        }
-
-        /// <summary>
-        /// Writes the output to standard input/output.
-        /// 
-        /// <param name="resp">
-        /// The response object to be written to standard output.
-        /// </param>
-        /// <param name="stderr">
-        /// If true, the output will be written to standard error, 
-        /// otherwise, the output will be written to standard output.
-        /// </param>
-        /// </summary>
-        public static void WriteOutput(object resp, bool stderr=false)
-        {
-            var options = new JsonSerializerOptions
-            {
-                // The Notation reads the output as UTF-8 encoded and 
-                // the JSON text will not be used in HTML, so skip the strict
-                // escaping rule for readability.
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-            string jsonString = JsonSerializer.Serialize(resp, options);
-
-            if (stderr)
-            {
-                Console.Error.WriteLine(jsonString);
-            }
-            else
-            {
-                Console.WriteLine(jsonString);
-            }
         }
     }
 }

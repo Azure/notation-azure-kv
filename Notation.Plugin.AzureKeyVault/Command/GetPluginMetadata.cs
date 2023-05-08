@@ -10,9 +10,9 @@ namespace Notation.Plugin.AzureKeyVault.Command
         public static readonly string Version;
         public static readonly string CommitHash;
 
-        public async Task<object> RunAsync()
+        public async Task<IPluginResponse> RunAsync()
         {
-            return await Task.FromResult<object>(new GetMetadataResponse(
+            return await Task.FromResult<IPluginResponse>(new GetMetadataResponse(
                 name: "azure-kv",
                 description: "Notation Azure Key Vault plugin",
                 version: Version,

@@ -1,3 +1,5 @@
+using Notation.Plugin.Protocol;
+
 namespace Notation.Plugin.AzureKeyVault.Command
 {
     /// <summary>
@@ -5,6 +7,6 @@ namespace Notation.Plugin.AzureKeyVault.Command
     /// </summary>
     public interface IPluginCommand
     {
-        Task<object> RunAsync();
+        Task<IPluginResponse> RunAsync();
     }
 }

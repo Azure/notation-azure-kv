@@ -26,6 +26,8 @@ for runtime in "${runtimes[@]}"; do
         -p:PublishSingleFile=true \
         -p:CommitHash="$commitHash" \
         -p:Version="$version" \
+        -p:PublishTrimmed=true \
+        -p:TrimmerDefaultAction=link \
         -r "$runtime" \
         -o "$output_dir/$runtime"
 done
@@ -63,11 +65,11 @@ for runtime in "${runtimes[@]}"; do
     artifacts+=("${artifact_name}")
 done
 
-# Create a release using GitHub CLI
-if [[ "$tag_name" == *"-"* ]]; then
-    # v1.0.0-rc.1 is a pre-release
-    gh release create --title "${tag_name}" --prerelease --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
-else
-    # v1.0.0 is a release
-    gh release create --title "${tag_name}" --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
-fi
+# # Create a release using GitHub CLI
+# if [[ "$tag_name" == *"-"* ]]; then
+#     # v1.0.0-rc.1 is a pre-release
+#     gh release create --title "${tag_name}" --prerelease --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+# else
+#     # v1.0.0 is a release
+#     gh release create --title "${tag_name}" --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+# fi
