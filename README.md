@@ -36,7 +36,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For macOS Zsh:
    ```zsh
-   version=1.0.0-rc.1
+   version=0.6.0
    arch=arm64
    install_path="${HOME}/Library/Application Support/notation/plugins/azure-kv"
 
