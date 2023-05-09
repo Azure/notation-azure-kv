@@ -25,15 +25,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Build actionlint config for runner labels
-        shell: bash
-        run: |
-          cat > .github/actionlint.yaml<< EOF
-          self-hosted-runner:
-            # Labels of self-hosted runner in array of string
-            labels:
-              - macos-13
-          EOF
       - name: Lint Code Base
         uses: github/super-linter@v5
         env:
