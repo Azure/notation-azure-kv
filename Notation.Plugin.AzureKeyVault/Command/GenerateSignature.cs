@@ -1,5 +1,4 @@
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.Json;
 using Notation.Plugin.AzureKeyVault.Certificate;
 using Notation.Plugin.AzureKeyVault.Client;

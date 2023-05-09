@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using Notation.Plugin.AzureKeyVault.Client;
 using Notation.Plugin.Protocol;
