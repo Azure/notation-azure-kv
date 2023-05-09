@@ -11,8 +11,8 @@ fi
 tag_name="$1"
 version=${tag_name#v}
 project_name="notation-azure-kv"
-output_dir=$(realpath ./publish)
-artifacts_dir=$(realpath ./artifacts)
+mkdir -p ./bin/publish && output_dir=$(realpath ./bin/publish)
+mkdir -p ./bin/artifacts && artifacts_dir=$(realpath ./bin/artifacts)
 checksum_name=$artifacts_dir/${project_name}_${version}_checksums.txt
 
 declare -a runtimes=("linux-x64" "linux-arm64" "osx-x64" "osx-arm64" "win-x64")
@@ -26,7 +26,6 @@ for runtime in "${runtimes[@]}"; do
         -p:PublishSingleFile=true \
         -p:CommitHash="$commitHash" \
         -p:Version="$version" \
-        -p:UseAppHost=true \
         -r "$runtime" \
         -o "$output_dir/$runtime"
 done
@@ -55,10 +54,10 @@ for runtime in "${runtimes[@]}"; do
         # to include the LICENSE file
         (cd "${binary_dir}" && zip -x '*.pdb' -r "${artifact_name}" .) && zip -ur "${artifact_name}" LICENSE
     else
-        tar czvf "${artifact_name}" --exclude='*.pdb' -C "${binary_dir}" . -C ../.. LICENSE
+        tar czvf "${artifact_name}" --exclude='*.pdb' -C "${binary_dir}" . -C ../../.. LICENSE
     fi
 
-    (cd "${artifacts_dir}" && sha256sum "$(basename "${artifact_name}")" >>"${checksum_name}")
+    (cd "${artifacts_dir}" && shasum -a 256 "$(basename "${artifact_name}")" >>"${checksum_name}")
 
     # Add the artifact to the list
     artifacts+=("${artifact_name}")
