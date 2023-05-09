@@ -19,7 +19,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
         public DescribeKey(string inputJson)
         {
             // Deserialize JSON string to DescribeKeyRequest object
-            var request = JsonSerializer.Deserialize<DescribeKeyRequest>(inputJson);
+            var request = JsonSerializer.Deserialize(inputJson, DescribeKeyRequestContext.Default.DescribeKeyRequest);
             if (request == null)
             {
                 throw new ValidationException(invalidInputError);
@@ -37,7 +37,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             this._keyVaultClient = keyVaultClient;
         }
 
-        public async Task<object> RunAsync()
+        public async Task<IPluginResponse> RunAsync()
         {
             // Get certificate from Azure Key Vault
             var cert = await _keyVaultClient.GetCertificateAsync();

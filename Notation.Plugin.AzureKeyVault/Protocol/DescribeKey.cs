@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Notation.Plugin.Protocol
@@ -40,10 +41,16 @@ namespace Notation.Plugin.Protocol
     }
 
     /// <summary>
+    /// Context class for describe-key command.
+    /// </summary>
+    [JsonSerializable(typeof(DescribeKeyRequest))]
+    internal partial class DescribeKeyRequestContext : JsonSerializerContext { }
+
+    /// <summary>
     /// Response class for describe-key command.
     /// The class implement the <a href="https://github.com/notaryproject/notaryproject/blob/main/specs/plugin-extensibility.md#describe-key">describe-key</a> response.
     /// </summary>
-    public class DescribeKeyResponse
+    public class DescribeKeyResponse : IPluginResponse
     {
         [JsonPropertyName("keyId")]
         public string KeyId { get; }
@@ -66,5 +73,21 @@ namespace Notation.Plugin.Protocol
             KeyId = keyId;
             KeySpec = keySpec;
         }
+
+        /// <summary>
+        /// Serializes the response object to JSON string.
+        /// </summary>
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(
+                value: this,
+                jsonTypeInfo: new DescribeKeyResponseContext(PluginIO.GetRelaxedJsonSerializerOptions()).DescribeKeyResponse);
+        }
     }
+
+    /// <summary>
+    /// Context class for describe-key command.
+    /// </summary>
+    [JsonSerializable(typeof(DescribeKeyResponse))]
+    internal partial class DescribeKeyResponseContext : JsonSerializerContext { }
 }

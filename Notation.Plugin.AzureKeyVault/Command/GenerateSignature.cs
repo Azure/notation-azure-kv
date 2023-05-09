@@ -20,7 +20,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
         public GenerateSignature(string inputJson)
         {
             // Parse the input
-            var request = JsonSerializer.Deserialize<GenerateSignatureRequest>(inputJson);
+            var request = JsonSerializer.Deserialize(inputJson, GenerateSignatureRequestContext.Default.GenerateSignatureRequest);
             if (request == null)
             {
                 throw new ValidationException("Invalid input");
@@ -38,7 +38,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             this._keyVaultClient = keyVaultClient;
         }
 
-        public async Task<object> RunAsync()
+        public async Task<IPluginResponse> RunAsync()
         {
             // Obtain the certificate chain
             X509Certificate2Collection certBundle;

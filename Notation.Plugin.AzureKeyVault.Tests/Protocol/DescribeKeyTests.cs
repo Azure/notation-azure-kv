@@ -51,10 +51,12 @@ namespace Notation.Plugin.Protocol.Tests
 
             // Act
             DescribeKeyResponse response = new DescribeKeyResponse(keyId, keySpec);
+            var json = response.ToJson();
 
             // Assert
             Assert.Equal(keyId, response.KeyId);
             Assert.Equal(keySpec, response.KeySpec);
+            Assert.Equal("{\"keyId\":\"test-key-id\",\"keySpec\":\"RSA-2048\"}", json);
         }
 
         [Theory]

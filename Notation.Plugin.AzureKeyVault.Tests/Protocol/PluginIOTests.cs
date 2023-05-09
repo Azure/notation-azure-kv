@@ -36,32 +36,5 @@ namespace Notation.Plugin.Protocol.Tests
             // Act & Assert
             Assert.Throws<ValidationException>(() => PluginIO.ReadInput());
         }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void WriteOutput_WritesCorrectOutput(bool stderr)
-        {
-            // Arrange
-            var obj = new { test = "value" };
-            const string expectedOutput = "{\"test\":\"value\"}\n";
-
-            using var stringWriter = new StringWriter();
-            if (stderr)
-            {
-                Console.SetError(stringWriter);
-            }
-            else
-            {
-                Console.SetOut(stringWriter);
-            }
-
-            // Act
-            PluginIO.WriteOutput(obj, stderr);
-
-            // Assert
-            string actualOutput = stringWriter.ToString();
-            Assert.Equal(expectedOutput, actualOutput);
-        }
     }
 }

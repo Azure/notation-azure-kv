@@ -1,3 +1,7 @@
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Notation.Plugin.Protocol
 {
     /// <summary>
@@ -30,14 +34,37 @@ namespace Notation.Plugin.Protocol
             // "Path: $ | LineNumber: 0 | BytePositionInLine: 0." suffix for
             // exception's Message, so remove it.
             errorMessage = errorMessage.Split("Path: $ |")[0];
-            var errorResponse = new
-            {
-                errorCode = errorCode,
-                errorMessage = errorMessage
-            };
-            PluginIO.WriteOutput(errorResponse, stderr: true);
+            var errorResponse = new ErrorResponse(errorCode, errorMessage);
+            Console.Error.WriteLine(errorResponse.ToJson());
         }
     }
+
+    public class ErrorResponse : IPluginResponse
+    {
+        [JsonPropertyName("errorCode")]
+        public string ErrorCode { get; set; }
+        [JsonPropertyName("errorMessage")]
+        public string ErrorMessage { get; set; }
+
+        public ErrorResponse(string errorCode, string errorMessage)
+        {
+            ErrorCode = errorCode;
+            ErrorMessage = errorMessage;
+        }
+
+        /// <summary>
+        /// Serializes the response object to JSON string.
+        /// </summary>
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(
+                value: this,
+                jsonTypeInfo: new ErrorResponseContext(PluginIO.GetRelaxedJsonSerializerOptions()).ErrorResponse);
+        }
+    }
+
+    [JsonSerializable(typeof(ErrorResponse))]
+    public partial class ErrorResponseContext : JsonSerializerContext { }
 
     /// <summary>
     /// Base class for plugin exceptions.

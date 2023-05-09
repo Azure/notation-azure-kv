@@ -17,6 +17,8 @@ namespace Notation.Plugin.Protocol.Tests
 
             // Act
             GetMetadataResponse response = new GetMetadataResponse(name, description, version, url, supportedContractVersions, capabilities);
+            var json = response.ToJson();
+            var expectedJson = "{\"name\":\"Test Plugin\",\"description\":\"A test plugin for Notation\",\"version\":\"1.0.0\",\"url\":\"https://github.com/example/test-plugin\",\"supportedContractVersions\":[\"1.0\"],\"capabilities\":[\"describe-key\",\"generate-signature\"]}";
 
             // Assert
             Assert.Equal(name, response.Name);
@@ -25,6 +27,7 @@ namespace Notation.Plugin.Protocol.Tests
             Assert.Equal(url, response.Url);
             Assert.Equal(supportedContractVersions, response.SupportedContractVersions);
             Assert.Equal(capabilities, response.Capabilities);
+            Assert.Equal(expectedJson, json);
         }
     }
 }
