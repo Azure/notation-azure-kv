@@ -40,5 +40,26 @@ namespace Notation.Plugin.Protocol.Tests
             Assert.Throws<ArgumentNullException>(() => new GenerateSignatureResponse(keyId, signature, string.Empty, certificateChain));
             Assert.Throws<ArgumentNullException>(() => new GenerateSignatureResponse(keyId, signature, signingAlgorithm, new List<byte[]>()));
         }
+
+        [Fact]
+        public void GenerateSignatureResponse_Valid()
+        {
+            // Arrange
+            string keyId = "test-key-id";
+            byte[] signature = new byte[] { 1, 2, 3, 4, 5 };
+            string signingAlgorithm = "RSA-PSS";
+            List<byte[]> certificateChain = new List<byte[]> { new byte[] { 6, 7, 8, 9, 10 } };
+
+            // Act
+            GenerateSignatureResponse response = new GenerateSignatureResponse(keyId, signature, signingAlgorithm, certificateChain);
+            var json = response.ToJson();
+
+            // Assert
+            Assert.Equal(keyId, response.KeyId);
+            Assert.Equal(signature, response.Signature);
+            Assert.Equal(signingAlgorithm, response.SigningAlgorithm);
+            Assert.Equal(certificateChain, response.CertificateChain);
+            Assert.Equal("{\"keyId\":\"test-key-id\",\"signature\":\"AQIDBAU=\",\"signingAlgorithm\":\"RSA-PSS\",\"certificateChain\":[\"BgcICQo=\"]}", json);
+        }
     }
 }
