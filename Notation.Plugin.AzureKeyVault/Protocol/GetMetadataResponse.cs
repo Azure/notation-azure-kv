@@ -33,7 +33,7 @@ namespace Notation.Plugin.Protocol
             string version,
             string url,
             string[] supportedContractVersions,
-            string[] capabilities) : base()
+            string[] capabilities)
         {
             Name = name;
             Description = description;
