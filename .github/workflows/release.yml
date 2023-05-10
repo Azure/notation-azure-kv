@@ -12,7 +12,6 @@ permissions:
 jobs:
   build:
     strategy:
-      max-parallel: 3
       matrix:
         runtime: ["linux-x64", "linux-arm64", "win-x64", "osx-x64", "osx-arm64"]
     name: Build
@@ -44,6 +43,10 @@ jobs:
     runs-on: macos-latest
     needs: build
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
