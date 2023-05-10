@@ -3,7 +3,7 @@
 set -e
 
 # Check if the tag name is provided
-if [ -z "$1" ] | [ -z "$2" ]; then
+if [ -z "$1" ] || [ -z "$2" ]; then
     echo "Usage: $0 <tag_name> <runtime>"
     exit 1
 fi

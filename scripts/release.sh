@@ -14,7 +14,7 @@ project_name="notation-azure-kv"
 checksum_name=$(pwd)/${project_name}_${version}_checksums.txt
 
 # create checksums
-declare -a artifacts=($(ls))
+artifacts=(*)
 for artifact in "${artifacts[@]}"; do
     shasum -a 256 "${artifact}" >>"${checksum_name}"
 done

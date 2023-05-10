@@ -10,11 +10,11 @@ permissions:
   contents: write
 
 jobs:
-  build_linux_and_windows:
+  build:
     strategy:
       matrix:
-        runtime: ["linux-x64", "linux-arm64", "win-x64"]
-    name: Release
+        runtime: ["linux-x64", "linux-arm64", "win-x64", "osx-x64", "osx-arm64"]
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,31 +33,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.runtime }}
-          path: ${{ github.workspace }}/bin/artifacts/*
-          retention-days: 1
-  build_macos:
-    strategy:
-      matrix:
-        runtime: ["osx-x64", "osx-arm64"]
-    name: Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name : Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '6.0.x'
-      - name: Build .NET project
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash ./scripts/build.sh "${GITHUB_REF_NAME}" ${{ matrix.runtime }}
-      - name: Upload ${{ matrix.runtime }} artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.runtime }}-unsigned
           path: ${{ github.workspace }}/bin/artifacts/*
           retention-days: 1
   macos_codesign:
@@ -66,12 +41,12 @@ jobs:
         runtime: ["osx-x64", "osx-arm64"]
     name: Codesign
     runs-on: macos-latest
-    needs: build_macos
+    needs: build
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: ${{ matrix.runtime }}-unsigned
+          name: ${{ matrix.runtime }}
           path: ${{ github.workspace }}/artifacts/${{ matrix.runtime }}
       - name: Codesign
         run: bash ./scripts/codesign.sh ${{ matrix.runtime }}
@@ -79,12 +54,12 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.runtime }}
-          path: ${{ github.workspace }}/bin/artifacts/*
+          path: ${{ github.workspace }}/artifacts/*
           retention-days: 1
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [build_linux_and_windows, macos_codesign]
+    needs: [macos_codesign]
     steps:
       - name: Download linux-x64 artifact
         uses: actions/download-artifact@v3
