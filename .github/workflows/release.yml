@@ -10,9 +10,12 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build_linux_and_windows:
+    strategy:
+      matrix:
+        runtime: ["linux-x64", "linux-arm64", "win-x64"]
     name: Release
-    runs-on: macos-13
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -22,7 +25,86 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '6.0.x'
-      - name: Release .NET project
+      - name: Build .NET project
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash ./scripts/build.sh "${GITHUB_REF_NAME}" ${{ matrix.runtime }}
+      - name: Upload ${{ matrix.runtime }} artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.runtime }}
+          path: ${{ github.workspace }}/bin/artifacts/*
+          retention-days: 1
+  build_macos:
+    strategy:
+      matrix:
+        runtime: ["osx-x64", "osx-arm64"]
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name : Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+      - name: Build .NET project
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash ./scripts/build.sh "${GITHUB_REF_NAME}" ${{ matrix.runtime }}
+      - name: Upload ${{ matrix.runtime }} artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.runtime }}-unsigned
+          path: ${{ github.workspace }}/bin/artifacts/*
+          retention-days: 1
+  macos_codesign:
+    strategy:
+      matrix:
+        runtime: ["osx-x64", "osx-arm64"]
+    name: Codesign
+    runs-on: macos-latest
+    needs: build_macos
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.runtime }}-unsigned
+          path: ${{ github.workspace }}/artifacts/${{ matrix.runtime }}
+      - name: Codesign
+        run: bash ./scripts/codesign.sh ${{ matrix.runtime }}
+      - name: Upload ${{ matrix.runtime }} artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.runtime }}
+          path: ${{ github.workspace }}/bin/artifacts/*
+          retention-days: 1
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build_linux_and_windows, macos_codesign]
+    steps:
+      - name: Download linux-x64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-x64
+      - name: Download linux-arm64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-arm64
+      - name: Download win-x64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: win-x64
+      - name: Download osx-x64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: osx-x64
+      - name: Download osx-arm64 artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: osx-arm64
+      - name: Create release
         run: bash ./scripts/release.sh "${GITHUB_REF_NAME}"
