@@ -26,6 +26,7 @@ codesign -s - notation-azure-kv
 tar --no-xattrs -czvf "$artifact_name" notation-azure-kv LICENSE
 rm notation-azure-kv LICENSE
 
+artifact_name=$(pwd)/"$artifact_name"
 # share the artifact name between steps
 if [[ ! -z "$GITHUB_ENV" ]]; then
     echo "${ARTIFACT_NAME}=${artifact_name}" >> $GITHUB_ENV

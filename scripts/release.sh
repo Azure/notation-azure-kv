@@ -19,7 +19,6 @@ for artifact in "${artifacts[@]}"; do
     shasum -a 256 "${artifact}" >>"${checksum_name}"
 done
 
-
 # Create a release using GitHub CLI
 if [[ "$tag_name" == *"-"* ]]; then
     # v1.0.0-rc.1 is a pre-release
