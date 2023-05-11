@@ -95,4 +95,6 @@ jobs:
           name: osx-arm64
           path: ${{ github.workspace }}/bin/artifacts
       - name: Create release
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash ./scripts/release.sh "${GITHUB_REF_NAME}"
