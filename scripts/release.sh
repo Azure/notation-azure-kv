@@ -28,8 +28,8 @@ shasum -a 256 -- * > "notation-azure-kv_${version}_checksums.txt"
 # Create a release using GitHub CLI
 if [[ "$tag_name" == *"-"* ]]; then
     # v1.0.0-rc.1 is a pre-release
-    gh release create --title "${tag_name}" --prerelease --draft "${tag_name}" * 
+    gh release create --title "${tag_name}" --prerelease --draft "${tag_name}" -- * 
 else
     # v1.0.0 is a release
-    gh release create --title "${tag_name}" --draft "${tag_name}" *
+    gh release create --title "${tag_name}" --draft "${tag_name}" -- *
 fi
