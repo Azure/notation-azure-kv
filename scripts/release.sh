@@ -17,7 +17,7 @@ checksum_name="$artifacts_dir"/notation-azure-kv_${version}_checksums.txt
 # create checksums
 mapfile -t artifacts < <(find "$artifacts_dir" -type f)
 for artifact in "${artifacts[@]}"; do
-    (cd "${artifacts_dir}" && shasum -a 256 "$(basename "${artifact}")" >>"${checksum_name}")
+    (cd $(dirname $artifact) && shasum -a 256 "$(basename "${artifact}")" >>"${checksum_name}")
 done
 
 # Create a release using GitHub CLI
