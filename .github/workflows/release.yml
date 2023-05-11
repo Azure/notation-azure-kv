@@ -64,36 +64,15 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [macos_codesign]
+    needs: macos_codesign
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Download linux-x64 artifact
+      - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: linux-x64
-          path: ${{ github.workspace }}/bin/artifacts
-      - name: Download linux-arm64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: linux-arm64
-          path: ${{ github.workspace }}/bin/artifacts
-      - name: Download win-x64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: win-x64
-          path: ${{ github.workspace }}/bin/artifacts
-      - name: Download osx-x64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: osx-x64
-          path: ${{ github.workspace }}/bin/artifacts
-      - name: Download osx-arm64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: osx-arm64
           path: ${{ github.workspace }}/bin/artifacts
       - name: Create release
         env:
