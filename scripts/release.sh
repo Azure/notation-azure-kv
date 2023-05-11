@@ -10,14 +10,14 @@ fi
 
 tag_name="$1"
 version=${tag_name#v}
+artifacts_dir=$(pwd)/artifacts
 
-cd artifacts
-checksum_name=$(pwd)/notation-azure-kv_${version}_checksums.txt
+checksum_name="$artifacts_dir"/notation-azure-kv_${version}_checksums.txt
 
 # create checksums
-artifacts=(*)
+mapfile -t artifacts < <(find "$artifacts_dir" -type f)
 for artifact in "${artifacts[@]}"; do
-    shasum -a 256 "${artifact}" >>"${checksum_name}"
+    (cd "${artifacts_dir}" && sha256sum "$(basename "${artifact_name}")" >>"${checksum_name}")
 done
 
 # Create a release using GitHub CLI

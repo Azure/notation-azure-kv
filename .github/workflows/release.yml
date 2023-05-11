@@ -51,14 +51,14 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ${{ matrix.runtime }}
-          path: ${{ github.workspace }}/artifacts/${{ matrix.runtime }}
+          path: ${{ github.workspace }}/bin/artifacts
       - name: Codesign
         run: bash ./scripts/codesign.sh ${{ matrix.runtime }}
       - name: Upload ${{ matrix.runtime }} artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.runtime }}
-          path: ${{ github.workspace }}/artifacts/*
+          path: ${{ github.workspace }}/bin/artifacts
           retention-days: 1
   release:
     name: Release

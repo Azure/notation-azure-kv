@@ -1,21 +1,15 @@
 #!/bin/bash
+# The script is for macOS to codesign the binary.
 
 set -e
 
-# Check if the tag name is provided
-if [ -z "$1" ]; then
-    echo "Usage: $0 <runtime>"
+cd ./bin/artifacts
+num_targets=$(ls -1 | grep '.tar.gz' | wc -l)
+if [ "$num_targets" -ne 1 ]; then
+    echo "Expect 1 artifact, but got $num_target"
     exit 1
-fi
-runtime="$1"
-
-cd ./artifacts/"$runtime"
 
 artifact_name=$(ls ./*.tar.gz)
-if [ -z "$artifact_name" ]; then
-    echo "No artifact found for $runtime"
-    exit 1
-fi
 
 # extract binary and remove the artifact
 tar -xf "$artifact_name"
