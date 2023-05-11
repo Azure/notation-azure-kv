@@ -54,7 +54,7 @@ jobs:
           name: ${{ matrix.runtime }}
           path: ${{ github.workspace }}/bin/artifacts
       - name: Codesign
-        run: bash ./scripts/codesign.sh ${{ matrix.runtime }}
+        run: bash ./scripts/codesign.sh
       - name: Upload ${{ matrix.runtime }} artifact
         uses: actions/upload-artifact@v3
         with:
