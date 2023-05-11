@@ -8,7 +8,7 @@ num_targets=$(ls -1 | grep '.tar.gz' | wc -l)
 if [ "$num_targets" -ne 1 ]; then
     echo "Expect 1 artifact, but got $num_target"
     exit 1
-
+fi
 artifact_name=$(ls ./*.tar.gz)
 
 # extract binary and remove the artifact

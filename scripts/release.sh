@@ -10,7 +10,7 @@ fi
 
 tag_name="$1"
 version=${tag_name#v}
-artifacts_dir=$(pwd)/artifacts
+artifacts_dir=$(pwd)/bin/artifacts
 
 checksum_name="$artifacts_dir"/notation-azure-kv_${version}_checksums.txt
 
