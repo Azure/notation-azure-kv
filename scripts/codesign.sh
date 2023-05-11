@@ -4,9 +4,9 @@
 set -e
 
 cd ./bin/artifacts
-num_targets=$(ls -1 | grep '.tar.gz' | wc -l)
+num_targets=$(ls -1 | grep -c '.tar.gz')
 if [ "$num_targets" -ne 1 ]; then
-    echo "Expect 1 artifact, but got $num_target"
+    echo "Expect 1 artifact, but got $num_targets"
     exit 1
 fi
 artifact_name=$(ls ./*.tar.gz)

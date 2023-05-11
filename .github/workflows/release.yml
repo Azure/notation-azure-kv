@@ -1,3 +1,4 @@
+---
 name: Release notation-azure-kv
 
 on:
@@ -21,7 +22,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name : Setup .NET
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '6.0.x'
@@ -96,5 +97,5 @@ jobs:
           path: ${{ github.workspace }}/bin/artifacts
       - name: Create release
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash ./scripts/release.sh "${GITHUB_REF_NAME}"
