@@ -10,8 +10,9 @@ fi
 
 tag_name="$1"
 version=${tag_name#v}
-project_name="notation-azure-kv"
-checksum_name=$(pwd)/${project_name}_${version}_checksums.txt
+
+cd artifacts
+checksum_name=$(pwd)/notation-azure-kv_${version}_checksums.txt
 
 # create checksums
 artifacts=(*)

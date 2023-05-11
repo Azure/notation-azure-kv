@@ -73,21 +73,26 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: linux-x64
+          path: ${{ github.workspace }}/artifacts
       - name: Download linux-arm64 artifact
         uses: actions/download-artifact@v3
         with:
           name: linux-arm64
+          path: ${{ github.workspace }}/artifacts
       - name: Download win-x64 artifact
         uses: actions/download-artifact@v3
         with:
           name: win-x64
+          path: ${{ github.workspace }}/artifacts
       - name: Download osx-x64 artifact
         uses: actions/download-artifact@v3
         with:
           name: osx-x64
+          path: ${{ github.workspace }}/artifacts
       - name: Download osx-arm64 artifact
         uses: actions/download-artifact@v3
         with:
           name: osx-arm64
+          path: ${{ github.workspace }}/artifacts
       - name: Create release
         run: bash ./scripts/release.sh "${GITHUB_REF_NAME}"
