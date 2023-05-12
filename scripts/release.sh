@@ -10,64 +10,26 @@ fi
 
 tag_name="$1"
 version=${tag_name#v}
-project_name="notation-azure-kv"
-output_dir=$(realpath ./publish)
-artifacts_dir=$(realpath ./artifacts)
-checksum_name=$artifacts_dir/${project_name}_${version}_checksums.txt
+release_assets_dir="$(pwd)/bin/release_assets"
 
-declare -a runtimes=("linux-x64" "linux-arm64" "osx-x64" "osx-arm64" "win-x64")
+# get all artifacts path
+mapfile -t artifacts < <(find "$(pwd)/bin/artifacts" -type f)
 
-# Publish for each runtime
-commitHash="$(git log --pretty=format:'%h' -n 1)"
-for runtime in "${runtimes[@]}"; do
-    dotnet publish ./Notation.Plugin.AzureKeyVault \
-        --configuration Release \
-        --self-contained true \
-        -p:PublishSingleFile=true \
-        -p:CommitHash="$commitHash" \
-        -p:Version="$version" \
-        -r "$runtime" \
-        -o "$output_dir/$runtime"
-done
+# create release_assets directory
+mkdir -p "$release_assets_dir"
+cd "$release_assets_dir"
 
-# Package the artifacts and create checksums
-declare -a artifacts=()
-mkdir -p "${artifacts_dir}"
-for runtime in "${runtimes[@]}"; do
-    if [[ $runtime == *"win"* ]]; then
-        ext="zip"
-    else
-        ext="tar.gz"
-    fi
+# move artifacts to release_assets directory
+mv "${artifacts[@]}" ./
 
-    # Apply the runtime name mapping
-    mapped_runtime="${runtime/x64/amd64}"
-    mapped_runtime="${mapped_runtime/win/windows}"
-    mapped_runtime="${mapped_runtime/osx/darwin}"
-    mapped_runtime="${mapped_runtime/-/_}"
-
-    artifact_name="${artifacts_dir}/${project_name}_${version}_${mapped_runtime}.${ext}"
-    binary_dir="$output_dir/$runtime"
-
-    if [[ $ext == "zip" ]]; then
-        # To have flat structured zip file, zip the binary and then update zip 
-        # to include the LICENSE file
-        (cd "${binary_dir}" && zip -x '*.pdb' -r "${artifact_name}" .) && zip -ur "${artifact_name}" LICENSE
-    else
-        tar czvf "${artifact_name}" --exclude='*.pdb' -C "${binary_dir}" . -C ../.. LICENSE
-    fi
-
-    (cd "${artifacts_dir}" && sha256sum "$(basename "${artifact_name}")" >>"${checksum_name}")
-
-    # Add the artifact to the list
-    artifacts+=("${artifact_name}")
-done
+# create checksums
+shasum -a 256 -- * > "notation-azure-kv_${version}_checksums.txt"
 
 # Create a release using GitHub CLI
 if [[ "$tag_name" == *"-"* ]]; then
     # v1.0.0-rc.1 is a pre-release
-    gh release create --title "${tag_name}" --prerelease --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+    gh release create --title "${tag_name}" --prerelease --draft "${tag_name}" -- * 
 else
     # v1.0.0 is a release
-    gh release create --title "${tag_name}" --draft "${tag_name}" "${artifacts[@]}" "${checksum_name}"
+    gh release create --title "${tag_name}" --draft "${tag_name}" -- *
 fi

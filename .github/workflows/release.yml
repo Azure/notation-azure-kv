@@ -1,3 +1,4 @@
+---
 name: Release notation-azure-kv
 
 on:
@@ -11,18 +12,69 @@ permissions:
 
 jobs:
   build:
-    name: Release
+    strategy:
+      matrix:
+        runtime: ["linux-x64", "linux-arm64", "win-x64", "osx-x64", "osx-arm64"]
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name : Setup .NET
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '6.0.x'
-      - name: Release .NET project
+      - name: Build .NET project
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash ./scripts/build.sh "${GITHUB_REF_NAME}" ${{ matrix.runtime }}
+      - name: Upload ${{ matrix.runtime }} artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.runtime }}
+          path: ${{ github.workspace }}/bin/artifacts/*
+          retention-days: 1
+  macos_codesign:
+    strategy:
+      matrix:
+        runtime: ["osx-x64", "osx-arm64"]
+    name: Codesign
+    runs-on: macos-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.runtime }}
+          path: ${{ github.workspace }}/bin/artifacts
+      - name: Codesign
+        run: bash ./scripts/codesign.sh
+      - name: Upload ${{ matrix.runtime }} artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.runtime }}
+          path: ${{ github.workspace }}/bin/artifacts
+          retention-days: 1
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: macos_codesign
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ${{ github.workspace }}/bin/artifacts
+      - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash ./scripts/release.sh "${GITHUB_REF_NAME}"
