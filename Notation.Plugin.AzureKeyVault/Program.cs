@@ -3,9 +3,9 @@ using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault
 {
-    class Program
+    public class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             try
             {
@@ -23,7 +23,7 @@ namespace Notation.Plugin.AzureKeyVault
             }
         }
 
-        static async Task ExecuteAsync(string[] args)
+        public static async Task ExecuteAsync(string[] args)
         {
             if (args.Length < 1)
             {
