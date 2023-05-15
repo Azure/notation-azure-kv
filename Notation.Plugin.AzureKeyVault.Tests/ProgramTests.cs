@@ -61,8 +61,6 @@ namespace Notation.Plugin.AzureKeyVault.Tests
             {
                 Console.SetOut(sw);
 
-                // We would ideally mock the input for describe-key and generate-signature
-                // as they expect inputs from PluginIO.ReadInput(). However, that is not covered in this example.
                 await Program.ExecuteAsync(args);
 
                 var output = sw.ToString();
@@ -83,8 +81,6 @@ namespace Notation.Plugin.AzureKeyVault.Tests
                 Console.SetOut(sw);
                 Console.SetIn(new StringReader(""));
 
-                // We would ideally mock the input for describe-key and generate-signature
-                // as they expect inputs from PluginIO.ReadInput(). However, that is not covered in this example.
                 await Assert.ThrowsAsync<ValidationException>(() => Program.ExecuteAsync(args));
             }
         }
