@@ -3,9 +3,9 @@ using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault
 {
-    class Program
+    public class Program
     {
-        static async Task Main(string[] args)
+        public static async Task Main(string[] args)
         {
             try
             {
@@ -23,16 +23,13 @@ namespace Notation.Plugin.AzureKeyVault
             }
         }
 
-        static async Task ExecuteAsync(string[] args)
+        public static async Task ExecuteAsync(string[] args)
         {
             if (args.Length < 1)
             {
                 PrintHelp();
                 return;
             }
-
-            // read the input
-            var inputJson = PluginIO.ReadInput();
 
             IPluginCommand? cmd = null;
             switch (args[0])
@@ -41,10 +38,10 @@ namespace Notation.Plugin.AzureKeyVault
                     cmd = new GetPluginMetadata();
                     break;
                 case "describe-key":
-                    cmd = new DescribeKey(inputJson);
+                    cmd = new DescribeKey(PluginIO.ReadInput());
                     break;
                 case "generate-signature":
-                    cmd = new GenerateSignature(inputJson);
+                    cmd = new GenerateSignature(PluginIO.ReadInput());
                     break;
                 default:
                     throw new ValidationException($"Invalid command: {args[0]}");
