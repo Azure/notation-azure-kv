@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Notation.Plugin.Protocol;
 
@@ -24,10 +25,21 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
             chain.ChainPolicy.CustomTrustStore.AddRange(certificateBundle);
 
-            bool isValid = chain.Build(leafCert);
-            if (!isValid)
+            try
             {
-                throw new ValidationException("Certificate is invalid");
+                bool isValid = chain.Build(leafCert);
+                if (!isValid)
+                {
+                    throw new ValidationException("Certificate is invalid");
+                }
+            }
+            catch (CryptographicException e)
+            {
+                throw new ValidationException($"Failed to build the X509 chain. {e.Message} The certificate bundle is unreadable. Please ensure the certificate bundle matches the specific certifcate.");
+            }
+            catch (ArgumentException e)
+            {
+                throw new ValidationException($"Failed to build the X509 chain. {e.Message} The certificate bundle is not a valid certificate or is null.");
             }
 
             foreach (X509ChainStatus status in chain.ChainStatus)
