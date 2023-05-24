@@ -42,7 +42,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             {
                 if (status.Status == X509ChainStatusFlags.PartialChain)
                 {
-                    throw new ValidationException("Failed to build the X509 chain up to the root certificate. To resolve this issue, provide the intermediate and root certificates by passing the certificate bundle file's path to the `ca_certs` key in the pluginConfig");
+                    throw new ValidationException("Failed to build the X509 chain up to the root certificate. The provided certificate bundle either does not match or does not contain enough certificates to build a complete chain. To resolve this issue, provide the intermediate and root certificates by passing the certificate bundle file's path to the `ca_certs` key in the pluginConfig");
                 }
 
                 if (status.Status != X509ChainStatusFlags.NoError && status.Status != X509ChainStatusFlags.UntrustedRoot)

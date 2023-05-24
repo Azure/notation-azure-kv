@@ -50,7 +50,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         {
             // Arrange
             X509Certificate2 leafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf.crt"));
-            X509Certificate2Collection certificateBundle = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "unmatchable_root.crt"));
+            X509Certificate2Collection certificateBundle = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "unmatchable_root.pem"));
 
             // Act and Assert
             Assert.Throws<ValidationException>(() => CertificateChain.Build(leafCert, certificateBundle));
