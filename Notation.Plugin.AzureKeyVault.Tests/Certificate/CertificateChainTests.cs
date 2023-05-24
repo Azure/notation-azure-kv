@@ -44,5 +44,16 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
             // Act and Assert
             Assert.Throws<ValidationException>(() => CertificateChain.Build(invalidLeafCert, certificateBundle));
         }
+
+        [Fact]
+        public void Build_WithValidLeafAndUnmatchableCertificateBundle_BuildsCertificateChain()
+        {
+            // Arrange
+            X509Certificate2 leafCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf.crt"));
+            X509Certificate2Collection certificateBundle = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "unmatchable_root.crt"));
+
+            // Act and Assert
+            Assert.Throws<ValidationException>(() => CertificateChain.Build(leafCert, certificateBundle));
+        }
     }
 }

@@ -37,10 +37,6 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             {
                 throw new ValidationException($"Failed to build the X509 chain. {e.Message} The certificate bundle is unreadable. Please ensure the certificate bundle matches the specific certifcate.");
             }
-            catch (ArgumentException e)
-            {
-                throw new ValidationException($"Failed to build the X509 chain. {e.Message} The certificate bundle is not a valid certificate or is null.");
-            }
 
             foreach (X509ChainStatus status in chain.ChainStatus)
             {
