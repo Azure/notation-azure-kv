@@ -99,9 +99,8 @@
    docker tag hello-world:latest $server/hello-world:v1
    docker push $server/hello-world:v1
    ```
-9. Sign the image with an external certificate bundle (`$certBundlePath`) including the intermediate certificates and a root certificate in PEM format. You may fetch the certificate bundle from your CA official site.
-   > **Note** Check that the certificates in the PEM certificate bundle are arranged in the correct order: starting from the first intermediate certificate that signed the leaf certificate and ending with the root certificate.
-   
+9. Sign the image with an external certificate bundle (`$certBundlePath`) including the in PEM format. Check that the certificates in the certificate bundle are arranged in the correct order: starting from the first intermediate certificate that signed the leaf certificate and ending with the root certificate.
+   You may fetch the certificate bundle from your CA official site.
    > **Note** If you have generated the certificate with `openssl` according to the above steps, the certificate bundle is the root certificate `ca.crt`.
    ```sh
    notation key add --plugin azure-kv --id $keyID akv-key --default
