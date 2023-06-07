@@ -101,7 +101,7 @@
    ```
 9. Sign the image with an external certificate bundle (`$certBundlePath`) in PEM format. You may fetch the certificate bundle from your CA official site.
 
-   Ensure that the certificates in the bundle are correctly ordered: starting from the intermediate certificate that signed the leaf certificate, and ending with the root certificate. 
+   Ensure that the certificates in the bundle are correctly ordered: starting from the intermediate certificate that signed the leaf certificate, and ending with the root certificate.
    They must be concatenated such that each certificate directly validates the preceding one. The following example features two certificates: an intermediate and a root certificate, but your certificate chain may include more or fewer.
    ```pem
    -----BEGIN CERTIFICATE-----
