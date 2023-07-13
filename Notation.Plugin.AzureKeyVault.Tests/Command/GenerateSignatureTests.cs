@@ -20,13 +20,13 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
             var expectedKeySpec = "RSA-2048";
-            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
             var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
-
             var mockKeyVaultClient = new Mock<IKeyVaultClient>();
-            // mock GetCertificateAsync
-            mockKeyVaultClient.Setup(client => client.GetCertificateAsync())
-                              .ReturnsAsync(mockCert);
+
+            // mock GetCertificateChainAsync
+            var mockCertChain = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
+            mockKeyVaultClient.Setup(client => client.GetCertificateChainAsync())
+                              .ReturnsAsync(mockCertChain);
 
             // mock SignAsync
             mockKeyVaultClient.Setup(client => client.SignAsync(It.IsAny<SignatureAlgorithm>(), It.IsAny<byte[]>()))
@@ -54,7 +54,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             Assert.Equal("RSASSA-PSS-SHA-256", response.SigningAlgorithm);
             Assert.Equal(mockSignature, response.Signature);
             Assert.Single(response.CertificateChain);
-            Assert.Equal(mockCert.RawData, response.CertificateChain[0]);
+            Assert.Equal(mockCertChain[0].RawData, response.CertificateChain[0]);
         }
 
         [Fact]
@@ -106,16 +106,16 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         }
 
         [Fact]
-        public async Task RunAsync_as_secret_ReturnsValidGenerateSignatureResponseAsync()
+        public async Task RunAsync_default_ReturnsValidGenerateSignatureResponseAsync()
         {
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
             var expectedKeySpec = "RSA-2048";
             var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
-            var mockCertChain = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pem"));
-
             var mockKeyVaultClient = new Mock<IKeyVaultClient>();
-            // mock GetCertificateAsync
+
+            // mock GetCertificateChainAsync
+            var mockCertChain = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pem"));
             mockKeyVaultClient.Setup(client => client.GetCertificateChainAsync())
                               .ReturnsAsync(mockCertChain);
 
@@ -126,10 +126,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             var request = new GenerateSignatureRequest(
                 contractVersion: "1.0",
                 keyId: keyId,
-                pluginConfig: new Dictionary<string, string>()
-                {
-                    ["as_secret"] = "true"
-                },
+                pluginConfig: new Dictionary<string, string>(){},
                 keySpec: expectedKeySpec,
                 hashAlgorithm: "SHA-256",
                 payload: Encoding.UTF8.GetBytes("Cg=="));
@@ -166,6 +163,32 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             string InvalidInputJson = "null";
 
             Assert.Throws<ValidationException>(() => new GenerateSignature(InvalidInputJson));
+        }
+
+        [Fact]
+        public void RunAsync_NoSecertsGetPermission(){
+             // Arrange
+            var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
+            var expectedKeySpec = "RSA-2048";
+            var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+            var mockKeyVaultClient = new Mock<IKeyVaultClient>();
+
+            // mock GetCertificateChainAsync
+            var mockCertChain = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pem"));
+            mockKeyVaultClient.Setup(client => client.GetCertificateChainAsync())
+                              .ThrowsAsync(new Azure.RequestFailedException("does not have secrets get permission"));
+
+            var request = new GenerateSignatureRequest(
+                contractVersion: "1.0",
+                keyId: keyId,
+                pluginConfig: new Dictionary<string, string>(){},
+                keySpec: expectedKeySpec,
+                hashAlgorithm: "SHA-256",
+                payload: Encoding.UTF8.GetBytes("Cg=="));
+
+            var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
+
+            Assert.Throws<PluginException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
         }
     }
 }

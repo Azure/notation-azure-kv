@@ -3,7 +3,7 @@
 
 > **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificate` and `Sign` permission have been granted to your role:
+2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificates`, `GetSecrets` and `Sign` permission for Azure Key Vault have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
