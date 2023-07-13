@@ -190,5 +190,31 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
 
             Assert.Throws<PluginException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
         }
+
+        [Fact]
+        public void RunAsync_OtherRequestFailedException(){
+             // Arrange
+            var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
+            var expectedKeySpec = "RSA-2048";
+            var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+            var mockKeyVaultClient = new Mock<IKeyVaultClient>();
+
+            // mock GetCertificateChainAsync
+            var mockCertChain = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pem"));
+            mockKeyVaultClient.Setup(client => client.GetCertificateChainAsync())
+                              .ThrowsAsync(new Azure.RequestFailedException("RequestFailedException"));
+
+            var request = new GenerateSignatureRequest(
+                contractVersion: "1.0",
+                keyId: keyId,
+                pluginConfig: new Dictionary<string, string>(){},
+                keySpec: expectedKeySpec,
+                hashAlgorithm: "SHA-256",
+                payload: Encoding.UTF8.GetBytes("Cg=="));
+
+            var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
+
+            Assert.Throws<Azure.RequestFailedException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
+        }
     }
 }
