@@ -126,7 +126,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             var request = new GenerateSignatureRequest(
                 contractVersion: "1.0",
                 keyId: keyId,
-                pluginConfig: new Dictionary<string, string>(){},
+                pluginConfig: new Dictionary<string, string>() { },
                 keySpec: expectedKeySpec,
                 hashAlgorithm: "SHA-256",
                 payload: Encoding.UTF8.GetBytes("Cg=="));
@@ -166,8 +166,9 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         }
 
         [Fact]
-        public void RunAsync_NoSecertsGetPermission(){
-             // Arrange
+        public void RunAsync_NoSecertsGetPermission()
+        {
+            // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
             var expectedKeySpec = "RSA-2048";
             var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
@@ -181,7 +182,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             var request = new GenerateSignatureRequest(
                 contractVersion: "1.0",
                 keyId: keyId,
-                pluginConfig: new Dictionary<string, string>(){},
+                pluginConfig: new Dictionary<string, string>() { },
                 keySpec: expectedKeySpec,
                 hashAlgorithm: "SHA-256",
                 payload: Encoding.UTF8.GetBytes("Cg=="));
@@ -192,8 +193,9 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         }
 
         [Fact]
-        public void RunAsync_OtherRequestFailedException(){
-             // Arrange
+        public void RunAsync_OtherRequestFailedException()
+        {
+            // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
             var expectedKeySpec = "RSA-2048";
             var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
@@ -207,7 +209,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             var request = new GenerateSignatureRequest(
                 contractVersion: "1.0",
                 keyId: keyId,
-                pluginConfig: new Dictionary<string, string>(){},
+                pluginConfig: new Dictionary<string, string>() { },
                 keySpec: expectedKeySpec,
                 hashAlgorithm: "SHA-256",
                 payload: Encoding.UTF8.GetBytes("Cg=="));

@@ -66,7 +66,8 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 }
                 catch (Azure.RequestFailedException ex)
                 {
-                    if (ex.Message.Contains("does not have secrets get permission")){
+                    if (ex.Message.Contains("does not have secrets get permission"))
+                    {
                         throw new PluginException("The plugin does not have secrets get permission. Please grant the permission to the credential associated with the plugin or specify the file path of the certificate chain bundle through the `ca_certs` parameter in the plugin config.");
                     }
                     throw;
