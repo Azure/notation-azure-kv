@@ -52,26 +52,31 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 // obtain the leaf certificate from Azure Key Vault
                 leafCert = await _keyVaultClient.GetCertificateAsync();
             }
-            else if (_request.PluginConfig?.TryGetValue("as_secret", out var asSecret) == true && asSecret.Equals("true", StringComparison.OrdinalIgnoreCase))
+            else
             {
                 // Obtain the certificate chain from Azure Key Vault using 
                 // GetSecret permission. Ensure intermediate and root 
                 // certificates are merged into the Key Vault certificate to 
                 // retrieve the full chain.
                 // reference: https://learn.microsoft.com//azure/key-vault/certificates/create-certificate-signing-request
-                var certificateChain = await _keyVaultClient.GetCertificateChainAsync();
+                X509Certificate2Collection? certificateChain;
+                try
+                {
+                    certificateChain = await _keyVaultClient.GetCertificateChainAsync();
+                }
+                catch (Azure.RequestFailedException ex)
+                {
+                    if (ex.Message.Contains("does not have secrets get permission")){
+                        throw new PluginException("The plugin does not have secrets get permission. Please grant the permission to the credential associated with the plugin or specify the file path of the certificate chain bundle through the `ca_certs` parameter in the plugin config.");
+                    }
+                    throw;
+                }
 
                 // the certBundle is the certificates start from the second one of certificateChain
                 certBundle = new X509Certificate2Collection(certificateChain.Skip(1).ToArray());
 
                 // the leafCert is the first certificate in the certBundle
                 leafCert = certificateChain[0];
-            }
-            else
-            {
-                // only have the leaf certificate
-                certBundle = new X509Certificate2Collection();
-                leafCert = await _keyVaultClient.GetCertificateAsync();
             }
 
             // Extract KeySpec from the certificate
