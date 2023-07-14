@@ -1,7 +1,7 @@
 # Sign and verify an artifact with a certificate signed by a trusted CA in Azure Key Vault
 > **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-2. Log in to Azure with Azure CLI, set the subscription and make sure the `GetCertificates`, `GetSecrets` and `Sign` permission for Azure Key Vault have been granted to your role:
+2. Log in to Azure with Azure CLI, set the subscription and make sure the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
@@ -114,7 +114,7 @@
    > **Note** If you have generated the certificate with `openssl` according to the above steps, the certificate bundle is the root certificate `ca.crt`.
    ```sh
    notation key add --plugin azure-kv --id $keyID akv-key --default
-   notation sign $server/hello-world:v1
+   notation sign $server/hello-world:v1 --plugin-config=ca_certs=$certBundlePath
    ```
 
    The following example output shows the artifact is successfully signed.

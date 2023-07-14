@@ -1,9 +1,9 @@
 # Sign and verify an artifact with a self-signed Azure Key Vault certificate
 > **Warning** Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
 >
-> **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL.
+> **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificates` and `Sign` permission for Azure Key Vault have been granted to your role:
+2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificate` and `Sign` permission have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
