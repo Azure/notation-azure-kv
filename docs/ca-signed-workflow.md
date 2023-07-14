@@ -114,7 +114,7 @@
    > **Note** If you have generated the certificate with `openssl` according to the above steps, the certificate bundle is the root certificate `ca.crt`.
    ```sh
    notation key add --plugin azure-kv --id $keyID akv-key --default
-   notation sign $server/hello-world:v1 --plugin-config=ca_certs=$certBundlePath
+   notation sign $server/hello-world:v1
    ```
 
    The following example output shows the artifact is successfully signed.

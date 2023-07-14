@@ -3,7 +3,7 @@
 >
 > **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL.
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificates`, `GetSecrets` and `Sign` permission for Azure Key Vault have been granted to your role:
+2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificates` and `Sign` permission for Azure Key Vault have been granted to your role:
    ```sh
    az login
    az account set --subscription $subscriptionID
@@ -75,7 +75,7 @@
    ```
 7. Sign the container image with Notation:
    ```sh
-   notation key add --plugin azure-kv --id $keyID akv-key --default
+   notation key add --plugin azure-kv --id $keyID akv-key --default --plugin-config=self_signed=true
    notation sign $server/hello-world:v1
    ```
 

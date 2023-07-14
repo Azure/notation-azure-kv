@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault.Certificate
 {
@@ -14,6 +15,10 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         {
             var certificates = new X509Certificate2Collection();
             certificates.ImportFromPemFile(pemFilePath);
+            if (certificates.Count == 0)
+            {
+                throw new PluginException($"No certificate found in {pemFilePath}");
+            }
             return certificates;
         }
     }

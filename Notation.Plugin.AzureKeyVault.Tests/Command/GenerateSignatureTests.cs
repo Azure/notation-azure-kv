@@ -23,10 +23,10 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
             var mockKeyVaultClient = new Mock<IKeyVaultClient>();
 
-            // mock GetCertificateChainAsync
-            var mockCertChain = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
-            mockKeyVaultClient.Setup(client => client.GetCertificateChainAsync())
-                              .ReturnsAsync(mockCertChain);
+            // mock GetCertificateAsync
+            var mockCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "leaf.crt"));
+            mockKeyVaultClient.Setup(client => client.GetCertificateAsync())
+                              .ReturnsAsync(mockCert);
 
             // mock SignAsync
             mockKeyVaultClient.Setup(client => client.SignAsync(It.IsAny<SignatureAlgorithm>(), It.IsAny<byte[]>()))
@@ -35,7 +35,10 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             var request = new GenerateSignatureRequest(
                 contractVersion: "1.0",
                 keyId: keyId,
-                pluginConfig: null,
+                pluginConfig: new Dictionary<string, string>()
+                {
+                    ["self_signed"] = "true"
+                },
                 keySpec: expectedKeySpec,
                 hashAlgorithm: "SHA-256",
                 payload: Encoding.UTF8.GetBytes("Cg=="));
@@ -54,7 +57,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             Assert.Equal("RSASSA-PSS-SHA-256", response.SigningAlgorithm);
             Assert.Equal(mockSignature, response.Signature);
             Assert.Single(response.CertificateChain);
-            Assert.Equal(mockCertChain[0].RawData, response.CertificateChain[0]);
+            Assert.Equal(mockCert.RawData, response.CertificateChain[0]);
         }
 
         [Fact]
@@ -217,6 +220,33 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
             var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
 
             Assert.Throws<Azure.RequestFailedException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
+        }
+
+        [Fact]
+        public void RunAsync_SelfSignedWithCaCerts()
+        {
+            // Arrange
+            var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
+            var expectedKeySpec = "RSA-2048";
+            var mockSignature = new byte[] { 0x01, 0x02, 0x03, 0x04 };
+            var mockKeyVaultClient = new Mock<IKeyVaultClient>();
+
+            // mock GetCertificateChainAsync
+            var mockCertChain = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "cert_chain.pem"));
+            var request = new GenerateSignatureRequest(
+                contractVersion: "1.0",
+                keyId: keyId,
+                pluginConfig: new Dictionary<string, string>() {
+                    { "self_signed", "true" },
+                    { "ca_certs", "/test/cert.pem" }
+                },
+                keySpec: expectedKeySpec,
+                hashAlgorithm: "SHA-256",
+                payload: Encoding.UTF8.GetBytes("Cg=="));
+
+            var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
+
+            Assert.Throws<PluginException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
         }
     }
 }
