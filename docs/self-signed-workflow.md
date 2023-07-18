@@ -1,6 +1,6 @@
 # Sign and verify an artifact with a self-signed Azure Key Vault certificate
 > **Warning** Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
-
+>
 > **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 2. Log in using the Azure CLI, set the subscription, and confirm the `GetCertificate` and `Sign` permission have been granted to your role:
@@ -75,12 +75,12 @@
    ```
 7. Sign the container image with Notation:
    ```sh
-   notation key add --plugin azure-kv --id $keyID akv-key --default
+   notation key add --plugin azure-kv --id $keyID akv-key --default --plugin-config self_signed=true
    notation sign $server/hello-world:v1
    ```
 
    The following example output shows the artifact is successfully signed.
-   ```
+   ```text
    Warning: Always sign the artifact using digest(@sha256:...) rather than a tag(:v1) because tags are mutable and a tag reference can point to a different artifact than the one signed.
    Successfully signed notation.azurecr.io/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
@@ -123,7 +123,7 @@
    notation verify $server/hello-world:v1
    ```
    The following output shows the artifact is successfully verified.
-   ```
+   ```text
    Warning: Always verify the artifact using digest(@sha256:...) rather than a tag(:v1) because resolved digest may not point to the same signed artifact, as tags are mutable.
    Successfully verified signature for notation.azurecr.io/hello-world@sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4
    ```
