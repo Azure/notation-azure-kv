@@ -4,23 +4,23 @@ The `notation-azure-kv` plugin supports plugin configuration to use advanced fea
 ## Usage
 - Add the plugin configuration when adding the key
   ```sh
-  $ notation key add \
-      --plugin azure-kv \
-      --id <key_identifier> \
-      --plugin-config <argument>=<value> \
-      --default
+  notation key add \
+    --plugin azure-kv \
+    --id <key_identifier> \
+    --plugin-config <argument>=<value> \
+    --default
   ```
   Then sign the artifact
   ```sh
-  $ notation sign <artifact_reference>
+  notation sign <registry>/<repository>@<digest>
   ```
 
 - Add the plugin config when sign the artifact
   ```sh
-  $ notation sign <artifact_reference> \
-      --plugin azure-kv \
-      --id <key_identifier> \
-      --plugin-config <argument>=<value>
+  notation sign <registry>/<repository>@<digest> \
+    --plugin azure-kv \
+    --id <key_identifier> \
+    --plugin-config <argument>=<value>
   ```
 
 ## Supported arguments
@@ -44,10 +44,10 @@ Default: **empty string**
 
 Example
 ```sh
-$ notation sign <artifact_reference> \
-    --plugin azure-kv \
-    --id <key_identifier> \
-    --plugin-config ca_certs=/path/to/cert_bundle.pem
+notation sign <registry>/<repository>@<digest> \
+  --plugin azure-kv \
+  --id <key_identifier> \
+  --plugin-config ca_certs=/path/to/cert_bundle.pem
 ```
 
 ### self_signed
@@ -57,10 +57,10 @@ Default: **false**
 
 Example
 ```sh
-$ notation sign <artifact_reference> \
-    --plugin azure-kv \
-    --id <key_identifier> \
-    --plugin-config self_signed=true
+notation sign <registry>/<repository>@<digest> \
+  --plugin azure-kv \
+  --id <key_identifier> \
+  --plugin-config self_signed=true
 ```
 
 ## Permission management
