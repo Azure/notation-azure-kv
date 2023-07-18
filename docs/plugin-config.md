@@ -11,7 +11,7 @@ The `notation-azure-kv` plugin supports plugin configuration to use advanced fea
       --default
   ```
   Then sign the artifact
-  ```
+  ```sh
   $ notation sign <artifact_reference>
   ```
 
@@ -30,9 +30,9 @@ When the `--id` specifies a certificate that has multiple certificates in the ce
 Default: **empty string**
 
 > **Note** Ensure that the certificates in the bundle are correctly ordered: starting from the intermediate certificate that signed the leaf certificate, and ending with the root certificate.
-> 
+>
 > They must be concatenated such that each certificate directly validates the preceding one. The following example features two certificates: an intermediate and a root certificate, but your certificate chain may include more or fewer.
-> 
+>
 > ```pem
 > -----BEGIN CERTIFICATE-----
 > Base64–encoded intermediate certificate
@@ -64,7 +64,7 @@ $ notation sign <artifact_reference> \
 ```
 
 ## Permission management
-The `notation-azure-kv` plugin support multiple level of permissions setting to satisfy different permission use cases. 
+The `notation-azure-kv` plugin support multiple level of permissions setting to satisfy different permission use cases.
 
 `Key Sign` permission is requred for remote signing, while `Secrets Get` and `Certificates Get` are optional based on use cases.
 
