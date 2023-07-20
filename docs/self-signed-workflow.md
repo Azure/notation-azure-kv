@@ -3,7 +3,7 @@
 >
 > **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-2. Log in using the Azure CLI, set the subscription, and confirm the `Certificates Get` and `Key Sign` permission have been granted to your role:
+2. Log in using the Azure CLI:
    ```sh
    az login
    az account set --subscription $subscriptionID
@@ -14,13 +14,24 @@
    keyVault=<your-key-vault-name>
    location=westus
    certName=notationSelfSignedCert
-
-   # create a resource group
+   ```
+   Create a resource group
+   ```sh
    az group create -n $resourceGroup -l $location
-   
-   # create a Azure Key Vault
+   ```
+   Create a Azure Key Vault
+   ```sh
    az keyvault create -l $location -n $keyVault --resource-group $resourceGroup
    ```
+   Assign `Certificates Get` and `Key Sign` permission to your credentials:
+   ```sh
+   userId=$(az ad signed-in-user show --query id -o tsv)
+   az keyvault set-policy -n "$keyVault" \
+      --key-permissions sign \
+      --certificates-permissions get \
+      --upn "$userId"
+   ```
+   > **Note** The script assigns the permission to the current user, and you can also assign the permission to your [managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) or [service principal](https://learn.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals?tabs=browser). To know more about permission management, please visit [Azure Key Vualt access policy](https://learn.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal). 
 4. create a self-signed certificate:
    ```sh
    # generate certificate policy

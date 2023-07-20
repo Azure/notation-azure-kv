@@ -1,5 +1,5 @@
 # Plugin Configuration
-The `notation-azure-kv` plugin supports plugin configuration to use advanced features.
+The `notation-azure-kv` plugin supports plugin configuration to get a valid cert chain or self-signed cert during remote signing.
 
 ## Usage
 - Add the plugin configuration when adding the key
@@ -41,6 +41,8 @@ Default: **empty string**
 > Base64–encoded root certificate
 > -----END CERTIFICATE-----
 > ```
+>
+> **Note** To obtain your intermediate certificates and root certificate, you need to visit your Certificate Authority's official website. For example, if your certificate is signed by `digicert`, you should visit https://www.digicert.com/digicert-root-certificates.htm to download your certificates and manually build your certificate bundle based on the above description.
 
 Example
 ```sh

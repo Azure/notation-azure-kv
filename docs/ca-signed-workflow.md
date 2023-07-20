@@ -1,24 +1,35 @@
 # Sign and verify an artifact with a certificate signed by a trusted CA in Azure Key Vault
 > **Note** The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
-2. Log in to Azure with Azure CLI, set the subscription and make sure the `Secrets Get` and `Key Sign` permission have been granted to your role:
+2. Log in to Azure with Azure CLI:
    ```sh
    az login
    az account set --subscription $subscriptionID
    ```
-3. Create an Azure Key Vault:
+3. Create an Azure Key Vault and assign permissions:
    ```sh
    resourceGroup=<your-resource-group-name>
    keyVault=<your-key-vault-name>
    location=westus
    certName=notationLeafCert
-
-   # create a resource group
+   ```
+   Create a resource group
+   ```sh
    az group create -n $resourceGroup -l $location
-   
-   # create a Azure Key Vault
+   ```
+   Create a Azure Key Vault
+   ```sh
    az keyvault create -l $location -n $keyVault --resource-group $resourceGroup
    ```
+   Assign `Secrets Get` and `Key Sign` permission to your credentials:
+   ```sh
+   userId=$(az ad signed-in-user show --query id -o tsv)
+   az keyvault set-policy -n "$keyVault" \
+      --key-permissions sign \
+      --secret-permissions get \
+      --upn "$userId"
+   ```
+   > **Note** The script assigns the permission to the current user, and you can also assign the permission to your [managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) or [service principal](https://learn.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals?tabs=browser). To know more about permission management, please visit [Azure Key Vualt access policy](https://learn.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal). 
 4. Create a Certificate Signing Request (CSR):
 
    Generate certificate policy:
