@@ -69,11 +69,6 @@ notation sign <registry>/<repository>@<digest> \
 ## Permission management
 The `notation-azure-kv` plugin support multiple level of permissions setting to satisfy different permission use cases.
 
-`Key Sign` permission is requred for remote signing, while `Secrets Get` and `Certificates Get` are optional based on use cases.
-
-| `ca_certs` | `self_signed` | Key Vault Permission | Explain                                                                                            |
-| ---------- | ------------- | -------------------- | -------------------------------------------------------------------------------------------------- |
-| empty      | false         | `Secrets Get`        | Get the certificiate chain from Azure Key Vualt                                                    |
-| empty      | true          | `Certificates Get`   | Get the self-signed certificate from Azure Key Vault                                               |
-| exist      | false         | `Certificates Get`   | Get the leaf certificate from Azure Key Vault and fetch the certificate bundle from `ca_certs`     |
-| exist      | true          | Exception            | If `self_signed` is true, the certificate chain should be empty, and `ca_certs` should not be set. |
+- For certificate with chain, no configuration is required. The required permissions are `secrets get` and `sign`
+- For certificate without chain, use `ca_certs` argument. The required permissions are `certificates get` and `sign`
+- For self-signed certificate, use `self_signed=true` argument. The required permissions are `certificates get` and `sign`.
