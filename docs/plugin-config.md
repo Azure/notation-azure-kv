@@ -29,7 +29,8 @@ When the `--id` specifies a certificate that has multiple certificates in the ce
 
 Default: **empty string**
 
-> **Note** Ensure that the certificates in the bundle are correctly ordered: starting from the intermediate certificate that signed the leaf certificate, and ending with the root certificate.
+> **Note**
+> Ensure that the certificates in the bundle are correctly ordered: starting from the intermediate certificate that signed the leaf certificate, and ending with the root certificate.
 >
 > They must be concatenated such that each certificate directly validates the preceding one. The following example features two certificates: an intermediate and a root certificate, but your certificate chain may include more or fewer.
 >
@@ -42,7 +43,8 @@ Default: **empty string**
 > -----END CERTIFICATE-----
 > ```
 >
-> **Note** To obtain your intermediate certificates and root certificate, you need to visit your Certificate Authority's official website. For example, if your certificate is signed by `digicert`, you should visit [DigiCert Trusted Root Authority Certificates
+> **Note**
+> To obtain your intermediate certificates and root certificate, you need to visit your Certificate Authority's official website. For example, if your certificate is signed by `digicert`, you should visit [DigiCert Trusted Root Authority Certificates
 ](https://www.digicert.com/digicert-root-certificates.htm) to download your certificates and manually build your certificate bundle based on the above description.
 
 Example
