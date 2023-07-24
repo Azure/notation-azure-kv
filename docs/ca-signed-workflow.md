@@ -2,6 +2,7 @@
 
 > **Note**
 > The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
+
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 2. Log in to Azure with Azure CLI:
    ```sh
