@@ -1,4 +1,5 @@
 # Sign and verify an artifact with a certificate signed by a trusted CA in Azure Key Vault
+
 > **Note**
 > The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
