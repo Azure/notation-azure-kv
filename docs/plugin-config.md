@@ -7,7 +7,7 @@ The `notation-azure-kv` plugin supports plugin configuration to get a valid cert
   notation key add \
     --plugin azure-kv \
     --id <key_identifier> \
-    --plugin-config <argument>=<value> \
+    --plugin-config "<argument>=<value>" \
     --default
   ```
   Then sign the artifact
@@ -20,7 +20,7 @@ The `notation-azure-kv` plugin supports plugin configuration to get a valid cert
   notation sign <registry>/<repository>@<digest> \
     --plugin azure-kv \
     --id <key_identifier> \
-    --plugin-config <argument>=<value>
+    --plugin-config "<argument>=<value>"
   ```
 
 ## Supported arguments
@@ -50,7 +50,7 @@ Example
 notation sign <registry>/<repository>@<digest> \
   --plugin azure-kv \
   --id <key_identifier> \
-  --plugin-config ca_certs=/path/to/cert_bundle.pem
+  --plugin-config "ca_certs=/path/to/cert_bundle.pem"
 ```
 
 ### self_signed
@@ -63,7 +63,7 @@ Example
 notation sign <registry>/<repository>@<digest> \
   --plugin azure-kv \
   --id <key_identifier> \
-  --plugin-config self_signed=true
+  --plugin-config "self_signed=true"
 ```
 
 ## Permission management
