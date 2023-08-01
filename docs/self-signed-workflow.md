@@ -1,7 +1,8 @@
 # Sign and verify an artifact with a self-signed Azure Key Vault certificate
-> **Warning** Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
->
-> **Note**
+> [!WARNING]
+> Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
+
+> [!NOTE]
 > The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 2. Log in using the Azure CLI:
@@ -32,7 +33,7 @@
       --certificates-permissions get \
       --upn "$userId"
    ```
-   > **Note**
+   > [!NOTE]
    > The script assigns the permission to the current user, and you can also assign the permission to your [managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) or [service principal](https://learn.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals?tabs=browser).
    > To know more about permission management, please visit [Azure Key Vualt access policy](https://learn.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal).
 4. create a self-signed certificate:

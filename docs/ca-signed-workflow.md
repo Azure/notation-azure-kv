@@ -1,5 +1,5 @@
 # Sign and verify an artifact with a certificate signed by a trusted CA in Azure Key Vault
-> **Note**
+> [!NOTE]
 > The following guide can be executed on Linux bash, macOS Zsh and Windows WSL
 1. [Install the Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli)
 2. Log in to Azure with Azure CLI:
@@ -30,7 +30,7 @@
       --secret-permissions get \
       --upn "$userId"
    ```
-   > **Note**
+   > [!NOTE]
    > The script assigns the permission to the current user, and you can also assign the permission to your [managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) or [service principal](https://learn.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals?tabs=browser).
    > To know more about permission management, please visit [Azure Key Vualt access policy](https://learn.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal).
 4. Create a Certificate Signing Request (CSR):
@@ -99,7 +99,7 @@
    certChainPath="${certName}-chain.crt"
    cat "$signedCertPath" ca.crt > "$certChainPath"
    ```
-   > **Note**
+   > [!NOTE]
    > If you have merged your certificate to Azure Key Vault without certificate chain or you don't want the plugin access your certificate chain with the `Secrets Get` permission, please use [ca_certs](./plugin-config.md#ca_certs) plugin configuration argument instead.
 
 6. After you get the leaf certificate, you can merge the certificate chain (file at `$certChainPath`) to your Azure Key Vault:
