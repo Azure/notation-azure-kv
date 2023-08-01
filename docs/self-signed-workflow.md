@@ -1,5 +1,5 @@
 # Sign and verify an artifact with a self-signed Azure Key Vault certificate
-> [!WARNING] 
+> [!WARNING]
 > Using self-signed certificates are intended for development and testing. Outside of development and testing, a certificate from a trusted CA is recommended.
 
 > [!NOTE]
