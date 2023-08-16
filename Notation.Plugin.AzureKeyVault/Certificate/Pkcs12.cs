@@ -12,7 +12,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// <param name="data"></param>
         /// <returns></returns>
         /// <exception cref="ValidationException"></exception>
-        public static byte[] RemoveMAC(byte[] data)
+        public static byte[] RemoveMac(byte[] data)
         {
             Pkcs12Info pfx = Pkcs12Info.Decode(data, out _);
             Pkcs12Builder pfxBuilder = new Pkcs12Builder();
