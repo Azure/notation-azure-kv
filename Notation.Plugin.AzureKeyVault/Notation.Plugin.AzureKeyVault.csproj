@@ -24,7 +24,22 @@
   </ItemGroup>
 
   <Target Name="GenerateBuildMetadata" BeforeTargets="CoreCompile">
-    <WriteLinesToFile File="$(IntermediateOutputPath)\GetPluginMetadta.g.cs" Lines="&#xA;        namespace Notation.Plugin.AzureKeyVault.Command&#xA;        {&#xA;            public partial class GetPluginMetadata&#xA;            {&#xA;                static GetPluginMetadata()&#xA;                {&#xA;                    Version = &quot;$(Version)&quot;%3b&#xA;                    CommitHash = &quot;$(CommitHash)&quot;%3b&#xA;                }&#xA;            }&#xA;        }" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)\GetPluginMetadta.g.cs"
+      Lines='
+        namespace Notation.Plugin.AzureKeyVault.Command
+        {
+            public partial class GetPluginMetadata
+            {
+                static GetPluginMetadata()
+                {
+                    Version = "$(Version)"%3b
+                    CommitHash = "$(CommitHash)"%3b
+                }
+            }
+        }'
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)\GetPluginMetadta.g.cs" />
     </ItemGroup>
