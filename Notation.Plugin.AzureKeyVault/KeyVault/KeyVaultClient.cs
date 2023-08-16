@@ -196,11 +196,11 @@ namespace Notation.Plugin.AzureKeyVault.Client
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         var newPFX = Pkcs12.Decrypt(Convert.FromBase64String(secretValue));
-                        chain.Import(newPFX, null, X509KeyStorageFlags.EphemeralKeySet);
+                        chain.Import(newPFX, null, X509KeyStorageFlags.DefaultKeySet);
                     }
                     else
                     {
-                        chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.EphemeralKeySet);
+                        chain.Import(Convert.FromBase64String(secretValue), null, X509KeyStorageFlags.EphemeralKeySet);
                     }
                     break;
                 case "application/x-pem-file":
