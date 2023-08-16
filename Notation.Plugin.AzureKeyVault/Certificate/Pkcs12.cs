@@ -16,11 +16,13 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         {
             Pkcs12Info pfx = Pkcs12Info.Decode(data, out _);
             // only remove the MAC if it is password protected
-            if (pfx.IntegrityMode != Pkcs12IntegrityMode.Password){
+            if (pfx.IntegrityMode != Pkcs12IntegrityMode.Password)
+            {
                 return data;
             }
             // verify the MAC with empty password
-            if (!pfx.VerifyMac(null)){
+            if (!pfx.VerifyMac(null))
+            {
                 throw new ValidationException("Invalid MAC");
             }
 
