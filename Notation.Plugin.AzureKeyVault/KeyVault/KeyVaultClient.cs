@@ -1,13 +1,12 @@
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.Pkcs;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
 using Notation.Plugin.Protocol;
-using System.Text;
+using System.Runtime.InteropServices;
+using Notation.Plugin.AzureKeyVault.Certificate;
 
 [assembly: InternalsVisibleTo("Notation.Plugin.AzureKeyVault.Tests")]
 namespace Notation.Plugin.AzureKeyVault.Client
@@ -192,33 +191,13 @@ namespace Notation.Plugin.AzureKeyVault.Client
             switch (contentType)
             {
                 case "application/x-pkcs12":
-                    int consumed;
-                    // convert string to bytes
-                    Pkcs12Info pfx = Pkcs12Info.Decode(Convert.FromBase64String(secretValue), out consumed);
-                    if (consumed == 0)
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
-                        throw new ValidationException($"Invalid PKCS12 content");
+                        chain = CertificateChain.DecodeFromPKCS12(Convert.FromBase64String(secretValue));
                     }
-                    foreach (var authSafe in pfx.AuthenticatedSafe)
+                    else
                     {
-                        switch (authSafe.ConfidentialityMode)
-                        {
-                            case Pkcs12ConfidentialityMode.Password:
-                                authSafe.Decrypt(new byte[0]);
-                                break;
-                            case Pkcs12ConfidentialityMode.PublicKey:
-                                throw new ValidationException($"Unsupported PKCS12 confidentiality mode: {authSafe.ConfidentialityMode}");
-                        }
-                        foreach (var bag in authSafe.GetBags())
-                        {
-                            if (bag.GetType() != typeof(Pkcs12CertBag))
-                            {
-                                continue;
-                            }
-                            Pkcs12CertBag certBag = (Pkcs12CertBag)bag;
-                            var cert = certBag.GetCertificate();
-                            chain.Add(cert);
-                        }
+                        chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.EphemeralKeySet);
                     }
                     break;
                 case "application/x-pem-file":
