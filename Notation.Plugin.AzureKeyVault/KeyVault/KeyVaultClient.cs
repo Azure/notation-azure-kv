@@ -191,6 +191,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             {
                 case "application/x-pkcs12":
                     // macOS doesn't support ephemeral key set
+                    // https://learn.microsoft.com/dotnet/standard/security/cross-platform-cryptography#write-a-pkcs12pfx
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.DefaultKeySet);
