@@ -193,8 +193,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 case "application/x-pkcs12":
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
-                        var pfxWithoutMAC = Pkcs12.RemoveMac(Convert.FromBase64String(secretValue));
-                        chain.Import(pfxWithoutMAC, null, X509KeyStorageFlags.DefaultKeySet);
+                        chain.Import(Pkcs12.RemoveMac(Convert.FromBase64String(secretValue)), null, X509KeyStorageFlags.DefaultKeySet);
                     }
                     else
                     {
