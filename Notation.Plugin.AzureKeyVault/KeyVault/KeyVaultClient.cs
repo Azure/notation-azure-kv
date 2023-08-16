@@ -191,8 +191,10 @@ namespace Notation.Plugin.AzureKeyVault.Client
             switch (contentType)
             {
                 case "application/x-pkcs12":
+                    // If the secret is a PKCS12 file, decode the base64 encoding
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
+                        // macOS doesn't support non-encrypted MAC
                         chain.Import(Pkcs12.RemoveMac(Convert.FromBase64String(secretValue)), null, X509KeyStorageFlags.DefaultKeySet);
                     }
                     else
