@@ -190,7 +190,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             switch (contentType)
             {
                 case "application/x-pkcs12":
-                    // If the secret is a PKCS12 file, decode the base64 encoding
+                    // macOS doesn't support ephemeral key set
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.DefaultKeySet);
