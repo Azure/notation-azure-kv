@@ -7,6 +7,8 @@ using Azure.Security.KeyVault.Secrets;
 using Notation.Plugin.Protocol;
 using System.Runtime.InteropServices;
 using Notation.Plugin.AzureKeyVault.Certificate;
+using System.Security.Cryptography.Pkcs;
+using System.Security.Cryptography;
 
 [assembly: InternalsVisibleTo("Notation.Plugin.AzureKeyVault.Tests")]
 namespace Notation.Plugin.AzureKeyVault.Client
@@ -193,7 +195,8 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 case "application/x-pkcs12":
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
-                        chain = CertificateChain.DecodeFromPKCS12(Convert.FromBase64String(secretValue));
+                        var newPFX = Pkcs12.Decrypt(Convert.FromBase64String(secretValue));
+                        chain.Import(newPFX, null, X509KeyStorageFlags.EphemeralKeySet);
                     }
                     else
                     {
