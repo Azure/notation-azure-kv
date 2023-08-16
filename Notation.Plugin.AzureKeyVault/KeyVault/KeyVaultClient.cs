@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
@@ -190,7 +191,14 @@ namespace Notation.Plugin.AzureKeyVault.Client
             {
                 case "application/x-pkcs12":
                     // If the secret is a PKCS12 file, decode the base64 encoding
-                    chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.EphemeralKeySet);
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.DefaultKeySet);
+                    }
+                    else
+                    {
+                        chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.EphemeralKeySet);
+                    }
                     break;
                 case "application/x-pem-file":
                     // If the secret is a PEM file, parse the PEM content directly
