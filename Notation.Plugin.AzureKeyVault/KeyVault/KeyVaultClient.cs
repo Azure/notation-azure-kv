@@ -1,11 +1,13 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.Pkcs;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
 using Notation.Plugin.Protocol;
+using System.Text;
 
 [assembly: InternalsVisibleTo("Notation.Plugin.AzureKeyVault.Tests")]
 namespace Notation.Plugin.AzureKeyVault.Client
@@ -190,15 +192,33 @@ namespace Notation.Plugin.AzureKeyVault.Client
             switch (contentType)
             {
                 case "application/x-pkcs12":
-                    // macOS doesn't support ephemeral key set
-                    // https://learn.microsoft.com/dotnet/standard/security/cross-platform-cryptography#write-a-pkcs12pfx
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    int consumed;
+                    // convert string to bytes
+                    Pkcs12Info pfx = Pkcs12Info.Decode(Convert.FromBase64String(secretValue), out consumed);
+                    if (consumed == 0)
                     {
-                        chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.DefaultKeySet);
+                        throw new ValidationException($"Invalid PKCS12 content");
                     }
-                    else
+                    foreach (var authSafe in pfx.AuthenticatedSafe)
                     {
-                        chain.Import(Convert.FromBase64String(secretValue), "", X509KeyStorageFlags.EphemeralKeySet);
+                        switch (authSafe.ConfidentialityMode)
+                        {
+                            case Pkcs12ConfidentialityMode.Password:
+                                authSafe.Decrypt(new byte[0]);
+                                break;
+                            case Pkcs12ConfidentialityMode.PublicKey:
+                                throw new ValidationException($"Unsupported PKCS12 confidentiality mode: {authSafe.ConfidentialityMode}");
+                        }
+                        foreach (var bag in authSafe.GetBags())
+                        {
+                            if (bag.GetType() != typeof(Pkcs12CertBag))
+                            {
+                                continue;
+                            }
+                            Pkcs12CertBag certBag = (Pkcs12CertBag)bag;
+                            var cert = certBag.GetCertificate();
+                            chain.Add(cert);
+                        }
                     }
                     break;
                 case "application/x-pem-file":
