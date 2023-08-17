@@ -6,7 +6,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
     static class Pkcs12
     {
         /// <summary>
-        /// Re-encode the PKCS12 data to removed the MAC and keys.
+        /// Re-encode the PKCS12 data to remove the MAC and keys.
         /// The macOS doesn't support PKCS12 with non-encrypted MAC.
         /// </summary>
         /// <param name="data"></param>
@@ -21,7 +21,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
                 return data;
             }
             // verify the MAC with null password
-            if (!pfx.VerifyMac(null))
+            if (!pfx.VerifyMac(ReadOnlySpan<char>.Empty))
             {
                 throw new ValidationException("Invalid MAC or the MAC password is not null");
             }
@@ -31,13 +31,13 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             foreach (var safeContent in pfx.AuthenticatedSafe)
             {
                 // decrypt with null password
-                safeContent.Decrypt(new byte[0]);
+                safeContent.Decrypt(ReadOnlySpan<byte>.Empty);
 
                 // create a newSafeContent and only contains the certificate bag
                 var newSafeContent = new Pkcs12SafeContents();
                 foreach (var bag in safeContent.GetBags())
                 {
-                    if (bag.GetType() == typeof(Pkcs12CertBag))
+                    if (bag is Pkcs12CertBag)
                     {
                         newSafeContent.AddSafeBag(bag);
                     }

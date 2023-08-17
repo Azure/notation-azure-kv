@@ -45,8 +45,6 @@ namespace Notation.Plugin.AzureKeyVault.Client
         protected Lazy<SecretClient> _secretClient;
         // Error message for invalid input
         private const string INVALID_INPUT_ERROR_MSG = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
-        // Flag for unit test
-        protected bool _testOSX;
 
         // Key name or certificate name
         private string _name;
@@ -54,7 +52,6 @@ namespace Notation.Plugin.AzureKeyVault.Client
         private string _version;
         // Key identifier (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
         private string _keyId;
-
 
         // Internal getters for unit test
         internal string Name => _name;
@@ -195,7 +192,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             {
                 case "application/x-pkcs12":
                     // If the secret is a PKCS12 file, decode the base64 encoding
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || _testOSX)
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         // macOS doesn't support non-encrypted MAC
                         // https://github.com/dotnet/runtime/issues/23635
