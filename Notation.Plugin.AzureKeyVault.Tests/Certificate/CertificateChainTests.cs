@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
-using Notation.Plugin.Protocol;
 using Xunit;
 
 namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
