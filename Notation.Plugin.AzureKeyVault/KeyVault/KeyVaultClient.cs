@@ -197,15 +197,15 @@ namespace Notation.Plugin.AzureKeyVault.Client
                         // macOS doesn't support non-encrypted MAC
                         // https://github.com/dotnet/runtime/issues/23635
                         chain.Import(
-                            rawData: Pkcs12.ReEncode(Convert.FromBase64String(secretValue)), 
-                            password: ReadOnlySpan<char>.Empty, 
+                            rawData: Pkcs12.ReEncode(Convert.FromBase64String(secretValue)),
+                            password: ReadOnlySpan<char>.Empty,
                             keyStorageFlags: X509KeyStorageFlags.DefaultKeySet);
                     }
                     else
                     {
                         chain.Import(
-                            rawData: Convert.FromBase64String(secretValue), 
-                            password: ReadOnlySpan<char>.Empty, 
+                            rawData: Convert.FromBase64String(secretValue),
+                            password: ReadOnlySpan<char>.Empty,
                             keyStorageFlags: X509KeyStorageFlags.EphemeralKeySet);
                     }
                     break;
