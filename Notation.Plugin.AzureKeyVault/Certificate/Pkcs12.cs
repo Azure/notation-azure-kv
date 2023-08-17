@@ -31,7 +31,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             foreach (var safeContent in pfx.AuthenticatedSafe)
             {
                 // decrypt with null password
-                safeContent.Decrypt(ReadOnlySpan<byte>.Empty);
+                safeContent.Decrypt(ReadOnlySpan<char>.Empty);
 
                 // create a newSafeContent and only contains the certificate bag
                 var newSafeContent = new Pkcs12SafeContents();
