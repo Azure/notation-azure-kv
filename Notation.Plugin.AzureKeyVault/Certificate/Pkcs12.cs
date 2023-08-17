@@ -21,7 +21,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
                 return data;
             }
             // verify the MAC with null password
-            if (!pfx.VerifyMac(ReadOnlySpan<char>.Empty))
+            if (!pfx.VerifyMac(null))
             {
                 throw new ValidationException("Invalid MAC or the MAC password is not null");
             }
@@ -31,7 +31,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             foreach (var safeContent in pfx.AuthenticatedSafe)
             {
                 // decrypt with null password
-                safeContent.Decrypt(ReadOnlySpan<char>.Empty);
+                safeContent.Decrypt((byte[]?)null);
 
                 // create a newSafeContent and only contains the certificate bag
                 var newSafeContent = new Pkcs12SafeContents();

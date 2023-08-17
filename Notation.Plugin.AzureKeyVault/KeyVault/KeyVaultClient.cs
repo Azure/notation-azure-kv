@@ -198,14 +198,14 @@ namespace Notation.Plugin.AzureKeyVault.Client
                         // https://github.com/dotnet/runtime/issues/23635
                         chain.Import(
                             rawData: Pkcs12.ReEncode(Convert.FromBase64String(secretValue)),
-                            password: ReadOnlySpan<char>.Empty,
+                            password: null,
                             keyStorageFlags: X509KeyStorageFlags.DefaultKeySet);
                     }
                     else
                     {
                         chain.Import(
                             rawData: Convert.FromBase64String(secretValue),
-                            password: ReadOnlySpan<char>.Empty,
+                            password: null,
                             keyStorageFlags: X509KeyStorageFlags.EphemeralKeySet);
                     }
                     break;
