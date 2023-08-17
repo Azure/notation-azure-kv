@@ -1,7 +1,5 @@
-using System;
 using System.IO;
 using System.Security.Cryptography.Pkcs;
-using System.Text;
 using Notation.Plugin.Protocol;
 using Xunit;
 

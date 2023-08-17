@@ -26,7 +26,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
                 throw new ValidationException("Invalid MAC or the MAC password is not null");
             }
 
-            // re-build PFX without MAC
+            // re-build PFX without MAC and keys
             Pkcs12Builder pfxBuilder = new Pkcs12Builder();
             foreach (var safeContent in pfx.AuthenticatedSafe)
             {
