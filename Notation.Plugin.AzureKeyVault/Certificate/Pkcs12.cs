@@ -6,13 +6,13 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
     static class Pkcs12
     {
         /// <summary>
-        /// Re-encode the PKCS12 data to removed the MAC.
+        /// Re-encode the PKCS12 data to removed the MAC and keys.
         /// The macOS doesn't support PKCS12 with non-encrypted MAC.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
         /// <exception cref="ValidationException"></exception>
-        public static byte[] RemoveMac(byte[] data)
+        public static byte[] ReEncode(byte[] data)
         {
             Pkcs12Info pfx = Pkcs12Info.Decode(data, out _);
             // only remove the MAC if it is password protected
@@ -20,17 +20,29 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             {
                 return data;
             }
-            // verify the MAC with empty password
+            // verify the MAC with null password
             if (!pfx.VerifyMac(null))
             {
-                throw new ValidationException("Invalid MAC");
+                throw new ValidationException("Invalid MAC or the MAC password is not null");
             }
 
             // re-build PFX without MAC
             Pkcs12Builder pfxBuilder = new Pkcs12Builder();
-            foreach (var authSafe in pfx.AuthenticatedSafe)
+            foreach (var safeContent in pfx.AuthenticatedSafe)
             {
-                pfxBuilder.AddSafeContentsUnencrypted(authSafe);
+                // decrypt with null password
+                safeContent.Decrypt(new byte[0]);
+
+                // create a newSafeContent and only contains the certificate bag
+                var newSafeContent = new Pkcs12SafeContents();
+                foreach (var bag in safeContent.GetBags())
+                {
+                    if (bag.GetType() == typeof(Pkcs12CertBag))
+                    {
+                        newSafeContent.AddSafeBag(bag);
+                    }
+                }
+                pfxBuilder.AddSafeContentsUnencrypted(newSafeContent);
             }
             pfxBuilder.SealWithoutIntegrity();
             return pfxBuilder.Encode();

@@ -18,7 +18,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
             Assert.True(originPfx.IntegrityMode == Pkcs12IntegrityMode.Password);
 
             // remove MAC for the pfx file
-            byte[] newData = Pkcs12.RemoveMac(data);
+            byte[] newData = Pkcs12.ReEncode(data);
             Pkcs12Info pfxWithoutMac = Pkcs12Info.Decode(newData, out _);
             Assert.True(pfxWithoutMac.IntegrityMode == Pkcs12IntegrityMode.None);
         }
@@ -32,7 +32,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
             Assert.True(originPfx.IntegrityMode == Pkcs12IntegrityMode.Password);
 
             // decrypt the pfx file
-            Assert.Throws<ValidationException>(() => Pkcs12.RemoveMac(data));
+            Assert.Throws<ValidationException>(() => Pkcs12.ReEncode(data));
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
             Assert.True(originPfx.IntegrityMode == Pkcs12IntegrityMode.None);
 
             // remove MAC for the pfx file
-            byte[] newData = Pkcs12.RemoveMac(data);
+            byte[] newData = Pkcs12.ReEncode(data);
             Pkcs12Info pfxWithoutMac = Pkcs12Info.Decode(newData, out _);
             Assert.True(pfxWithoutMac.IntegrityMode == Pkcs12IntegrityMode.None);
 
