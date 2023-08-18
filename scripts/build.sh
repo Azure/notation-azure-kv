@@ -47,5 +47,5 @@ if [[ $ext == "zip" ]]; then
     # to include the LICENSE file
     (cd "${binary_dir}" && zip -x '*.pdb' -r "${artifact_name}" .) && zip -ur "${artifact_name}" LICENSE
 else
-    tar --no-xattrs -czvf "${artifact_name}" --exclude='*.pdb' -C "${binary_dir}" . -C ../../.. LICENSE
+    tar --no-xattrs -czvf "${artifact_name}" -C "${binary_dir}" notation-azure-kv -C ../../.. LICENSE
 fi
