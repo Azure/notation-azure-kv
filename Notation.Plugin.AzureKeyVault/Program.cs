@@ -73,7 +73,7 @@ Commands:
   get-plugin-metadata  Get plugin metadata
 
 Documentation:
-  https://github.com/notaryproject/notaryproject/blob/v1.0.0-rc.2/specs/plugin-extensibility.md#plugin-contract");
+  https://github.com/notaryproject/notaryproject/blob/v1.0.0/specs/plugin-extensibility.md#plugin-contract");
         }
     }
 }
