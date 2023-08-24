@@ -26,9 +26,10 @@
    ```sh
    userId=$(az ad signed-in-user show --query id -o tsv)
    az keyvault set-policy -n "$keyVault" \
+      --certificate-permissions create get list\
       --key-permissions sign \
       --secret-permissions get \
-      --upn "$userId"
+      --object-id "$userId"
    ```
    > [!NOTE]
    > The script assigns the permission to the current user, and you can also assign the permission to your [managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) or [service principal](https://learn.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals?tabs=browser).
