@@ -26,7 +26,7 @@
    ```sh
    userId=$(az ad signed-in-user show --query id -o tsv)
    az keyvault set-policy -n "$keyVault" \
-      --certificate-permissions create get list\
+      --certificate-permissions create get list \
       --key-permissions sign \
       --secret-permissions get \
       --object-id "$userId"
