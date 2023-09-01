@@ -7,6 +7,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
 {
     public class Pkcs12Tests
     {
+        // MAC integrity mode is password(null) and saftContent confidential mode is password(null)
         [Fact]
         public void ReEncode()
         {
@@ -47,8 +48,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
             Assert.True(pfxWithoutMac.IntegrityMode == Pkcs12IntegrityMode.None);
         }
 
-        // MAC integrity mode is password encrypted with null password
-        // but saftContent confidential mode is none
+        // MAC integrity mode is password(null) and saftContent confidential mode is none
         [Fact]
         public void ReEncode_akv_imported()
         {
