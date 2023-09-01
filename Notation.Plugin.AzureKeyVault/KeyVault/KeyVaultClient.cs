@@ -196,6 +196,9 @@ namespace Notation.Plugin.AzureKeyVault.Client
                     {
                         // macOS doesn't support non-encrypted MAC
                         // https://github.com/dotnet/runtime/issues/23635
+
+                        // Import will reverse the order of the certificates 
+                        // in the chain
                         chain.Import(
                             rawData: Pkcs12.ReEncode(Convert.FromBase64String(secretValue)),
                             password: null,
@@ -203,11 +206,15 @@ namespace Notation.Plugin.AzureKeyVault.Client
                     }
                     else
                     {
+                        // Import will reverse the order of the certificates 
+                        // in the chain
                         chain.Import(
                             rawData: Convert.FromBase64String(secretValue),
                             password: null,
                             keyStorageFlags: X509KeyStorageFlags.EphemeralKeySet);
                     }
+
+                    chain = sortChain(chain);
                     break;
                 case "application/x-pem-file":
                     // If the secret is a PEM file, parse the PEM content directly
@@ -215,6 +222,32 @@ namespace Notation.Plugin.AzureKeyVault.Client
                     break;
                 default:
                     throw new ValidationException($"Unsupported secret content type: {contentType}");
+            }
+            return chain;
+        }
+
+        public X509Certificate2Collection sortChain(X509Certificate2Collection chain)
+        {
+            // AKV PKCS12 chain is in root->leaf order if the chain is created by 
+            // AKV the `X509Certificate2Collection.Import` function will reverse the
+            // order of the certificates in the chain. So the result is in the
+            // order of leaf -> root.
+
+            // if the PKCS12 chain is imported to AKV, the order of the chain
+            // will keep the same as the original PKCS12 file. The customer 
+            // should ensure that the order of the chain is in leaf -> root order.
+            // After `X509Certificate2Collection.Import` function, the order of
+            // the chain will be reversed. So we need to reverse the chain again
+            if (chain.Count >= 2 && chain[0].Issuer == chain[0].Subject)
+            {
+                // if the first certificate is root certificate, reverse 
+                // the chain to make the first certificate as leaf certificate
+                var reversedChain = new X509Certificate2Collection();
+                for (int i = chain.Count - 1; i >= 0; i--)
+                {
+                    reversedChain.Add(chain[i]);
+                }
+                return reversedChain;
             }
             return chain;
         }
