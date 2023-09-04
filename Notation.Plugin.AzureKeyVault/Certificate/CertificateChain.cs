@@ -9,14 +9,14 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
     static class CertificateChain
     {
         /// <summary>
-        /// Build the certificate chain from the certificate bundle by matching
+        /// Build the certificate chain from the certificates by matching
         /// the issuer and subject distinguished name.
         /// 
-        /// It doesn't verify the certificate path.
+        /// Note: It doesn't verify the certificate path.
         /// </summary>
         /// <param name="certs"></param>
         /// <returns>
-        /// The certificate chain. The first certificate is the leaf certificate.
+        /// The certificate chain. The order is from leaf to root.
         /// </returns>
         /// <exception cref="PluginException"></exception>
         public static X509Certificate2Collection Build(X509Certificate2Collection certs)
