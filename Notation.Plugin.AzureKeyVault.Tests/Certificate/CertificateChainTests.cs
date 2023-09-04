@@ -34,7 +34,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         [InlineData("leaf_inter2_inter1_unknown.pem", "leaf_inter2_inter1_unknown.pem", false)] // 4: leaf + inter2 + inter1 + unknown certs
         [InlineData("leaf_inter2_inter1_root.pem", "leaf_inter2_inter1_root.pem", true)] // 4: leaf + inter2 + inter1 + root certs
         [InlineData("inter2_inter1_root_leaf.pem", "leaf_inter2_inter1_root.pem", true)] // 4: leaf + inter2 + inter1 + root certs
-        public void Build_WithValidLeafAndCertificateBundle_BuildsCertificateChain(string certName, string targetChainName, bool isValid)
+        public void Build(string certName, string targetChainName, bool isValid)
         {
             // Arrange
             X509Certificate2Collection certBundle = CertificateBundle.Create(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "chain", certName));

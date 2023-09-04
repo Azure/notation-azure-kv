@@ -23,13 +23,14 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         {
             if (certs.Count == 0)
             {
-                throw new PluginException("The certificate bundle is empty");
+                throw new PluginException("The certificates that need to be built into a chain are empty.");
             }
 
-            if (certs.Count == 1){
+            if (certs.Count == 1)
+            {
                 if (certs[0].SubjectName.Name != certs[0].IssuerName.Name)
                 {
-                    throw new PluginException("The certificate bundle only contains one certificate but it is not a self-signed certificate. Please complete the certificate bundle by `ca_certs` through plugin config.");
+                    throw new PluginException("Only obtained one certificate but it is not a self-signed certificate. Please complete the certificate bundle by `ca_certs` through plugin config.");
                 }
                 return certs;
             }
@@ -41,7 +42,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             {
                 if (certMap.ContainsKey(cert.SubjectName.Name))
                 {
-                    throw new PluginException($"The certificate bundle contains duplicated certificates: {cert.SubjectName.Name}");
+                    throw new PluginException($"Found duplicated certificates: {cert.SubjectName.Name}");
                 }
                 certMap[cert.SubjectName.Name] = cert;
                 issuerSet.Add(cert.IssuerName.Name);
@@ -51,7 +52,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             if (certs.Count(x => !issuerSet.Contains(x.SubjectName.Name)) != 1)
             {
                 // AKV certificates always contain the leaf certificate
-                throw new PluginException("The certificate bundle may contains multiple leaf certificates");
+                throw new PluginException("Found multiple leaf certificates");
             }
             var leafCert = certs.First(x => !issuerSet.Contains(x.SubjectName.Name));
 
@@ -71,14 +72,14 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
                 // check if the issuer is found in the certificate bundle
                 if (!certMap.ContainsKey(currentCert.IssuerName.Name))
                 {
-                    throw new PluginException($"The certificate bundle is not complete. The issuer of {currentCert.SubjectName.Name} is not found.");
+                    throw new PluginException($"Certificate chain is not complete. The issuer of {currentCert.SubjectName.Name} is not found.");
                 }
                 currentCert = certMap[currentCert.IssuerName.Name];
             }
 
             if (chain.Count != certs.Count)
             {
-                throw new PluginException($"The certificate bundle has {certs.Count()} certificates but the certificate chain only has {chain.Count()} certficates.");
+                throw new PluginException($"Obtained {certs.Count()} certificates but the certificate chain only needs {chain.Count()} certficates.");
             }
             return chain;
         }
