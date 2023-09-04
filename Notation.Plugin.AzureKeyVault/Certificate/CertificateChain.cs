@@ -21,6 +21,29 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// <exception cref="PluginException"></exception>
         public static X509Certificate2Collection Build(X509Certificate2Collection certs)
         {
+            /*
+            Valid case:
+            1. self-signed leaf cert
+            2. cert chain: CA1 -> CA2 -> leaf
+
+            Invalid cases:
+            1. empty
+            2. non-self-signed leaf cert
+            3. missing intermediate cert: CA1 -> (x) -> leaf 
+            4. missing root cert: (x) -> CA2 -> leaf
+            5. unnecessary intermediate cert: CA1 -> CA2 -> leaf
+                                              (x) -> CA3
+            6. unnecessary root: CA1 -> CA2 -> leaf
+                                 CA3
+            6. unnecessary cert: CA1 -> CA2 -> leaf
+                                 (x) -> CA3
+            7. duplicated certs: CA1 -> CA2 -> leaf
+                                  └───> CA2
+            8. multiple leaf certs: CA1 -> CA2 -> leaf1
+                                            └───> leaf2
+            9. multple chain: CA1 -> CA2 -> leaf1
+                              CA3 -> leaf2
+            */
             if (certs.Count == 0)
             {
                 throw new PluginException("The certificates that need to be built into a chain are empty.");
@@ -52,7 +75,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             if (certs.Count(x => !issuerSet.Contains(x.SubjectName.Name)) != 1)
             {
                 // AKV certificates always contain the leaf certificate
-                throw new PluginException("Found multiple leaf certificates");
+                throw new PluginException("Found multiple leaf certificates or unreferenced intermediate CAs");
             }
             var leafCert = certs.First(x => !issuerSet.Contains(x.SubjectName.Name));
 

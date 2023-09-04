@@ -26,6 +26,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         [InlineData("root_leaf.pem", "leaf_root.pem", true)] // 2: unordered root + leaf certs
         [InlineData("leaf_root_without_inter.pem", "leaf_root_without_inter.pem", false)] // 3: leaf + root certs without intermediate cert
         [InlineData("2root_leaf.pem", "2root_leaf.pem", false)] // 3: duplicated root + leaf certs
+        [InlineData("root1_leaf_root2.pem", "root1_leaf_root2.pem", false)] // 3: root1 + root2 + leaf certs
         [InlineData("root_leaf1_leaf2.pem", "root_leaf1_leaf2.pem", false)] // 2: root + leaf1 + leaf2 certs
         [InlineData("leaf_root_unknown.pem", "leaf_root_unknown.pem", false)] // 3: leaf + root + unknown certs
         [InlineData("leaf_inter.pem", "leaf_inter.pem", false)] // 2: leaf + intermediate certs
@@ -36,6 +37,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         [InlineData("leaf_inter2_inter1_unknown.pem", "leaf_inter2_inter1_unknown.pem", false)] // 4: leaf + inter2 + inter1 + unknown certs
         [InlineData("leaf_inter2_inter1_root.pem", "leaf_inter2_inter1_root.pem", true)] // 4: leaf + inter2 + inter1 + root certs
         [InlineData("inter2_inter1_root_leaf.pem", "leaf_inter2_inter1_root.pem", true)] // 4: inter2 + inter1 + root + leaf certs
+        [InlineData("leaf_inter_root_leaf2_root2.pem", "leaf_inter_root_leaf2_root2.pem", false)] // 5: leaf + inter + root cert chain + leaf2 + root2 cert chain
         public void Build(string certName, string targetChainName, bool isValid)
         {
             // Arrange
