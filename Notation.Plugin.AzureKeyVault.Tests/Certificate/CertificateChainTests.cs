@@ -31,6 +31,7 @@ namespace Notation.Plugin.AzureKeyVault.Certificate.Tests
         [InlineData("leaf_inter.pem", "leaf_inter.pem", false)] // 2: leaf + intermediate certs
         [InlineData("leaf_inter_root.pem", "leaf_inter_root.pem", true)] // 3: leaf + inter + root certs
         [InlineData("inter_root_leaf.pem", "leaf_inter_root.pem", true)] // 3: unordered inter + root + leaf certs
+        [InlineData("leaf_inter_root_otherinter.pem", "leaf_inter_root_otherinter.pem", false)] // 3: leaf + inter + root + other intermediate cert certs
         [InlineData("leaf_inter_root_unknown.pem", "leaf_inter_root_unknown.pem", false)] // 4: leaf + inter + root + unknown certs
         [InlineData("leaf_inter2_inter1_unknown.pem", "leaf_inter2_inter1_unknown.pem", false)] // 4: leaf + inter2 + inter1 + unknown certs
         [InlineData("leaf_inter2_inter1_root.pem", "leaf_inter2_inter1_root.pem", true)] // 4: leaf + inter2 + inter1 + root certs
