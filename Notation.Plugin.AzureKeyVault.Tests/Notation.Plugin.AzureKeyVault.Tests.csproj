@@ -24,6 +24,7 @@
     <Content Include="TestData\*.crt" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="TestData\*.pem" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="TestData\*.pfx" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="TestData\chain\*.pem" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
