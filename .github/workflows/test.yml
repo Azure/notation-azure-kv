@@ -35,8 +35,11 @@ jobs:
           FILTER_REGEX_EXCLUDE: .*Tests/.*
           VALIDATE_MARKDOWN: false
   build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
     name: "Build"
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     permissions:
       contents: read
@@ -45,7 +48,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '6.0.x'
-      - name: Check out code into the Go module directory
+      - name: Check out code into the project directory
         uses: actions/checkout@v3
       - name: Run unit tests
         run: make test
