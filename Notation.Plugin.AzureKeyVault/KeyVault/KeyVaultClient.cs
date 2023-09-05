@@ -192,6 +192,8 @@ namespace Notation.Plugin.AzureKeyVault.Client
             {
                 case "application/x-pkcs12":
                     // If the secret is a PKCS12 file, decode the base64 encoding
+                    // Import will reverse the order of the certificates 
+                    // in the chain
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         // macOS doesn't support non-encrypted MAC

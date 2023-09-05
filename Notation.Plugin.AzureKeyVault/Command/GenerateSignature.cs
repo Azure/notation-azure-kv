@@ -41,7 +41,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
         public async Task<IPluginResponse> RunAsync()
         {
             // Obtain the certificate chain
-            X509Certificate2Collection certBundle;
+            var certChain = new X509Certificate2Collection();
             X509Certificate2 leafCert;
             string? certBundlePath = _request.PluginConfig?.GetValueOrDefault("ca_certs", "");
 
@@ -51,11 +51,9 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 {
                     throw new PluginException("Self-signed certificate is specified. Please do not specify the `ca_certs` parameter if it is a self-signed certificate.");
                 }
-                // Certificate bundle is empty
-                certBundle = new X509Certificate2Collection();
-
                 // Obtain self-signed leaf certificate from Azure Key Vault
                 leafCert = await _keyVaultClient.GetCertificateAsync();
+                certChain.Add(leafCert);
             }
             else
             {
@@ -80,20 +78,23 @@ namespace Notation.Plugin.AzureKeyVault.Command
                         throw;
                     }
 
-                    // the certBundle is the certificates start from the second one of certificateChain
-                    certBundle = new X509Certificate2Collection(certificateChain.Skip(1).ToArray());
-
-                    // the leafCert is the first certificate in the certBundle
-                    leafCert = certificateChain[0];
+                    // build the certificate chain
+                    certChain = CertificateChain.Build(certificateChain);
+                    leafCert = certChain.First();
                 }
                 else
                 {
                     // Obtain the certificate bundle from file 
                     // (including the intermediate and root certificates).
-                    certBundle = CertificateBundle.Create(certBundlePath);
+                    var certBundle = CertificateBundle.Create(certBundlePath);
 
                     // obtain the leaf certificate from Azure Key Vault
                     leafCert = await _keyVaultClient.GetCertificateAsync();
+
+                    // build the certificate chain
+                    certChain.Add(leafCert);
+                    certChain.AddRange(certBundle);
+                    certChain = CertificateChain.Build(certChain);
                 }
             }
 
@@ -107,7 +108,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 keyId: _request.KeyId,
                 signature: signature,
                 signingAlgorithm: keySpec.ToSigningAlgorithm(),
-                certificateChain: CertificateChain.Build(leafCert, certBundle));
+                certificateChain: certChain.Select(x => x.RawData).ToList());
         }
     }
 }
