@@ -1,9 +1,21 @@
+using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
 namespace Notation.Plugin.Protocol.Tests
 {
+    public sealed class RunOnLinux : TheoryAttribute
+    {
+        public RunOnLinux()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                Skip = "test only works on Linux";
+            }
+        }
+    }
     public class CertificateExtensionTests
     {
         [Theory]
@@ -26,16 +38,13 @@ namespace Notation.Plugin.Protocol.Tests
             Assert.Equal(keySize, result.Size);
         }
 
-        [Theory]
+        // only run test on Linux because ECDSA other than NIST P-256, 
+        // NIST P-384, NIST P-521 is not supported on Windows and macOS
+        [RunOnLinux]
         [InlineData("RSA", 1024)]
-        [InlineData("EC", 128)]
+        [InlineData("EC", 163)]
         public void KeySpec_InvalidKeySize_ThrowsValidationException(string keyType, int keySize)
         {
-            // skip the test on macOS
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
-            {
-                return;
-            }
             // Arrange
             X509Certificate2 certificate = LoadCertificate(keyType, keySize);
 
@@ -61,6 +70,5 @@ namespace Notation.Plugin.Protocol.Tests
             var certName = $"{keyType.ToLower()}_{keySize}.crt";
             return new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", certName));
         }
-
     }
 }
