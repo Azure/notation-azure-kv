@@ -42,9 +42,9 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
                                             └───> leaf2
             9. multiple chain: CA1 -> CA2 -> leaf1
                               CA3 -> leaf2
-            10. DN nameing loop: CA1 -> CA2 -> leaf1
-                                  ^      |
-                                  └──────┘
+            10. DN cycle: CA1 -> CA2 -> leaf1
+                           ^      |
+                           └──────┘
             */
             if (certs.Count == 0)
             {
