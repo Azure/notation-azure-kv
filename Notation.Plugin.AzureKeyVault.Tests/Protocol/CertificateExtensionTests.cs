@@ -31,6 +31,11 @@ namespace Notation.Plugin.Protocol.Tests
         [InlineData("EC", 128)]
         public void KeySpec_InvalidKeySize_ThrowsValidationException(string keyType, int keySize)
         {
+            // skip the test on macOS
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+            {
+                return;
+            }
             // Arrange
             X509Certificate2 certificate = LoadCertificate(keyType, keySize);
 
