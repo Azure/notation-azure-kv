@@ -119,6 +119,6 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// </summary>
         /// <param name="cert"></param>
         /// <returns></returns>
-        public static bool isRootCA(X509Certificate2 cert) => cert.SubjectName.Name == cert.IssuerName.Name;
+        private static bool isRootCA(X509Certificate2 cert) => cert.SubjectName.Name == cert.IssuerName.Name;
     }
 }
