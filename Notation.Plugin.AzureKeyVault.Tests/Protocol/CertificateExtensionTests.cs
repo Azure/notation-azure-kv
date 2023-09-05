@@ -28,7 +28,7 @@ namespace Notation.Plugin.Protocol.Tests
 
         [Theory]
         [InlineData("RSA", 1024)]
-        [InlineData("EC", 163)]
+        [InlineData("EC", 192)]
         public void KeySpec_InvalidKeySize_ThrowsValidationException(string keyType, int keySize)
         {
             // Arrange
