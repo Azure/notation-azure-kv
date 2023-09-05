@@ -82,19 +82,19 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
             var leafCert = certs.First(x => !caSet.Contains(x.SubjectName.Name));
 
             // build the certificate chain
-            X509Certificate2Collection chain = new X509Certificate2Collection();
+            var chain = new X509Certificate2Collection();
             var currentCert = leafCert;
             while (true)
             {
                 chain.Add(currentCert);
-                var subjectDN = currentCert.SubjectName.Name;
-                var issuerDN = currentCert.IssuerName.Name;
 
                 if (isRootCA(currentCert))
                 {
                     break;
                 }
 
+                var subjectDN = currentCert.SubjectName.Name;
+                var issuerDN = currentCert.IssuerName.Name;
                 if (!caSet.Remove(issuerDN))
                 {
                     throw new PluginException($"Found multiple certificates issued by {issuerDN}");
@@ -119,9 +119,6 @@ namespace Notation.Plugin.AzureKeyVault.Certificate
         /// </summary>
         /// <param name="cert"></param>
         /// <returns></returns>
-        public static bool isRootCA(X509Certificate2 cert)
-        {
-            return cert.SubjectName.Name == cert.IssuerName.Name;
-        }
+        public static bool isRootCA(X509Certificate2 cert) => cert.SubjectName.Name == cert.IssuerName.Name;
     }
 }
