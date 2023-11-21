@@ -13,7 +13,7 @@ runs:
     - name: setup Notation CLI
       uses: notaryproject/notation-action/setup@v1
       with:
-        version: 1.0.1
+        version: 1.0.0
     - name: self-signed certificate 
       uses: notaryproject/notation-action/sign@v1
       with:
