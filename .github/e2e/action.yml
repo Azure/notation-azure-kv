@@ -1,23 +1,26 @@
-name: 'Hello World'
-description: 'Greet someone'
+name: 'notation-azure-kv E2E testing'
+description: 'This is a test action for testing the notation-azure-kv plugin on mltiple platforms.'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  pluginDownloadURL:
+    description: 'Where to download the plugin'
     required: true
-    default: 'World'
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
+  pluginChecksum:
+    description: 'The checksum of the plugin'
+    required: true
 runs:
   using: "composite"
   steps:
-    - run: echo Hello ${{ inputs.who-to-greet }}.
-      shell: bash
-    - id: random-number-generator
-      run: echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
-      shell: bash
-    - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
-      shell: bash
-    - run: goodbye.sh
-      shell: bash
+    - name: setup Notation CLI
+      uses: notaryproject/notation-action/setup@v1
+      with:
+        version: 1.0.1
+    - name: self-signed certificate 
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.plginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/self-signed-pkcs12/70747b2064c0488e936eba7a29acc4c6
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: 'self_signed=true'

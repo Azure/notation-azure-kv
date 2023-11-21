@@ -69,7 +69,23 @@ jobs:
       - name: Build bianry
         run: ./scripts/build.sh v0.0.1 linux-x64
       - name: Run download server locally
-        run: nohup python3 ./.github/e2e/e2e-server.py &
+        run: |
+          # start the server
+          nohup python3 ./.github/e2e/e2e-server.py &
+
+          # prepare the environment variables for E2E
+          artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
+          checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
+          echo "pluginChecksum=$checksum" >> $GITHUB_ENV
+          echo "pluginDownloadURL=http://localhost:8080/$artifactName" >> $GITHUB_ENV
+ 
+      - name: Prepare container registry
+        run: |
+          docker run  --name registry --rm -d -p 5000:5000 registry:2
+          docker pull hello-world:latest
+          docker tag hello-world:latest localhost:5000/hello-world:v1
+          docker push localhost:5000/hello-world:v1
       - uses: ./.github/e2e
         with:
-          who-to-greet: 'Mona the Octocat'
+          pluginDownloadURL: ${{ env.pluginDownloadURL }}
+          pluginChecksum: ${{ env.pluginChecksum }}
