@@ -18,7 +18,7 @@ runs:
       uses: notaryproject/notation-action/sign@v1
       with:
         plugin_name: azure-kv
-        plugin_url: ${{ inputs.plginDownloadURL }}
+        plugin_url: ${{ inputs.pluginDownloadURL }}
         plugin_checksum: ${{ inputs.pluginChecksum }}
         key_id: https://acrci-test-kv.vault.azure.net/keys/self-signed-pkcs12/70747b2064c0488e936eba7a29acc4c6
         target_artifact_reference: localhost:5000/hello-world:v1
