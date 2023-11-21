@@ -70,6 +70,6 @@ jobs:
         run: ./scripts/build.sh v0.0.1 linux-x64
       - name: Run download server locally
         run: nohup python3 ./scripts/e2e-server.py &
-      - uses: ./e2e-action.yml
+      - uses: ./.github/e2e-action.yml
         with:
           who-to-greet: 'Mona the Octocat'
