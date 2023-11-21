@@ -77,7 +77,7 @@ jobs:
           artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
           checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
           echo "pluginChecksum=$checksum" >> $GITHUB_ENV
-          echo "pluginDownloadURL=http://localhost:8080/$artifactName" >> $GITHUB_ENV
+          echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> $GITHUB_ENV
  
       - name: Prepare container registry
         run: |
