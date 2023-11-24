@@ -99,7 +99,7 @@ jobs:
           path: ./bin/artifacts
       - name: Run download server locally
         run: |
-          nohup python3 ./.github/e2e/download-server/download-server.py &
+          nohup python3 ./.github/e2e/download-server.py &
 
           # prepare the environment variables for E2E
           artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
@@ -133,12 +133,8 @@ jobs:
           path: ./bin/artifacts
       - name: Run download server locally
         run: |
-          bash -c 'nohup python3 ./.github/e2e/download-server/download-server.py &'
-
-          $Url = "http://localhost:8000/notation-azure-kv_0.0.1_windows_amd64.zip"
-          $Output = "C:\sample.zip"
-          Invoke-WebRequest -Uri $Url -OutFile $Output
-          ls $Output
+          # wsl bash
+          bash -c 'nohup python3 ./.github/e2e/download-server.py &'
 
           # Prepare the environment variables for E2E
           $artifactName = "notation-azure-kv_0.0.1_windows_amd64.zip"
