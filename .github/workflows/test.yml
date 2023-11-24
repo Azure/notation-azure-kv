@@ -53,8 +53,9 @@ jobs:
         run: make build
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
-
-  e2e-linux:
+  # write an e2e-build job to build with ./scrpits/build.sh for linux, windows and macos,
+  # upload the artifacts 
+  e2e-build:
     runs-on: ubuntu-latest
     steps:
       - name: Setup .NET
@@ -64,7 +65,39 @@ jobs:
       - name: Check out code into the project directory
         uses: actions/checkout@v3
       - name: Build bianry
-        run: ./scripts/build.sh v0.0.1 linux-x64
+        run: |
+          ./scripts/build.sh v0.0.1 linux-x64
+          ./scripts/build.sh v0.0.1 win-x64
+          ./scripts/build.sh v0.0.1 osx-x64
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-amd64-binary
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_linux_amd64.tar.gz
+          retention-days: 1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: darwin-amd64-binary
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_darwin_amd64.tar.gz
+          retention-days: 1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: win-amd64-binary
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_win_amd64.zip
+          retention-days: 1
+  e2e-linux:
+    runs-on: ubuntu-latest
+    needs: e2e-build
+    steps:
+      - name: Check out code into the project directory
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-amd64-binary
+          path: ./bin/artifacts
+      - run: ls -lr
       - name: Run download server locally
         run: |
           # start the server
@@ -75,7 +108,6 @@ jobs:
           checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
           echo "pluginChecksum=$checksum" >> $GITHUB_ENV
           echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> $GITHUB_ENV
- 
       - name: Prepare container registry
         run: |
           docker run  --name registry --rm -d -p 5000:5000 registry:2
@@ -92,16 +124,15 @@ jobs:
           pluginDownloadURL: ${{ env.pluginDownloadURL }}
           pluginChecksum: ${{ env.pluginChecksum }}
   e2e-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
+    needs: e2e-build
     steps:
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '6.0.x'
       - name: Check out code into the project directory
         uses: actions/checkout@v3
-      - name: Build bianry
-        run: bash ./scripts/build.sh v0.0.1 win-x64
+      - uses: actions/download-artifact@v3
+        with:
+          name: win-amd64-binary
+          path: ./bin/artifacts
       - name: Run download server locally
         run: |
           # Start the server
