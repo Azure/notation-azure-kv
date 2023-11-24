@@ -184,7 +184,7 @@ jobs:
           nohup ./zot serve ./.github/e2e/zot/config.json &
 
           # install oras
-          wget -O oras.tar.gz https://github.com/oras-project/oras/releases/download/v1.1.0/oras_1.1.0_linux_amd64.tar.gz
+          wget -O oras.tar.gz https://github.com/oras-project/oras/releases/download/v1.1.0/oras_1.1.0_darwin_amd64.tar.gz
           tar -zxf oras.tar.gz
           ./oras push localhost:5000/hello-world:v1 --artifact-type  application/octet-stream ./LICENSE
       - name: Azure login
