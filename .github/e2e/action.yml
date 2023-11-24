@@ -14,7 +14,7 @@ runs:
       uses: notaryproject/notation-action/setup@v1
       with:
         version: 1.0.0
-    - name: self-signed certificate 
+    - name: self-signed pkcs12 certificate 
       uses: notaryproject/notation-action/sign@v1
       with:
         plugin_name: azure-kv
@@ -24,3 +24,67 @@ runs:
         target_artifact_reference: localhost:5000/hello-world:v1
         signature_format: cose
         plugin_config: 'self_signed=true'
+    - name: self-signed pem certificate 
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/self-signed-pem/a2c329545a934f0aaf434afe64bb392d
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: 'self_signed=true'
+    - name: imported ca-issued pem
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem/5a768b6209564c3cb30ecc30d800dc43
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+    - name: imported ca-issued pem unordered
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem-unordered/c0dcfcda9a454880aec242c70dcb1e2a
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+    - name: imported ca-issued pkcs12
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12/20548a2bcaba42308f609df2d79682b5
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+    - name: imported ca-issued pkcs12 unordered
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12-unordered/b4fdf86062e44839b666ce8ff3f3a470
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+    - name: csr ca-issued pem chain
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/csr-ca-issued-pem-chain/09cd1aeaaa894e60b0ef83f062604863
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+    - name: csr ca-issued pem chain
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/csr-ca-issued-pkcs12-chain/aad06a96a2684d6ab79a4ad84cbe917e
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
