@@ -97,12 +97,12 @@ jobs:
         with:
           name: linux-amd64-binary
           path: ./bin/artifacts
-      - run: tree ./bin/artifacts
+      - uses: JarvusInnovations/background-action@v1
+        name: Bootstrap System Under Test (SUT)
+        with:
+          run: python3 ./.github/e2e/e2e-server.py
       - name: Run download server locally
         run: |
-          # start the server
-          nohup python3 ./.github/e2e/e2e-server.py &
-
           # prepare the environment variables for E2E
           artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
           checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
@@ -133,11 +133,12 @@ jobs:
         with:
           name: win-amd64-binary
           path: ./bin/artifacts
+      - uses: JarvusInnovations/background-action@v1
+        name: Bootstrap System Under Test (SUT)
+        with:
+          run: python3 .\.github\e2e\download-server\download-server.py
       - name: Run download server locally
         run: |
-          # Start the server
-          Start-Process -NoNewWindow -FilePath "python3" -ArgumentList ".\.github\e2e\e2e-server.py"
-
           # Prepare the environment variables for E2E
           $artifactName = "notation-azure-kv_0.0.1_windows_amd64.zip"
           $checksum = (Get-FileHash ".\bin\artifacts\$artifactName" -Algorithm SHA256).Hash

@@ -1,5 +1,5 @@
-# this script is used to serve the e2e test artifacts server locally for
-# downloading the artifacts in the e2e tests
+# this script is used to serve the artifacts server locally for
+# downloading the artifacts
 import http.server
 import socketserver
 

@@ -1,0 +1,21 @@
+# Use Windows Nano Server image as the base image
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2022
+
+# Download the Python installer
+ADD https://www.python.org/ftp/python/3.8.0/python-3.8.0.exe C:\\temp\\python-installer.exe
+
+# Install Python
+RUN C:\\temp\\python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0 && \
+    del C:\\temp\\python-installer.exe
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the Python script into the container at the working directory
+COPY download-server.py ./
+
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
+
+# Command to run e2e-server.py when the container launches
+CMD ["python", ".\download-server.py"]
