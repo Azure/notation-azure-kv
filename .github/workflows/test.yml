@@ -85,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: win-amd64-binary
-          path: ./bin/artifacts/notation-azure-kv_0.0.1_win_amd64.zip
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_windows_amd64.zip
           retention-days: 1
   e2e-linux:
     runs-on: ubuntu-latest
@@ -97,7 +97,7 @@ jobs:
         with:
           name: linux-amd64-binary
           path: ./bin/artifacts
-      - run: ls -lr
+      - run: tree ./bin/artifacts
       - name: Run download server locally
         run: |
           # start the server
