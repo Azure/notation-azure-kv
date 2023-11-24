@@ -136,7 +136,7 @@ jobs:
           bash -c 'nohup python3 ./.github/e2e/download-server/download-server.py &'
 
           $Url = "http://localhost:8000/notation-azure-kv_0.0.1_windows_amd64.zip"
-          $Output = "C:\Downloads\sample.zip"
+          $Output = "C:\sample.zip"
           Invoke-WebRequest -Uri $Url -OutFile $Output
           ls $Output
 
