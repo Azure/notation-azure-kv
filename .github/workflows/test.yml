@@ -82,6 +82,10 @@ jobs:
           docker pull hello-world:latest
           docker tag hello-world:latest localhost:5000/hello-world:v1
           docker push localhost:5000/hello-world:v1
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: ./.github/e2e
         with:
           pluginDownloadURL: ${{ env.pluginDownloadURL }}
