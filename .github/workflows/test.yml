@@ -133,7 +133,7 @@ jobs:
           path: ./bin/artifacts
       - name: Run download server locally
         run: |
-          schtasks /create /tn "downloadServer" /tr ".\.github\e2e\download-server\download-server.py" /sc once /st 00:00 /du 23:59:59 /sd 01/01/2000 /f
+          schtasks /create /tn "downloadServer" /tr "python .\.github\e2e\download-server\download-server.py" /sc once /st 00:00 /du 23:59 /f
           schtasks /run /tn "downloadServer"
 
           $Url = "http://localhost:8000/notation-azure-kv_0.0.1_windows_amd64.zip"
