@@ -54,7 +54,7 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
 
-  e2e:
+  e2e-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Setup .NET
@@ -86,7 +86,46 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - uses: ./.github/e2e
+      - name: E2E testing
+        uses: ./.github/e2e
+        with:
+          pluginDownloadURL: ${{ env.pluginDownloadURL }}
+          pluginChecksum: ${{ env.pluginChecksum }}
+  e2e-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+      - name: Check out code into the project directory
+        uses: actions/checkout@v3
+      - name: Build bianry
+        run: ./scripts/build.sh v0.0.1 win-x64
+      - name: Run download server locally
+        run: |
+          # Start the server
+          Start-Process -NoNewWindow -FilePath "python3" -ArgumentList ".\.github\e2e\e2e-server.py"
+
+          # Prepare the environment variables for E2E
+          $artifactName = "notation-azure-kv_0.0.1_windows_amd64.tar.gz"
+          $checksum = (Get-FileHash "./bin/artifacts/$artifactName" -Algorithm SHA256).Hash
+          "pluginChecksum=$checksum" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          "pluginDownloadURL=http://localhost:8000/$artifactName" | Out-File -Append -FilePath $Env:GITHUB_ENV
+        shell: powershell
+      - name: Prepare container registry
+        run: |
+          docker build --build-arg IMAGE_VERSION=ltsc2022 -t registry:2 -f .\.github\e2e\registry\Dockerfile.windows .\.github\e2e\registry\
+          docker run  --name registry --rm -d -p 5000:5000 registry:2
+          docker pull hello-world:latest
+          docker tag hello-world:latest localhost:5000/hello-world:v1
+          docker push localhost:5000/hello-world:v1
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: E2E testing
+        uses: ./.github/e2e
         with:
           pluginDownloadURL: ${{ env.pluginDownloadURL }}
           pluginChecksum: ${{ env.pluginChecksum }}
