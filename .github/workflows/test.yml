@@ -53,8 +53,6 @@ jobs:
         run: make build
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
-  # write an e2e-build job to build with ./scrpits/build.sh for linux, windows and macos,
-  # upload the artifacts 
   e2e-build:
     runs-on: ubuntu-latest
     steps:
@@ -144,12 +142,51 @@ jobs:
         shell: pwsh
       - name: Prepare container registry
         run: |
-          docker build --build-arg IMAGE_VERSION=ltsc2022 -t registry:2 -f .\.github\e2e\registry\Dockerfile.windows .\.github\e2e\registry\
+          docker build --build-arg IMAGE_VERSION=ltsc2022 -t registry:2 -f .\.github\e2e\distribution\Dockerfile.windows .\.github\e2e\distribution\
           docker run  --name registry --rm -d -p 5000:5000 registry:2
           docker pull hello-world:latest
           docker tag hello-world:latest localhost:5000/hello-world:v1
           docker push localhost:5000/hello-world:v1
         shell: pwsh
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: E2E testing
+        uses: ./.github/e2e
+        with:
+          pluginDownloadURL: ${{ env.pluginDownloadURL }}
+          pluginChecksum: ${{ env.pluginChecksum }}
+  e2e-macos:
+    runs-on: macos-13
+    needs: e2e-build
+    steps:
+      - name: Check out code into the project directory
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-amd64-binary
+          path: ./bin/artifacts
+      - name: Run download server locally
+        run: |
+          nohup python3 ./.github/e2e/download-server.py &
+
+          # prepare the environment variables for E2E
+          artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
+          checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
+          echo "pluginChecksum=$checksum" >> $GITHUB_ENV
+          echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> $GITHUB_ENV
+      - name: Prepare container registry
+        run: |
+          # start zot registry
+          wget -O zot https://github.com/project-zot/zot/releases/download/v2.0.0-rc7/zot-darwin-amd64-minimal
+          chmod +x zot
+          nohup ./zot serve ./.github/e2e/zot/config.json &
+
+          # install oras
+          wget -O oras.tar.gz https://github.com/oras-project/oras/releases/download/v1.1.0/oras_1.1.0_linux_amd64.tar.gz
+          tar -zxf oras.tar.gz
+          ./oras push localhost:5000/hello-world:v1 --artifact-type  application/octet-stream ./LICENSE
       - name: Azure login
         uses: azure/login@v1
         with:
