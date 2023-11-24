@@ -101,7 +101,7 @@ jobs:
       - name: Check out code into the project directory
         uses: actions/checkout@v3
       - name: Build bianry
-        run: ./scripts/build.sh v0.0.1 win-x64
+        run: bash ./scripts/build.sh v0.0.1 win-x64
       - name: Run download server locally
         run: |
           # Start the server
