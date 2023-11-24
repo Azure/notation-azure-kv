@@ -97,12 +97,10 @@ jobs:
         with:
           name: linux-amd64-binary
           path: ./bin/artifacts
-      - uses: JarvusInnovations/background-action@v1
-        name: Bootstrap System Under Test (SUT)
-        with:
-          run: python3 ./.github/e2e/e2e-server.py
       - name: Run download server locally
         run: |
+          nohup python3 ./.github/e2e/download-server/download-server.py &
+
           # prepare the environment variables for E2E
           artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
           checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
@@ -133,12 +131,16 @@ jobs:
         with:
           name: win-amd64-binary
           path: ./bin/artifacts
-      - uses: JarvusInnovations/background-action@v1
-        name: Bootstrap System Under Test (SUT)
-        with:
-          run: python3 .\.github\e2e\download-server\download-server.py
       - name: Run download server locally
         run: |
+          schtasks /create /tn "downloadServer" /tr ".\.github\e2e\download-server\download-server.py" /sc once /st 00:00 /du 23:59:59 /sd 01/01/2000 /f
+          schtasks /run /tn "downloadServer"
+
+          $Url = "http://localhost:8000/notation-azure-kv_0.0.1_windows_amd64.zip"
+          $Output = "C:\Downloads\sample.zip"
+          Invoke-WebRequest -Uri $Url -OutFile $Output
+          ls $Output
+
           # Prepare the environment variables for E2E
           $artifactName = "notation-azure-kv_0.0.1_windows_amd64.zip"
           $checksum = (Get-FileHash ".\bin\artifacts\$artifactName" -Algorithm SHA256).Hash
