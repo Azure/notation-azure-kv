@@ -112,7 +112,7 @@ jobs:
           $checksum = (Get-FileHash "./bin/artifacts/$artifactName" -Algorithm SHA256).Hash
           "pluginChecksum=$checksum" | Out-File -Append -FilePath $Env:GITHUB_ENV
           "pluginDownloadURL=http://localhost:8000/$artifactName" | Out-File -Append -FilePath $Env:GITHUB_ENV
-        shell: powershell
+        shell: pwsh
       - name: Prepare container registry
         run: |
           docker build --build-arg IMAGE_VERSION=ltsc2022 -t registry:2 -f .\.github\e2e\registry\Dockerfile.windows .\.github\e2e\registry\
@@ -120,6 +120,7 @@ jobs:
           docker pull hello-world:latest
           docker tag hello-world:latest localhost:5000/hello-world:v1
           docker push localhost:5000/hello-world:v1
+        shell: pwsh
       - name: Azure login
         uses: azure/login@v1
         with:
