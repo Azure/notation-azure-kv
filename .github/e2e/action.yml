@@ -127,6 +127,23 @@ runs:
           echo "partial pem certificate chain with invalid local cert bundle should failed, but succeeded."
           exit 1
       shell: bash
+    - name: partial pem cert chain without local cert bundle
+      continue-on-error: true
+      id: partial-pem-cert-chain-without-local-cert-bundle
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/partial-pem-cert-chain/bf6299c95b96492894be0230935bdab8
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+    - name: 'Should Fail: partial pem cert chain without local cert bundle'
+      if: steps.partial-pem-cert-chain-without-local-cert-bundle.outcome != 'failure'
+      run: |
+          echo "partial pem certificate chain without local cert bundle should failed, but succeeded."
+          exit 1
+      shell: bash
     - name: certificate chain with self signed plugin config
       uses: notaryproject/notation-action/sign@v1
       continue-on-error: true
