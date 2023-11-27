@@ -293,7 +293,7 @@ EOF
 
   # download CSR
   local csr
-  csr=$(az keyvault certificate pending show --vault-name $AKV_NAME --name $certName --query "csr" -o tsv)
+  csr=$(az keyvault certificate pending show --vault-name "$AKV_NAME" --name "$certName" --query "csr" -o tsv)
   local csrPath
   csrPath=${certName}.csr
   printf -- "-----BEGIN CERTIFICATE REQUEST-----\n%s\n-----END CERTIFICATE REQUEST-----\n" "$csr" > ${csrPath}

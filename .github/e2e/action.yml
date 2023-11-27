@@ -156,7 +156,7 @@ runs:
         key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem/5a768b6209564c3cb30ecc30d800dc43
         target_artifact_reference: localhost:5000/hello-world:v1
         signature_format: cose
-        plugin_config: 'self_signed=true;ca_certs=./.github/e2e/certs/cert-bundle.pem'
+        plugin_config: 'self_signed=true\nca_certs=./.github/e2e/certs/cert-bundle.pem'
     - name: 'Should Fail: both self signed and ca certs plugin config exist'
       if: steps.both-self-signed-and-ca-certs-plugin-config-exist.outcome != 'failure'
       run: |
