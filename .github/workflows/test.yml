@@ -32,7 +32,7 @@ jobs:
           FILTER_REGEX_EXCLUDE: '.*Tests/.*|.*.yml|.*/scripts/generate-certs.sh'
           VALIDATE_MARKDOWN: false
   test:
-    name: Test
+    name: Unit Testing and Build
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
