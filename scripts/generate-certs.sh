@@ -153,7 +153,8 @@ function importCAIssuedPKCS12CertificateChain() {
   certName="imported-ca-issued-pkcs12"
   local unorderedCertName
   unorderedCertName="imported-ca-issued-pkcs12-unordered"
-  local policy=$(cat << EOF
+  local policy
+  policy=$(cat << EOF
 {
   "keyProperties": {
     "exportable": false
@@ -180,7 +181,8 @@ function importCAIssuedPEMCertificateChain() {
   certName="imported-ca-issued-pem"
   local unorderedCertName
   unorderedCertName="imported-ca-issued-pem-unordered"
-  local policy=$(cat << EOF
+  local policy
+  policy=$(cat << EOF
 {
   "keyProperties": {
     "exportable": false

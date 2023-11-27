@@ -1,3 +1,4 @@
+---
 name: 'notation-azure-kv E2E testing'
 description: 'This is a test action for testing the notation-azure-kv plugin on mltiple platforms.'
 inputs:
@@ -97,7 +98,7 @@ runs:
         key_id: https://acrci-test-kv.vault.azure.net/keys/partial-pem-cert-chain/bf6299c95b96492894be0230935bdab8
         target_artifact_reference: localhost:5000/hello-world:v1
         signature_format: cose
-        plugin_config: 'ca_certs=./.github/e2e/certs/cert_bundle.pem'
+        plugin_config: 'ca_certs=./.github/e2e/certs/cert-bundle.pem'
     - name: pkcs12 cert chain with local cert bundle
       uses: notaryproject/notation-action/sign@v1
       with:
@@ -107,7 +108,7 @@ runs:
         key_id: https://acrci-test-kv.vault.azure.net/keys/partial-pkcs12-cert-chain/c90493832b4148ee80e2aa10ada67a0b
         target_artifact_reference: localhost:5000/hello-world:v1
         signature_format: cose
-        plugin_config: 'ca_certs=./.github/e2e/certs/cert_bundle.pem'
+        plugin_config: 'ca_certs=./.github/e2e/certs/cert-bundle.pem'
     - name: partial pem cert chain with local invalid local cert bundle
       continue-on-error: true
       id: partial-pem-cert-chain-invalid-local-cert-bundle
@@ -155,7 +156,7 @@ runs:
         key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem/5a768b6209564c3cb30ecc30d800dc43
         target_artifact_reference: localhost:5000/hello-world:v1
         signature_format: cose
-        plugin_config: 'self_signed=true,ca_certs=./.github/e2e/certs/cert_bundle.pem'
+        plugin_config: 'self_signed=true,ca_certs=./.github/e2e/certs/cert-bundle.pem'
     - name: 'Should Fail: both self signed and ca certs plugin config exist'
       if: steps.both-self-signed-and-ca-certs-plugin-config-exist.outcome != 'failure'
       run: |
