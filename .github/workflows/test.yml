@@ -29,14 +29,11 @@ jobs:
           DEFAULT_BRANCH: main
           DEFAULT_WORKSPACE: ./Notation.Plugin.AzureKeyVault
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_EXCLUDE: '.*Tests/.*|*.yml'
+          FILTER_REGEX_EXCLUDE: '.*Tests/.*|.*.yml'
           VALIDATE_MARKDOWN: false
-  build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+  unit-test:
     name: "Build"
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
@@ -49,8 +46,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Run unit tests
         run: make test
-      - name: Build testing
-        run: make build
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
   e2e-build:
