@@ -88,3 +88,77 @@ runs:
         key_id: https://acrci-test-kv.vault.azure.net/keys/csr-ca-issued-pkcs12-chain/aad06a96a2684d6ab79a4ad84cbe917e
         target_artifact_reference: localhost:5000/hello-world:v1
         signature_format: cose
+    - name: partial pem cert chain with local cert bundle
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/partial-pem-cert-chain/bf6299c95b96492894be0230935bdab8
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: 'ca_certs=./.github/e2e/certs/cert_bundle.pem'
+    - name: pkcs12 cert chain with local cert bundle
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/partial-pkcs12-cert-chain/c90493832b4148ee80e2aa10ada67a0b
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: 'ca_certs=./.github/e2e/certs/cert_bundle.pem'
+    - name: partial pem cert chain with local invalid local cert bundle
+      continue-on-error: true
+      id: partial-pem-cert-chain-invalid-local-cert-bundle
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/partial-pem-cert-chain/bf6299c95b96492894be0230935bdab8
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: 'ca_certs=./.github/e2e/certs/root.pem'
+    - name: 'Should Fail: partial pem cert chain with local invalid local cert bundle'
+      if: steps.partial-pem-cert-chain-invalid-local-cert-bundle.outcome != 'failure'
+      run: |
+          echo "partial pem certificate chain with invalid local cert bundle should failed, but succeeded."
+          exit 1
+      shell: bash
+    - name: certificate chain with self signed plugin config
+      uses: notaryproject/notation-action/sign@v1
+      continue-on-error: true
+      id: certificate-chain-with-self-signed-plugin-config
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem/5a768b6209564c3cb30ecc30d800dc43
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: 'self_signed=true'
+    - name: 'Should Fail: certificate chain with self signed plugin config'
+      if: steps.certificate-chain-with-self-signed-plugin-config.outcome != 'failure'
+      run: |
+          echo "certificate chain with self signed plugin config should failed, but succeeded."
+          exit 1
+      shell: bash
+    - name: both self signed and ca certs plugin config exist
+      uses: notaryproject/notation-action/sign@v1
+      continue-on-error: true
+      id: both-self-signed-and-ca-certs-plugin-config-exist
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem/5a768b6209564c3cb30ecc30d800dc43
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: 'self_signed=true,ca_certs=./.github/e2e/certs/cert_bundle.pem'
+    - name: 'Should Fail: both self signed and ca certs plugin config exist'
+      if: steps.both-self-signed-and-ca-certs-plugin-config-exist.outcome != 'failure'
+      run: |
+          echo "both self signed and ca certs plugin config exist should failed, but succeeded."
+          exit 1
+      shell: bash

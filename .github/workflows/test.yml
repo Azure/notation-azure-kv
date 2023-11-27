@@ -142,8 +142,7 @@ jobs:
         shell: pwsh
       - name: Prepare container registry
         run: |
-          docker build --build-arg IMAGE_VERSION=ltsc2022 -t registry:2 -f .\.github\e2e\distribution\Dockerfile.windows .\.github\e2e\distribution\
-          docker run  --name registry --rm -d -p 5000:5000 registry:2
+          docker run  --name registry --rm -d -p 5000:5000 junjiegaomsft/registry:v2.8.2-ltsc2022
           docker pull hello-world:latest
           docker tag hello-world:latest localhost:5000/hello-world:v1
           docker push localhost:5000/hello-world:v1

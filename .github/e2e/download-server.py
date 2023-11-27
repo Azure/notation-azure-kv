@@ -1,5 +1,5 @@
 # this script is used to serve the artifacts server locally for
-# downloading the artifacts
+# downloading the artifacts i
 import http.server
 import socketserver
 
