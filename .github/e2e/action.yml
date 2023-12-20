@@ -1,6 +1,6 @@
 ---
 name: 'notation-azure-kv E2E testing'
-description: 'This is a test action for testing the notation-azure-kv plugin on mltiple platforms.'
+description: 'This is a E2E test action for testing the notation-azure-kv plugin on mltiple platforms.'
 inputs:
   pluginDownloadURL:
     description: 'Where to download the plugin'
