@@ -1,0 +1,31 @@
+ARG IMAGE_VERSION
+FROM mcr.microsoft.com/oss/go/microsoft/golang:1.21-nanoserver-$IMAGE_VERSION AS builder
+
+ARG DISTRIBUTION_VERSION="2.8.2"
+ARG SOURCE_CODE_URL="https://github.com/distribution/distribution/archive/refs/tags/v${DISTRIBUTION_VERSION}.zip"
+
+WORKDIR "C:\\distribution"
+
+ENV GO111MODULE="auto" \
+    GOPATH="C:\\distribution"
+
+# Download distribution source code and build registry
+RUN curl.exe -o distribution.zip -L %SOURCE_CODE_URL% && \
+    mkdir .\src\github.com\docker\ && \
+    tar.exe -C .\src\github.com\docker\ -x -p -f .\distribution.zip && \
+    ren .\src\github.com\docker\distribution-%DISTRIBUTION_VERSION% distribution && \
+    go build -o ".\\registry.exe" ".\\src\\github.com\\docker\\distribution\\cmd\\registry\\"
+
+# Runtime image
+FROM mcr.microsoft.com/windows/nanoserver:$IMAGE_VERSION
+
+WORKDIR "C:\\distribution"
+
+# Copy the built registry binary from the builder image
+COPY --from=builder "C:\\distribution\\registry.exe" ".\\"
+
+# Copy the configuration file
+COPY ".\\registry.conf" ".\\"
+
+# Start the registry
+CMD ["C:\\distribution\\registry.exe", "serve", "C:\\distribution\\registry.conf"]
