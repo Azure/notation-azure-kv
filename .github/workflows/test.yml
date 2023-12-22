@@ -91,7 +91,7 @@ jobs:
           path: ./bin/artifacts
       - name: Run download server locally
         run: |
-          nohup python3 ./.github/e2e/download-server.py &
+          nohup python3 ./test/e2e/download-server.py &
 
           # prepare the environment variables for E2E
           artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
@@ -109,7 +109,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: E2E testing
-        uses: ./.github/e2e
+        uses: ./test/e2e
         with:
           pluginDownloadURL: ${{ env.pluginDownloadURL }}
           pluginChecksum: ${{ env.pluginChecksum }}
@@ -128,7 +128,7 @@ jobs:
       - name: Run download server locally
         run: |
           # wsl bash
-          bash -c 'nohup python3 ./.github/e2e/download-server.py &'
+          bash -c 'nohup python3 ./test/e2e/download-server.py &'
 
           # Prepare the environment variables for E2E
           $artifactName = "notation-azure-kv_0.0.1_windows_amd64.zip"
@@ -148,7 +148,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: E2E testing
-        uses: ./.github/e2e
+        uses: ./test/e2e
         with:
           pluginDownloadURL: ${{ env.pluginDownloadURL }}
           pluginChecksum: ${{ env.pluginChecksum }}
@@ -166,7 +166,7 @@ jobs:
           path: ./bin/artifacts
       - name: Run download server locally
         run: |
-          nohup python3 ./.github/e2e/download-server.py &
+          nohup python3 ./test/e2e/download-server.py &
 
           # prepare the environment variables for E2E
           artifactName=notation-azure-kv_0.0.1_darwin_amd64.tar.gz
@@ -178,7 +178,7 @@ jobs:
           # start zot registry
           wget -O zot https://github.com/project-zot/zot/releases/download/v2.0.0-rc7/zot-darwin-amd64-minimal
           chmod +x zot
-          nohup ./zot serve ./.github/e2e/zot/config.json &
+          nohup ./zot serve ./test/e2e/zot/config.json &
 
           # install oras
           wget -O oras.tar.gz https://github.com/oras-project/oras/releases/download/v1.1.0/oras_1.1.0_darwin_amd64.tar.gz
@@ -189,7 +189,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: E2E testing
-        uses: ./.github/e2e
+        uses: ./test/e2e
         with:
           pluginDownloadURL: ${{ env.pluginDownloadURL }}
           pluginChecksum: ${{ env.pluginChecksum }}
