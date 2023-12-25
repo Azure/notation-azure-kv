@@ -169,7 +169,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         }
 
         [Fact]
-        public void RunAsync_NoSecertsGetPermission()
+        public async void RunAsync_NoSecertsGetPermission()
         {
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
@@ -192,11 +192,11 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
 
             var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
 
-            Assert.Throws<PluginException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<PluginException>(async () => await generateSignatureCommand.RunAsync());
         }
 
         [Fact]
-        public void RunAsync_OtherRequestFailedException()
+        public async void RunAsync_OtherRequestFailedException()
         {
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
@@ -219,11 +219,11 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
 
             var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
 
-            Assert.Throws<Azure.RequestFailedException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<Azure.RequestFailedException>(async () => await generateSignatureCommand.RunAsync());
         }
 
         [Fact]
-        public void RunAsync_SelfSignedWithCaCerts()
+        public async void RunAsync_SelfSignedWithCaCerts()
         {
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
@@ -246,7 +246,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
 
             var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
 
-            Assert.Throws<PluginException>(() => generateSignatureCommand.RunAsync().GetAwaiter().GetResult());
+            await Assert.ThrowsAsync<PluginException>(async () => await generateSignatureCommand.RunAsync());
         }
     }
 }
