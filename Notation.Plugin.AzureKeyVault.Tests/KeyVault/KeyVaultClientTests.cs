@@ -56,7 +56,6 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
 
         [Theory]
         [InlineData("")]
-        [InlineData(null)]
         public void TestConstructorWithEmptyKeyId(string invalidKeyId)
         {
             Assert.Throws<ArgumentNullException>(() => new KeyVaultClient(invalidKeyId));

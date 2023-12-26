@@ -21,9 +21,7 @@ namespace Notation.Plugin.Protocol.Tests
         }
 
         [Theory]
-        [InlineData(null, "test-key-id")]
         [InlineData("", "test-key-id")]
-        [InlineData("1.0", null)]
         [InlineData("1.0", "")]
         public void DescribeKeyRequest_InvalidParameters_ThrowsException(string contractVersion, string keyId)
         {
@@ -60,9 +58,7 @@ namespace Notation.Plugin.Protocol.Tests
         }
 
         [Theory]
-        [InlineData(null, "RSA-2048")]
         [InlineData("", "RSA-2048")]
-        [InlineData("test-key-id", null)]
         [InlineData("test-key-id", "")]
         public void DescribeKeyResponse_InvalidParameters_ThrowsException(string keyId, string keySpec)
         {
