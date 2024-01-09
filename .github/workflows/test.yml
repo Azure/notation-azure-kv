@@ -123,7 +123,7 @@ jobs:
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Install tar
-        run: yum install tar -y
+        run: yum install tar -y --nogpgcheck --skipsignature
       - name: Check out code into the project directory
         uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
