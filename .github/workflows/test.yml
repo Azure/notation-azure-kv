@@ -119,6 +119,9 @@ jobs:
     container:
       image: mcr.microsoft.com/cbl-mariner/base/core:2.0
       options: --cpus 1
+      ports:
+       - 80
+       - 443
     needs: test
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
