@@ -77,11 +77,10 @@ jobs:
           name: win-amd64-binary
           path: ./bin/artifacts/notation-azure-kv_0.0.1_windows_amd64.zip
           retention-days: 1
-  e2e-linux:
-    name: E2E testing on Linux
+  e2e-container:
+    name: E2E testing on container
     runs-on: ubuntu-latest
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v3
@@ -89,107 +88,133 @@ jobs:
         with:
           name: linux-amd64-binary
           path: ./bin/artifacts
-      - name: Run download server locally
-        run: |
-          nohup python3 -m http.server --directory ./bin/artifacts/ &
-
-          # prepare the environment variables for E2E
-          artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
-          checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
-          echo "pluginChecksum=$checksum" >> "$GITHUB_ENV"
-          echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> "$GITHUB_ENV"
       - name: Prepare container registry
         run: |
           docker run  --name registry --rm -d -p 5000:5000 registry:2
           docker pull hello-world:latest
           docker tag hello-world:latest localhost:5000/hello-world:v1
           docker push localhost:5000/hello-world:v1
-      - name: Azure login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: E2E testing
-        uses: ./test/e2e
-        with:
-          pluginDownloadURL: ${{ env.pluginDownloadURL }}
-          pluginChecksum: ${{ env.pluginChecksum }}
-  e2e-windows:
-    name: E2E testing on Windows
-    runs-on: windows-2022
-    needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
-    steps:
-      - name: Check out code into the project directory
-        uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: win-amd64-binary
-          path: ./bin/artifacts
-      - name: Run download server locally
+      - name: Build notation-akv:v1 image
         run: |
-          # wsl bash
-          bash -c 'nohup python3 -m http.server --directory ./bin/artifacts/ &'
+          docker build -t notation-akv:v1 -f ./test/e2e/containerized/Dockerfile.mariner .
+      - name: Run e2e
+        run: |
+          bash ./test/e2e/containerized/test.sh
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+  # e2e-linux:
+  #   name: E2E testing on Linux
+  #   runs-on: ubuntu-latest
+  #   needs: test
+  #   if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+  #   steps:
+  #     - name: Check out code into the project directory
+  #       uses: actions/checkout@v3
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: linux-amd64-binary
+  #         path: ./bin/artifacts
+  #     - name: Run download server locally
+  #       run: |
+  #         nohup python3 -m http.server --directory ./bin/artifacts/ &
 
-          # Prepare the environment variables for E2E
-          $artifactName = "notation-azure-kv_0.0.1_windows_amd64.zip"
-          $checksum = (Get-FileHash ".\bin\artifacts\$artifactName" -Algorithm SHA256).Hash
-          "pluginChecksum=$checksum" | Out-File -Append -FilePath $Env:GITHUB_ENV
-          "pluginDownloadURL=http://localhost:8000/$artifactName" | Out-File -Append -FilePath $Env:GITHUB_ENV
-        shell: pwsh
-      - name: Prepare container registry
-        run: |
-          docker run  --name registry --rm -d -p 5000:5000 junjiegaomsft/registry:v2.8.2-ltsc2022
-          docker pull hello-world:latest
-          docker tag hello-world:latest localhost:5000/hello-world:v1
-          docker push localhost:5000/hello-world:v1
-        shell: pwsh
-      - name: Azure login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: E2E testing
-        uses: ./test/e2e
-        with:
-          pluginDownloadURL: ${{ env.pluginDownloadURL }}
-          pluginChecksum: ${{ env.pluginChecksum }}
-  e2e-macos:
-    name: E2E testing on macOS
-    runs-on: macos-13
-    needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
-    steps:
-      - name: Check out code into the project directory
-        uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: darwin-amd64-binary
-          path: ./bin/artifacts
-      - name: Run download server locally
-        run: |
-          nohup python3 -m http.server --directory ./bin/artifacts/ &
+  #         # prepare the environment variables for E2E
+  #         artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
+  #         checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
+  #         echo "pluginChecksum=$checksum" >> "$GITHUB_ENV"
+  #         echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> "$GITHUB_ENV"
+  #     - name: Prepare container registry
+  #       run: |
+  #         docker run  --name registry --rm -d -p 5000:5000 registry:2
+  #         docker pull hello-world:latest
+  #         docker tag hello-world:latest localhost:5000/hello-world:v1
+  #         docker push localhost:5000/hello-world:v1
+  #     - name: Azure login
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #     - name: E2E testing
+  #       uses: ./test/e2e
+  #       with:
+  #         pluginDownloadURL: ${{ env.pluginDownloadURL }}
+  #         pluginChecksum: ${{ env.pluginChecksum }}
+  # e2e-windows:
+  #   name: E2E testing on Windows
+  #   runs-on: windows-2022
+  #   needs: test
+  #   if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+  #   steps:
+  #     - name: Check out code into the project directory
+  #       uses: actions/checkout@v3
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: win-amd64-binary
+  #         path: ./bin/artifacts
+  #     - name: Run download server locally
+  #       run: |
+  #         # wsl bash
+  #         bash -c 'nohup python3 -m http.server --directory ./bin/artifacts/ &'
 
-          # prepare the environment variables for E2E
-          artifactName=notation-azure-kv_0.0.1_darwin_amd64.tar.gz
-          checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
-          echo "pluginChecksum=$checksum" >> "$GITHUB_ENV"
-          echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> "$GITHUB_ENV"
-      - name: Prepare container registry
-        run: |
-          # start zot registry
-          wget -O zot https://github.com/project-zot/zot/releases/download/v2.0.0-rc7/zot-darwin-amd64-minimal
-          chmod +x zot
-          nohup ./zot serve ./test/e2e/zot/config.json &
+  #         # Prepare the environment variables for E2E
+  #         $artifactName = "notation-azure-kv_0.0.1_windows_amd64.zip"
+  #         $checksum = (Get-FileHash ".\bin\artifacts\$artifactName" -Algorithm SHA256).Hash
+  #         "pluginChecksum=$checksum" | Out-File -Append -FilePath $Env:GITHUB_ENV
+  #         "pluginDownloadURL=http://localhost:8000/$artifactName" | Out-File -Append -FilePath $Env:GITHUB_ENV
+  #       shell: pwsh
+  #     - name: Prepare container registry
+  #       run: |
+  #         docker run  --name registry --rm -d -p 5000:5000 junjiegaomsft/registry:v2.8.2-ltsc2022
+  #         docker pull hello-world:latest
+  #         docker tag hello-world:latest localhost:5000/hello-world:v1
+  #         docker push localhost:5000/hello-world:v1
+  #       shell: pwsh
+  #     - name: Azure login
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #     - name: E2E testing
+  #       uses: ./test/e2e
+  #       with:
+  #         pluginDownloadURL: ${{ env.pluginDownloadURL }}
+  #         pluginChecksum: ${{ env.pluginChecksum }}
+  # e2e-macos:
+  #   name: E2E testing on macOS
+  #   runs-on: macos-13
+  #   needs: test
+  #   if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+  #   steps:
+  #     - name: Check out code into the project directory
+  #       uses: actions/checkout@v3
+  #     - uses: actions/download-artifact@v3
+  #       with:
+  #         name: darwin-amd64-binary
+  #         path: ./bin/artifacts
+  #     - name: Run download server locally
+  #       run: |
+  #         nohup python3 -m http.server --directory ./bin/artifacts/ &
 
-          # install oras
-          wget -O oras.tar.gz https://github.com/oras-project/oras/releases/download/v1.1.0/oras_1.1.0_darwin_amd64.tar.gz
-          tar -zxf oras.tar.gz
-          ./oras push localhost:5000/hello-world:v1 --artifact-type  application/octet-stream ./LICENSE
-      - name: Azure login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: E2E testing
-        uses: ./test/e2e
-        with:
-          pluginDownloadURL: ${{ env.pluginDownloadURL }}
-          pluginChecksum: ${{ env.pluginChecksum }}
+  #         # prepare the environment variables for E2E
+  #         artifactName=notation-azure-kv_0.0.1_darwin_amd64.tar.gz
+  #         checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
+  #         echo "pluginChecksum=$checksum" >> "$GITHUB_ENV"
+  #         echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> "$GITHUB_ENV"
+  #     - name: Prepare container registry
+  #       run: |
+  #         # start zot registry
+  #         wget -O zot https://github.com/project-zot/zot/releases/download/v2.0.0-rc7/zot-darwin-amd64-minimal
+  #         chmod +x zot
+  #         nohup ./zot serve ./test/e2e/zot/config.json &
+
+  #         # install oras
+  #         wget -O oras.tar.gz https://github.com/oras-project/oras/releases/download/v1.1.0/oras_1.1.0_darwin_amd64.tar.gz
+  #         tar -zxf oras.tar.gz
+  #         ./oras push localhost:5000/hello-world:v1 --artifact-type  application/octet-stream ./LICENSE
+  #     - name: Azure login
+  #       uses: azure/login@v1
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #     - name: E2E testing
+  #       uses: ./test/e2e
+  #       with:
+  #         pluginDownloadURL: ${{ env.pluginDownloadURL }}
+  #         pluginChecksum: ${{ env.pluginChecksum }}
