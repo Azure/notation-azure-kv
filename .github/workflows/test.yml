@@ -78,7 +78,7 @@ jobs:
           path: ./bin/artifacts/notation-azure-kv_0.0.1_windows_amd64.zip
           retention-days: 1
   e2e-mariner-container:
-    name: E2E testing on container
+    name: E2E testing for Mariner container
     runs-on: ubuntu-latest
     needs: test
     steps:
