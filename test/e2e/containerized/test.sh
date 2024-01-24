@@ -20,7 +20,7 @@ function testSign(){
         -e AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET \
         -e AZURE_CLIENT_ID=$AZURE_CLIENT_ID \
         -e AZURE_TENANT_ID=$AZURE_TENANT_ID \
-        --network host -it notation-akv:v1 \
+        --network host notation-akv:v1 \
         notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv $@
     local result=$?
     echo ""
