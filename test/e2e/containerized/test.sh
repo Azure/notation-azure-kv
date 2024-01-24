@@ -20,7 +20,7 @@ AZURE_CLIENT_SECRET=$(echo "$AZURE_CREDENTIALS" | jq -r .clientSecret)
 
 function testSign(){
     # print all the arguments
-    echo "notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv "$@""
+    echo "notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv" "$@"
     docker run \
         -v "$(pwd)"/test/:/test \
         -e AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" \
