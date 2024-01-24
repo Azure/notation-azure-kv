@@ -6,7 +6,6 @@
 #   - AZURE_CREDENTIALS environment variable
 
 set -e
-shopt -s expand_aliases
 
 # setup credentials
 if [ -z "$AZURE_CREDENTIALS" ]; then
@@ -49,7 +48,6 @@ function assertFailed(){
 
 set +e
 echo "start notation azure-kv plugin containerized test"
-test cases
 testSign --id https://acrci-test-kv.vault.azure.net/keys/self-signed-pkcs12/70747b2064c0488e936eba7a29acc4c6 --plugin-config self_signed=true
 assertSucceeded
 testSign --id https://acrci-test-kv.vault.azure.net/keys/self-signed-pem/a2c329545a934f0aaf434afe64bb392d --plugin-config self_signed=true

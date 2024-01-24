@@ -1,7 +1,6 @@
-FROM ubuntu as base
+FROM busybox:latest as base
 
-RUN apt-get update && apt-get install -y curl
-RUN curl -OL https://github.com/notaryproject/notation/releases/download/v1.0.1/notation_1.0.1_linux_amd64.tar.gz 
+RUN wget https://github.com/notaryproject/notation/releases/download/v1.0.1/notation_1.0.1_linux_amd64.tar.gz 
 RUN tar -xzf notation_1.0.1_linux_amd64.tar.gz 
 COPY ./bin/artifacts/notation-azure-kv_0.0.1_linux_amd64.tar.gz .
 RUN tar -xzf notation-azure-kv_0.0.1_linux_amd64.tar.gz
