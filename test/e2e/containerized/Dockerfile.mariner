@@ -1,0 +1,16 @@
+FROM busybox:latest as base
+
+RUN wget https://github.com/notaryproject/notation/releases/download/v1.0.1/notation_1.0.1_linux_amd64.tar.gz 
+RUN tar -xzf notation_1.0.1_linux_amd64.tar.gz 
+COPY ./bin/artifacts/notation-azure-kv_0.0.1_linux_amd64.tar.gz .
+RUN tar -xzf notation-azure-kv_0.0.1_linux_amd64.tar.gz
+
+FROM mcr.microsoft.com/cbl-mariner/base/core:2.0
+
+RUN mkdir -p $HOME/.config/notation/plugins/azure-kv
+RUN yum install ca-certificates -y
+
+COPY --from=base ./notation /usr/local/bin
+COPY --from=base ./notation-azure-kv /root/.config/notation/plugins/azure-kv
+
+CMD ["notation"]

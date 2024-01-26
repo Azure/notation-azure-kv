@@ -77,6 +77,29 @@ jobs:
           name: win-amd64-binary
           path: ./bin/artifacts/notation-azure-kv_0.0.1_windows_amd64.zip
           retention-days: 1
+  e2e-mariner-container:
+    name: E2E testing for Mariner container
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Check out code into the project directory
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: linux-amd64-binary
+          path: ./bin/artifacts
+      - name: Prepare container registry
+        run: |
+          docker run --name registry --rm -d -p 5000:5000 registry:2
+          docker pull hello-world:latest
+          docker tag hello-world:latest localhost:5000/hello-world:v1
+          docker push localhost:5000/hello-world:v1
+      - name: Build notation-akv:v1 image
+        run: docker build -t notation-akv:v1 -f ./test/e2e/containerized/Dockerfile.mariner .
+      - name: Run e2e
+        run: bash ./test/e2e/containerized/test.sh
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
   e2e-linux:
     name: E2E testing on Linux
     runs-on: ubuntu-latest
@@ -100,7 +123,7 @@ jobs:
           echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> "$GITHUB_ENV"
       - name: Prepare container registry
         run: |
-          docker run  --name registry --rm -d -p 5000:5000 registry:2
+          docker run --name registry --rm -d -p 5000:5000 registry:2
           docker pull hello-world:latest
           docker tag hello-world:latest localhost:5000/hello-world:v1
           docker push localhost:5000/hello-world:v1
@@ -138,7 +161,7 @@ jobs:
         shell: pwsh
       - name: Prepare container registry
         run: |
-          docker run  --name registry --rm -d -p 5000:5000 junjiegaomsft/registry:v2.8.2-ltsc2022
+          docker run --name registry --rm -d -p 5000:5000 junjiegaomsft/registry:v2.8.2-ltsc2022
           docker pull hello-world:latest
           docker tag hello-world:latest localhost:5000/hello-world:v1
           docker push localhost:5000/hello-world:v1
