@@ -1,4 +1,5 @@
-﻿using Notation.Plugin.AzureKeyVault.Command;
+﻿using System.Text.Json;
+using Notation.Plugin.AzureKeyVault.Command;
 using Notation.Plugin.Protocol;
 
 namespace Notation.Plugin.AzureKeyVault
@@ -14,6 +15,31 @@ namespace Notation.Plugin.AzureKeyVault
             catch (PluginException e)
             {
                 Error.PrintError(e.Code, e.Message);
+                Environment.Exit(1);
+            }
+            catch (Azure.RequestFailedException e)
+            {
+                // wrap azure exception to notation plugin error response
+                var rawResponse = e.GetRawResponse();
+                if (rawResponse != null)
+                {
+                    var content = JsonDocument.Parse(rawResponse.Content);
+                    if (content.RootElement.TryGetProperty("error", out var errorInfo) &&
+                            errorInfo.TryGetProperty("message", out var errMsg))
+                    {
+                        var errorMessage = errMsg.GetString();
+                        if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            Error.PrintError(
+                                errorCode: e.ErrorCode ?? Error.ERROR,
+                                errorMessage: errorMessage);
+                            Environment.Exit(1);
+                        }
+                    }
+                }
+
+                // fallback to default error message
+                Error.PrintError(Error.ERROR, e.Message);
                 Environment.Exit(1);
             }
             catch (Exception e)
