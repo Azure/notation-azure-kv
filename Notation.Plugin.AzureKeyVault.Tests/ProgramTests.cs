@@ -100,7 +100,7 @@ namespace Notation.Plugin.AzureKeyVault.Tests
         [InlineData(500, "{\"error\":{\"message\":\"TestErrorMessage\"}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
         [InlineData(500, "{\"error2\":{\"message\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
         [InlineData(500, "{\"error\":{\"message2\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
-        [InlineData(500, "{\"error\":{\"message2\":\"\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
+        [InlineData(500, "{\"error\":{\"message\":\"\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
         public void HandleAzureException(int code, string content, string expectedErrorMessage)
         {
             // Arrange
