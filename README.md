@@ -14,9 +14,15 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 1. Navigate to the [Releases](https://github.com/Azure/notation-azure-kv/releases) page and choose a release of `notation-azure-kv`.
 2. Download, verify, and then install the specified version of the plugin.
 
+**Automatically install**:
+
+   For Notation >= v1.1.0, please use [notation plugin install](https://github.com/notaryproject/notation/blob/v1.1.0/specs/commandline/plugin.md#notation-plugin-install) command to automatically install azure-kv plugin.
+
+**Manually install:**
+
    For Linux Bash:
    ```bash
-   version=1.0.1
+   version=1.0.2
    arch=amd64
    install_path="${HOME}/.config/notation/plugins/azure-kv"
 
@@ -36,7 +42,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For macOS Zsh:
    ```zsh
-   version=1.0.1
+   version=1.0.2
    arch=arm64
    install_path="${HOME}/Library/Application Support/notation/plugins/azure-kv"
 
@@ -56,7 +62,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For Windows Powershell:
    ```powershell
-   $version = "1.0.1"
+   $version = "1.0.2"
    $arch = "amd64"
    $install_path = "${env:AppData}\notation\plugins\azure-kv"
 
@@ -76,7 +82,7 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
    mkdir ${install_path}
    Expand-Archive -Path ${zip_file} -DestinationPath ${install_path}
    ```
-3. Run `notation plugin list` and confirm the `azure-kv` plugin is installed.
+1. Run `notation plugin list` and confirm the `azure-kv` plugin is installed.
 
 ## Getting started
 1. [Sign and verify an artifact with a self-signed Azure Key Vault certificate](docs/self-signed-workflow.md)
