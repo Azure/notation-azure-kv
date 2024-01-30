@@ -95,13 +95,17 @@ namespace Notation.Plugin.AzureKeyVault.Tests
         delegate bool TryGetHeaderCallback(string name, ref string value);
 
 
-        [Fact]
-        public void HandleAzureException_valid()
+        [Theory]
+        [InlineData(200, "{\"error\":{\"message\":\"TestErrorMessage\"}}", "TestErrorMessage")]
+        [InlineData(500, "{\"error\":{\"message\":\"TestErrorMessage\"}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
+        [InlineData(500, "{\"error2\":{\"message\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
+        [InlineData(500, "{\"error\":{\"message2\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
+        public void HandleAzureException(int code, string content, string expectedErrorMessage)
         {
             // Arrange
             Mock<Response> responseMock = new Mock<Response>();
-            responseMock.SetupGet(r => r.Status).Returns(200);
-            responseMock.SetupGet(r => r.Content).Returns(BinaryData.FromString("{\"error\":{\"message\":\"TestErrorMessage\"}}"));
+            responseMock.SetupGet(r => r.Status).Returns(code);
+            responseMock.SetupGet(r => r.Content).Returns(BinaryData.FromString(content));
 
             // mock headers
             responseMock.CallBase = true;
@@ -119,35 +123,7 @@ namespace Notation.Plugin.AzureKeyVault.Tests
             var errorResponse = Program.HandleAzureException(exception);
 
             // Assert exit code 1
-            Assert.Equal("TestErrorMessage", errorResponse.ErrorMessage);
-            Assert.Equal("ERROR", errorResponse.ErrorCode);
-        }
-
-        [Fact]
-        public void HandleAzureException_content_is_not_json()
-        {
-            // Arrange
-            Mock<Response> responseMock = new Mock<Response>();
-            responseMock.SetupGet(r => r.Status).Returns(500);
-            responseMock.SetupGet(r => r.Content).Returns(BinaryData.FromString("{\"error\":{\"message\":\"TestErrorMessage\"}"));
-
-            // mock headers
-            responseMock.CallBase = true;
-            responseMock.Protected().As<IResponseMock>().Setup(m => m.TryGetHeader(It.IsAny<string>(), out It.Ref<string>.IsAny))
-                   .Returns(new TryGetHeaderCallback((string name, ref string value) =>
-                   {
-                       value = "ETAG";
-                       Console.WriteLine(name);
-                       return true;
-                   }));
-
-            var exception = new RequestFailedException(responseMock.Object);
-
-            // Act
-            var errorResponse = Program.HandleAzureException(exception);
-
-            // Assert exit code 1
-            Assert.Equal("Service request failed.\nStatus: 500\n\nHeaders:\n", errorResponse.ErrorMessage);
+            Assert.Equal(expectedErrorMessage, errorResponse.ErrorMessage);
             Assert.Equal("ERROR", errorResponse.ErrorCode);
         }
     }
