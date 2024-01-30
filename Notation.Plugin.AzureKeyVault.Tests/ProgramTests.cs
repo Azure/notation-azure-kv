@@ -1,10 +1,11 @@
 using Xunit;
 using Moq;
-using Notation.Plugin.AzureKeyVault.Command;
+using Azure;
 using Notation.Plugin.Protocol;
 using System.IO;
 using System.Threading.Tasks;
 using System;
+using Moq.Protected;
 
 namespace Notation.Plugin.AzureKeyVault.Tests
 {
@@ -83,6 +84,48 @@ namespace Notation.Plugin.AzureKeyVault.Tests
 
                 await Assert.ThrowsAsync<ValidationException>(() => Program.ExecuteAsync(args));
             }
+        }
+        // we need this because of method being protected
+        internal interface IResponseMock
+        {
+            bool TryGetHeader(string name, out string value);
+        }
+
+        // we need this to be able to define the callback with out parameter
+        delegate bool TryGetHeaderCallback(string name, ref string value);
+
+
+        [Theory]
+        [InlineData(200, "{\"error\":{\"message\":\"TestErrorMessage\"}}", "TestErrorMessage")]
+        [InlineData(500, "{\"error\":{\"message\":\"TestErrorMessage\"}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
+        [InlineData(500, "{\"error2\":{\"message\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
+        [InlineData(500, "{\"error\":{\"message2\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n\nHeaders:\n")]
+        [InlineData(500, "{\"error\":{\"message\":\"\"}}", "\nStatus: 500\n\nHeaders:\n")]
+        public void HandleAzureException(int code, string content, string expectedErrorMessage)
+        {
+            // Arrange
+            Mock<Response> responseMock = new Mock<Response>();
+            responseMock.SetupGet(r => r.Status).Returns(code);
+            responseMock.SetupGet(r => r.Content).Returns(BinaryData.FromString(content));
+
+            // mock headers
+            responseMock.CallBase = true;
+            responseMock.Protected().As<IResponseMock>().Setup(m => m.TryGetHeader(It.IsAny<string>(), out It.Ref<string>.IsAny))
+                   .Returns(new TryGetHeaderCallback((string name, ref string value) =>
+                   {
+                       value = "ETAG";
+                       Console.WriteLine(name);
+                       return true;
+                   }));
+
+            var exception = new RequestFailedException(responseMock.Object);
+
+            // Act
+            var errorResponse = Program.HandleAzureException(exception);
+
+            // Assert exit code 1
+            Assert.Equal(expectedErrorMessage, errorResponse.ErrorMessage);
+            Assert.Equal("ERROR", errorResponse.ErrorCode);
         }
     }
 }

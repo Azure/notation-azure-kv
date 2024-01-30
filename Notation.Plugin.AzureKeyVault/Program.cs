@@ -19,9 +19,27 @@ namespace Notation.Plugin.AzureKeyVault
             }
             catch (Azure.RequestFailedException e)
             {
-                // wrap azure exception to notation plugin error response
-                var rawResponse = e.GetRawResponse();
-                if (rawResponse != null)
+                Console.Error.WriteLine(HandleAzureException(e).ToJson());
+                Environment.Exit(1);
+            }
+            catch (Exception e)
+            {
+                Error.PrintError(Error.ERROR, e.Message);
+                Environment.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// Handles Azure.RequestFailedException and returns ErrorResponse.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static ErrorResponse HandleAzureException(Azure.RequestFailedException e)
+        {
+            var rawResponse = e.GetRawResponse();
+            if (rawResponse != null)
+            {
+                try
                 {
                     var content = JsonDocument.Parse(rawResponse.Content);
                     if (content.RootElement.TryGetProperty("error", out var errorInfo) &&
@@ -30,23 +48,22 @@ namespace Notation.Plugin.AzureKeyVault
                         var errorMessage = errMsg.GetString();
                         if (!string.IsNullOrEmpty(errorMessage))
                         {
-                            Error.PrintError(
+                            return new ErrorResponse(
                                 errorCode: e.ErrorCode ?? Error.ERROR,
                                 errorMessage: errorMessage);
-                            Environment.Exit(1);
                         }
                     }
                 }
+                catch (Exception)
+                {
+                    // ignore
+                }
+            }
 
-                // fallback to default error message
-                Error.PrintError(Error.ERROR, e.Message);
-                Environment.Exit(1);
-            }
-            catch (Exception e)
-            {
-                Error.PrintError(Error.ERROR, e.Message);
-                Environment.Exit(1);
-            }
+            // fallback to default error message
+            return new ErrorResponse(
+                errorCode: e.ErrorCode ?? Error.ERROR,
+                errorMessage: e.Message);
         }
 
         public static async Task ExecuteAsync(string[] args)
