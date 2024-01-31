@@ -18,6 +18,31 @@ Before you begin, make sure the latest version of the [Notation CLI has been ins
 
    For Notation >= v1.1.0, please use [notation plugin install](https://github.com/notaryproject/notation/blob/v1.1.0/specs/commandline/plugin.md#notation-plugin-install) command to automatically install azure-kv plugin.
 
+   For Linux amd64:
+   ```
+   notation plugin install --url https://github.com/Azure/notation-azure-kv/releases/download/v1.0.2/notation-azure-kv_1.0.2_linux_amd64.tar.gz --sha256sum f2b2e131a435b6a9742c202237b9aceda81859e6d4bd6242c2568ba556cee20e
+   ```
+
+   For Linux arm64:
+   ```
+   notation plugin install --url https://github.com/Azure/notation-azure-kv/releases/download/v1.0.2/notation-azure-kv_1.0.2_linux_arm64.tar.gz --sha256sum 05cb2ca3460d07841f69b25d56fc7c93afe333b6b46ce33882a599cf0af9d532
+   ```
+
+   For Windows amd64:
+   ```
+   notation plugin install --url https://github.com/Azure/notation-azure-kv/releases/download/v1.0.2/notation-azure-kv_1.0.2_windows_amd64.zip --sha256sum 47769106233f9a4f34abed67d0ad6154ddee0e45b31c52127c23c52302970496
+   ```
+
+   For macOS amd64:
+   ```
+   notation plugin install --url https://github.com/Azure/notation-azure-kv/releases/download/v1.0.2/notation-azure-kv_1.0.2_darwin_amd64.tar.gz --sha256sum 9dfc197b2d03e2f0470c62997434cf6fa78476cc1364527025fe8a86acda94e3
+   ```
+
+   For macOS arm64:
+   ```
+   notation plugin install --url https://github.com/Azure/notation-azure-kv/releases/download/v1.0.2/notation-azure-kv_1.0.2_darwin_arm64.tar.gz --sha256sum ebc53b7ef1c32fb9d4ea7b85d30875b4595893d310a3ad7facfb333f55d5c3ed
+   ```
+
    **Manually install**:
 
    For Linux Bash:
