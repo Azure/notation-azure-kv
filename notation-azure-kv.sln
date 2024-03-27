@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notation.Plugin.AzureKeyVault.Tests", "Notation.Plugin.AzureKeyVault.Tests\Notation.Plugin.AzureKeyVault.Tests.csproj", "{40C4B7A1-22EF-4A39-B7EB-5CCD4B55280C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notation.Plugin.AzureKeyVault", "Notation.Plugin.AzureKeyVault\Notation.Plugin.AzureKeyVault.csproj", "{8605E5E0-2031-44AE-BBDB-E77BCB7FC4C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{40C4B7A1-22EF-4A39-B7EB-5CCD4B55280C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40C4B7A1-22EF-4A39-B7EB-5CCD4B55280C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40C4B7A1-22EF-4A39-B7EB-5CCD4B55280C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40C4B7A1-22EF-4A39-B7EB-5CCD4B55280C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8605E5E0-2031-44AE-BBDB-E77BCB7FC4C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8605E5E0-2031-44AE-BBDB-E77BCB7FC4C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8605E5E0-2031-44AE-BBDB-E77BCB7FC4C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8605E5E0-2031-44AE-BBDB-E77BCB7FC4C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E33D37BA-53C5-4424-8536-7687A827BB1A}
+	EndGlobalSection
+EndGlobal
