@@ -19,8 +19,7 @@ runtime="$2"
 commitHash="$(git log --pretty=format:'%h' -n 1)"
 dotnet publish ./Notation.Plugin.AzureKeyVault \
     --configuration Release \
-    --self-contained true \
-    -p:PublishSingleFile=true \
+    -p:PublishAot=true \
     -p:CommitHash="$commitHash" \
     -p:Version="$version" \
     -r "$runtime" \
