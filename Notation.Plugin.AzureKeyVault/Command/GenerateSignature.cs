@@ -1,5 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
+using Notation.Plugin.AzureKeyVault.Credential;
 using Notation.Plugin.AzureKeyVault.Certificate;
 using Notation.Plugin.AzureKeyVault.Client;
 using Notation.Plugin.Protocol;
@@ -26,7 +27,9 @@ namespace Notation.Plugin.AzureKeyVault.Command
                 throw new ValidationException("Invalid input");
             }
             this._request = request;
-            this._keyVaultClient = new KeyVaultClient(request.KeyId);
+            this._keyVaultClient = new KeyVaultClient(
+                id: request.KeyId,
+                credential: Credentials.GetCredentials(request.PluginConfig));
         }
 
         /// <summary>
