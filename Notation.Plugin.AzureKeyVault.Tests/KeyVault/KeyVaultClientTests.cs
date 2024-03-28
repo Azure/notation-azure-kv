@@ -11,6 +11,7 @@ using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
 using Moq;
+using Notation.Plugin.AzureKeyVault.Credential;
 using Notation.Plugin.Protocol;
 using Xunit;
 
@@ -23,7 +24,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         {
             string keyId = "https://myvault.vault.azure.net/keys/my-key/123";
 
-            KeyVaultClient keyVaultClient = new KeyVaultClient(keyId);
+            KeyVaultClient keyVaultClient = new KeyVaultClient(keyId, Credentials.GetCredentials("default"));
 
             Assert.Equal("my-key", keyVaultClient.Name);
             Assert.Equal("123", keyVaultClient.Version);
@@ -37,7 +38,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             string name = "my-key";
             string version = "123";
 
-            KeyVaultClient keyVaultClient = new KeyVaultClient(keyVaultUrl, name, version);
+            KeyVaultClient keyVaultClient = new KeyVaultClient(keyVaultUrl, name, version, Credentials.GetCredentials("default"));
 
             Assert.Equal(name, keyVaultClient.Name);
             Assert.Equal(version, keyVaultClient.Version);
@@ -51,32 +52,32 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         [InlineData("http://myvault.vault.azure.net/keys/my-key/123")]
         public void TestConstructorWithInvalidKeyId(string invalidKeyId)
         {
-            Assert.Throws<ValidationException>(() => new KeyVaultClient(invalidKeyId));
+            Assert.Throws<ValidationException>(() => new KeyVaultClient(invalidKeyId, Credentials.GetCredentials("default")));
         }
 
         [Theory]
         [InlineData("")]
         public void TestConstructorWithEmptyKeyId(string invalidKeyId)
         {
-            Assert.Throws<ArgumentNullException>(() => new KeyVaultClient(invalidKeyId));
+            Assert.Throws<ArgumentNullException>(() => new KeyVaultClient(invalidKeyId, Credentials.GetCredentials("default")));
         }
 
         private class TestableKeyVaultClient : KeyVaultClient
         {
-            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, CryptographyClient cryptoClient)
-                : base(keyVaultUrl, name, version)
+            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, CryptographyClient cryptoClient, TokenCredential credenital)
+                : base(keyVaultUrl, name, version, credenital)
             {
                 this._cryptoClient = new Lazy<CryptographyClient>(() => cryptoClient);
             }
 
-            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, CertificateClient certificateClient)
-                : base(keyVaultUrl, name, version)
+            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, CertificateClient certificateClient, TokenCredential credenital)
+                : base(keyVaultUrl, name, version, credenital)
             {
                 this._certificateClient = new Lazy<CertificateClient>(() => certificateClient);
             }
 
-            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, SecretClient secretClient)
-                : base(keyVaultUrl, name, version)
+            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, SecretClient secretClient, TokenCredential credenital)
+                : base(keyVaultUrl, name, version, credenital)
             {
                 this._secretClient = new Lazy<SecretClient>(() => secretClient);
             }
@@ -88,7 +89,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             mockCryptoClient.Setup(c => c.SignDataAsync(It.IsAny<SignatureAlgorithm>(), It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(signResult);
 
-            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-key", "123", mockCryptoClient.Object);
+            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-key", "123", mockCryptoClient.Object, Credentials.GetCredentials("default"));
         }
 
         private TestableKeyVaultClient CreateMockedKeyVaultClient(KeyVaultCertificate certificate)
@@ -97,7 +98,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             mockCertificateClient.Setup(c => c.GetCertificateVersionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Response.FromValue(certificate, new Mock<Response>().Object));
 
-            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", "123", mockCertificateClient.Object);
+            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", "123", mockCertificateClient.Object, Credentials.GetCredentials("default"));
         }
 
         private TestableKeyVaultClient CreateMockedKeyVaultClient(KeyVaultSecret secret)
@@ -105,7 +106,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             var mockSecretClient = new Mock<SecretClient>(new Uri("https://fake.vault.azure.net/secrets/fake-secret/123"), new Mock<TokenCredential>().Object);
             mockSecretClient.Setup(c => c.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Response.FromValue(secret, new Mock<Response>().Object));
-            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", "123", mockSecretClient.Object);
+            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", "123", mockSecretClient.Object, Credentials.GetCredentials("default"));
         }
 
         [Fact]

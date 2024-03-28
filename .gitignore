@@ -19,6 +19,7 @@ coverage.txt
 .vscode/
 .idea/
 .devcontainer
+.mono/
 
 # binary output
 bin/
