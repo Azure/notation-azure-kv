@@ -21,11 +21,11 @@ namespace Notation.Plugin.AzureKeyVault.Credential
         /// <summary>
         /// Workload identity credential name.
         /// </summary>
-        public const string WorkloadIdentityCredentialName = "workloadidentity";
+        public const string WorkloadIdentityCredentialName = "workloadid";
         /// <summary>
         /// Managed identity credential name.
         /// </summary>
-        public const string ManagedIdentityCredentialName = "managedidentity";
+        public const string ManagedIdentityCredentialName = "managedid";
         /// <summary>
         /// Azure CLI credential name.
         /// </summary>

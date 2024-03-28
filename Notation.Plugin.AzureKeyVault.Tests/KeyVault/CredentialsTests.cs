@@ -10,8 +10,8 @@ namespace Notation.Plugin.AzureKeyVault.Credential.Tests
         [Theory]
         [InlineData("default")]
         [InlineData("environment")]
-        [InlineData("workloadidentity")]
-        [InlineData("managedidentity")]
+        [InlineData("workloadid")]
+        [InlineData("managedid")]
         [InlineData("azurecli")]
         public void GetCredentials_WithValidCredentialType_ReturnsExpectedCredential(string credentialType)
         {

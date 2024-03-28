@@ -182,3 +182,77 @@ runs:
           echo "both self signed and ca certs plugin config exist should failed, but succeeded."
           exit 1
       shell: bash
+
+    # credential type test
+    - name: enviroment credential failed
+      continue-on-error: true
+      id: enviroment-credential-failed
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/self-signed-pkcs12/70747b2064c0488e936eba7a29acc4c6
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: |
+          credential_type=environment
+          self_signed=true
+    - name: 'Should Fail: enviroment credential failed'
+      if: steps.enviroment-credential-failed.outcome != 'failure'
+      run: |
+          echo "enviroment credential failed should failed, but succeeded."
+          exit 1
+      shell: bash
+    - name: workload identity failed
+      continue-on-error: true
+      id: workload-identity-failed
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/self-signed-pkcs12/70747b2064c0488e936eba7a29acc4c6
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: |
+          credential_type=workloadid
+          self_signed=true
+    - name: 'Should Fail: workload identity failed'
+      if: steps.workload-identity-failed.outcome != 'failure'
+      run: |
+          echo "workload identity failed should failed, but succeeded."
+          exit 1
+      shell: bash
+    - name: managed identity failed
+      continue-on-error: true
+      id: managed-identity-failed
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/self-signed-pkcs12/70747b2064c0488e936eba7a29acc4c6
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: |
+          credential_type=managedid
+          self_signed=true
+    - name: 'Should Fail: managed identity failed'
+      if: steps.managed-identity-failed.outcome != 'failure'
+      run: |
+          echo "managed identity failed should failed, but succeeded."
+          exit 1
+      shell: bash
+    - name: azure cli succeeded
+      uses: notaryproject/notation-action/sign@v1
+      with:
+        plugin_name: azure-kv
+        plugin_url: ${{ inputs.pluginDownloadURL }}
+        plugin_checksum: ${{ inputs.pluginChecksum }}
+        key_id: https://acrci-test-kv.vault.azure.net/keys/self-signed-pkcs12/70747b2064c0488e936eba7a29acc4c6
+        target_artifact_reference: localhost:5000/hello-world:v1
+        signature_format: cose
+        plugin_config: |
+          credential_type=azurecli
+          self_signed=true
