@@ -51,6 +51,7 @@ def main():
         publish_command.append("-p:PublishAot=true")
     else:
         publish_command.append("-p:PublishSingleFile=true")
+        publish_command.append("-p:PublishTrimmed=true")
 
     # Publish for each runtime
     subprocess.run(publish_command, check=True)
