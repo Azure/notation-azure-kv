@@ -44,7 +44,7 @@ def main():
         "-r",
         args.runtime,
         "-o",
-        f"{output_dir}/{args.runtime}",
+        os.path.join(output_dir, args.runtime),
     ]
 
     if args.enable_aot:
