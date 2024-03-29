@@ -41,11 +41,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
-      - name: Setup ARM emulator for AOT build
-        if: matrix.config.runtime == 'linux-arm64'
-        run: |
-          sudo apt-get update
-          sudo apt-get install gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
       - name: Build .NET project
         run: python3 ./scripts/build.py "${GITHUB_REF_NAME}" ${{ matrix.config.runtime }} ${{ matrix.config.build_args }}
       - name: Upload ${{ matrix.config.runtime }} artifact
