@@ -18,13 +18,13 @@ jobs:
           - runtime: osx-x64
             build_args: ""
             os: ubuntu-latest
+          - runtime: osx-arm64
+            build_args: ""
+            os: ubuntu-latest
           - runtime: linux-x64
             build_args: --enable-aot
             os: ubuntu-latest
           - runtime: linux-arm64
-            build_args: --enable-aot
-            os: ubuntu-latest
-          - runtime: osx-arm64
             build_args: ""
             os: ubuntu-latest
           - runtime: win-x64
