@@ -53,7 +53,7 @@ jobs:
         uses: codecov/codecov-action@v3
       - name: Build Linux Binary
         run: |
-          # the binary will be shared on E2E test
+          # the binary will be used in E2E test
           python3 ./scripts/build.py v0.0.1 linux-x64 --enable-aot
       - name: Upload Linux artifact
         if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
@@ -64,7 +64,7 @@ jobs:
           retention-days: 1
       - name: Build macOS Binary
         run: |
-          # the binary will be shared on E2E test
+          # the binary will be used in E2E test
           python3 ./scripts/build.py v0.0.1 osx-x64
       - name: Upload macOS artifact
         if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
