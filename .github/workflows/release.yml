@@ -14,9 +14,24 @@ jobs:
   build:
     strategy:
       matrix:
-        runtime: ["linux-x64", "linux-arm64", "win-x64", "osx-x64", "osx-arm64"]
+        config:
+          - runtime: osx-x64
+            build_args: ""
+            os: ubuntu-latest
+          - runtime: linux-x64
+            build_args: --enable-aot
+            os: ubuntu-latest
+          - runtime: linux-arm64
+            build_args: --enable-aot
+            os: ubuntu-latest
+          - runtime: osx-arm64
+            build_args: ""
+            os: ubuntu-latest
+          - runtime: win-x64
+            build_args: --enable-aot
+            os: windows-latest
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.config.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -29,11 +44,11 @@ jobs:
       - name: Build .NET project
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash ./scripts/build.sh "${GITHUB_REF_NAME}" ${{ matrix.runtime }}
-      - name: Upload ${{ matrix.runtime }} artifact
+        run: python3 ./scripts/build.py "${GITHUB_REF_NAME}" ${{ matrix.config.runtime }} ${{ matrix.config.build_args }}
+      - name: Upload ${{ matrix.config.runtime }} artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.runtime }}
+          name: ${{ matrix.config.runtime }}
           path: ${{ github.workspace }}/bin/artifacts/*
           retention-days: 1
   macos_codesign:
@@ -64,7 +79,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: macos_codesign
+    needs: [macos_codesign, build]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
