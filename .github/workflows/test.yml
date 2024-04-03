@@ -32,7 +32,7 @@ jobs:
           DEFAULT_BRANCH: main
           DEFAULT_WORKSPACE: ./Notation.Plugin.AzureKeyVault
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_EXCLUDE: '.*Tests/.*|.*.yml|.*/scripts/generate-certs.sh'
+          FILTER_REGEX_EXCLUDE: '.*Tests/.*|.*.yml|.*/scripts/generate-certs.sh|.*.py'
           VALIDATE_MARKDOWN: false
   test:
     name: Unit Testing and Build
@@ -51,11 +51,10 @@ jobs:
         run: make test
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
-      - name: Build bianry for E2E testing
+      - name: Build Linux Binary
         run: |
-          ./scripts/build.sh v0.0.1 linux-x64
-          ./scripts/build.sh v0.0.1 win-x64
-          ./scripts/build.sh v0.0.1 osx-x64
+          # the binary will be used in E2E test
+          python3 ./scripts/build.py v0.0.1 linux-x64 --enable-aot
       - name: Upload Linux artifact
         if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
         uses: actions/upload-artifact@v2
@@ -63,19 +62,16 @@ jobs:
           name: linux-amd64-binary
           path: ./bin/artifacts/notation-azure-kv_0.0.1_linux_amd64.tar.gz
           retention-days: 1
+      - name: Build macOS Binary
+        run: |
+          # the binary will be used in E2E test
+          python3 ./scripts/build.py v0.0.1 osx-x64
       - name: Upload macOS artifact
         if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
         uses: actions/upload-artifact@v2
         with:
           name: darwin-amd64-binary
           path: ./bin/artifacts/notation-azure-kv_0.0.1_darwin_amd64.tar.gz
-          retention-days: 1
-      - name: Upload Windows artifact
-        if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
-        uses: actions/upload-artifact@v2
-        with:
-          name: win-amd64-binary
-          path: ./bin/artifacts/notation-azure-kv_0.0.1_windows_amd64.zip
           retention-days: 1
   e2e-mariner-container:
     name: E2E testing for Mariner container
@@ -138,16 +134,18 @@ jobs:
           pluginChecksum: ${{ env.pluginChecksum }}
   e2e-windows:
     name: E2E testing on Windows
-    runs-on: windows-2022
+    runs-on: windows-latest
     needs: test
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          name: win-amd64-binary
-          path: ./bin/artifacts
+          dotnet-version: '8.0.x'
+      - name: Build Windows Binary
+        run: python3 ./scripts/build.py v0.0.1 win-x64 --enable-aot
       - name: Run download server locally
         run: |
           # wsl bash
