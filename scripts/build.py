@@ -35,16 +35,12 @@ def main():
         "dotnet",
         "publish",
         "./Notation.Plugin.AzureKeyVault",
-        "--configuration",
-        "Release",
-        "--self-contained",
-        "true",
+        "--configuration", "Release",
+        "--self-contained", "true",
         f"-p:CommitHash={commit_hash}",
         f"-p:Version={version}",
-        "-r",
-        args.runtime,
-        "-o",
-        os.path.join(output_dir, args.runtime),
+        "-r", args.runtime,
+        "-o", os.path.join(output_dir, args.runtime),
     ]
 
     if args.enable_aot:
