@@ -134,7 +134,7 @@ jobs:
           pluginChecksum: ${{ env.pluginChecksum }}
   e2e-windows:
     name: E2E testing on Windows
-    runs-on: windows-2022
+    runs-on: windows-latest
     needs: test
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
