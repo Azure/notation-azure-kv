@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.config.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup .NET
@@ -58,7 +58,7 @@ jobs:
         shell: bash
         run: python3 ./scripts/build.py "${GITHUB_REF_NAME}" ${{ matrix.config.runtime }} ${{ matrix.config.build_args }}
       - name: Upload ${{ matrix.config.runtime }} artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.config.runtime }}
           path: ${{ github.workspace }}/bin/artifacts/*
@@ -72,18 +72,18 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.runtime }}
           path: ${{ github.workspace }}/bin/artifacts
       - name: Codesign
         run: bash ./scripts/codesign.sh
       - name: Upload ${{ matrix.runtime }} artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.runtime }}
           path: ${{ github.workspace }}/bin/artifacts
@@ -94,11 +94,11 @@ jobs:
     needs: macos_codesign
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ${{ github.workspace }}/bin/artifacts
       - name: Create release
