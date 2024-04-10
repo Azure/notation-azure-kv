@@ -68,6 +68,24 @@ notation sign <registry>/<repository>@<digest> \
   --plugin-config "self_signed=true"
 ```
 
+## credential_type
+Set the prefered credential type. Currently support the follow credential type:
+- [default](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet)
+- [environment](https://learn.microsoft.com/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet)
+- [workloadid](https://learn.microsoft.com/dotnet/api/azure.identity.workloadidentitycredential?view=azure-dotnet)
+- [managedid](https://learn.microsoft.com/dotnet/api/azure.identity.managedidentitycredential?view=azure-dotnet)
+
+Default: **default** (default credential)
+
+Example
+```
+notation sign <registry>/<repository>@<digest> \
+  --plugin azure-kv \
+  --id <key_identifier> \
+  --plugin-config "self_signed=true"
+  --plugin-config "credential_type=managedid"
+```
+
 ## Permission management
 The `notation-azure-kv` plugin support multiple level of permissions setting to satisfy different permission use cases.
 
