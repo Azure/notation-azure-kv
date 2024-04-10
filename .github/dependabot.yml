@@ -1,0 +1,15 @@
+version: 2
+
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/Notation.Plugin.AzureKeyVault" #Notation.Plugin.AzureKeyVault.csproj
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "nuget"
+    directory: "/Notation.Plugin.AzureKeyVault.Tests" #Notation.Plugin.AzureKeyVault.Tests.csproj
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
