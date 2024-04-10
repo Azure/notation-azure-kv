@@ -69,7 +69,7 @@ notation sign <registry>/<repository>@<digest> \
 ```
 
 ## credential_type
-Set the prefered credential type. Currently support the follow credential type:
+Set the preferred credential type. Currently, the following credential types are supported:
 - [default](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet)
 - [environment](https://learn.microsoft.com/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet)
 - [workloadid](https://learn.microsoft.com/dotnet/api/azure.identity.workloadidentitycredential?view=azure-dotnet)
