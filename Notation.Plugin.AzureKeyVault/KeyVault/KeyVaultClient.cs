@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
-using Azure.Identity;
+using Azure.Core;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using Azure.Security.KeyVault.Secrets;
@@ -62,7 +62,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// Constructor to create AzureKeyVault object from keyVaultUrl, name 
         /// and version.
         /// </summary>
-        public KeyVaultClient(string keyVaultUrl, string name, string version)
+        public KeyVaultClient(string keyVaultUrl, string name, string version, TokenCredential credential)
         {
             if (string.IsNullOrEmpty(keyVaultUrl))
             {
@@ -84,7 +84,6 @@ namespace Notation.Plugin.AzureKeyVault.Client
             this._keyId = $"{keyVaultUrl}/keys/{name}/{version}";
 
             // initialize credential and lazy clients
-            var credential = new DefaultAzureCredential();
             this._certificateClient = new Lazy<CertificateClient>(() => new CertificateClient(new Uri(keyVaultUrl), credential));
             this._cryptoClient = new Lazy<CryptographyClient>(() => new CryptographyClient(new Uri(_keyId), credential));
             this._secretClient = new Lazy<SecretClient>(() => new SecretClient(new Uri(keyVaultUrl), credential));
@@ -93,18 +92,20 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <summary>
         /// Constructor to create AzureKeyVault object from key identifier or
         /// certificate identifier.
-        ///
+        /// </summary>
         /// <param name="id">
         /// Key identifier or certificate identifier. (e.g. https://<vaultname>.vault.azure.net/keys/<name>/<version>)
         /// </param>
-        /// </summary>
-        public KeyVaultClient(string id) : this(ParseId(id)) { }
+        /// <param name="credential">
+        /// TokenCredential object to authenticate with Azure Key Vault.
+        /// </param>
+        public KeyVaultClient(string id, TokenCredential credential) : this(ParseId(id), credential) { }
 
         /// <summary>
         /// A helper constructor to create KeyVaultClient from KeyVaultMetadata.
         /// </summary>
-        private KeyVaultClient(KeyVaultMetadata metadata)
-            : this(metadata.KeyVaultUrl, metadata.Name, metadata.Version) { }
+        private KeyVaultClient(KeyVaultMetadata metadata, TokenCredential credential)
+            : this(metadata.KeyVaultUrl, metadata.Name, metadata.Version, credential) { }
 
         /// <summary>
         /// A helper function to parse key identifier or certificate identifier
