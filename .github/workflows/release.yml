@@ -87,6 +87,7 @@ jobs:
         with:
           name: ${{ matrix.runtime }}
           path: ${{ github.workspace }}/bin/artifacts
+          overwrite: true
           retention-days: 1
   release:
     name: Release
