@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <Target Name="GenerateBuildMetadata" BeforeTargets="CoreCompile">
-   <WriteLinesToFile
+    <WriteLinesToFile
       File="$(IntermediateOutputPath)\GetPluginMetadata.g.cs"
       Lines="
         namespace Notation.Plugin.AzureKeyVault.Command
