@@ -70,12 +70,12 @@ notation sign <registry>/<repository>@<digest> \
 
 ## credential_type
 Set the preferred credential type. Currently, the following credential types are supported:
-- [default](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet)
 - [environment](https://learn.microsoft.com/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet)
 - [workloadid](https://learn.microsoft.com/dotnet/api/azure.identity.workloadidentitycredential?view=azure-dotnet)
 - [managedid](https://learn.microsoft.com/dotnet/api/azure.identity.managedidentitycredential?view=azure-dotnet)
+- [azurecli](https://learn.microsoft.com/dotnet/api/azure.identity.azureclicredential?view=azure-dotnet)
 
-Default: **default** (default credential)
+Default: please see the [Default Azure Credential](https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet) for details on automatically trying a list of credential types.
 
 Example
 ```
