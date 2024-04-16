@@ -34,8 +34,8 @@
             {
                 static GetPluginMetadata()
                 {
-                    Version = &quot;$(Version)&quot;;
-                    CommitHash = &quot;$(CommitHash)&quot;;
+                    Version = &quot;$(Version)&quot;%3b
+                    CommitHash = &quot;$(CommitHash)&quot;%3b
                 }
             }
         }"
