@@ -11,10 +11,6 @@ namespace Notation.Plugin.AzureKeyVault.Credential
         /// </summary>
         public const string CredentialTypeKey = "credential_type";
         /// <summary>
-        /// Default credential name.
-        /// </summary>
-        public const string DefaultCredentialName = "default";
-        /// <summary>
         /// Environment credential name.
         /// </summary>
         public const string EnvironmentCredentialName = "environment";
@@ -34,13 +30,16 @@ namespace Notation.Plugin.AzureKeyVault.Credential
         /// <summary>
         /// Get the credential based on the credential type.
         /// </summary>
-        public static TokenCredential GetCredentials(string credentialType)
+        public static TokenCredential GetCredentials(string? credentialType)
         {
+            if (credentialType == null)
+            {
+                return new DefaultAzureCredential();
+            }
+
             credentialType = credentialType.ToLower();
             switch (credentialType)
             {
-                case DefaultCredentialName:
-                    return new DefaultAzureCredential();
                 case EnvironmentCredentialName:
                     return new EnvironmentCredential();
                 case WorkloadIdentityCredentialName:
@@ -50,7 +49,7 @@ namespace Notation.Plugin.AzureKeyVault.Credential
                 case AzureCliCredentialName:
                     return new AzureCliCredential();
                 default:
-                    throw new ValidationException($"Invalid credential key: {credentialType}");
+                    throw new ValidationException($"Invalid credential type: {credentialType}");
             }
         }
 
@@ -59,9 +58,9 @@ namespace Notation.Plugin.AzureKeyVault.Credential
         /// </summary>
         public static TokenCredential GetCredentials(Dictionary<string, string>? pluginConfig)
         {
-            var credentialName = pluginConfig?.GetValueOrDefault(CredentialTypeKey, DefaultCredentialName) ??
-                                    DefaultCredentialName;
-            return GetCredentials(credentialName);
+            string? credentialType = null;
+            pluginConfig?.TryGetValue(CredentialTypeKey, out credentialType);
+            return GetCredentials(credentialType);
         }
     }
 }
