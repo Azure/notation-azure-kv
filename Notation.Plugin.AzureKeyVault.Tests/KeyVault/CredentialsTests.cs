@@ -8,12 +8,12 @@ namespace Notation.Plugin.AzureKeyVault.Credential.Tests
     public class CredentialsTests
     {
         [Theory]
-        [InlineData("default")]
+        [InlineData(null)]
         [InlineData("environment")]
         [InlineData("workloadid")]
         [InlineData("managedid")]
         [InlineData("azurecli")]
-        public void GetCredentials_WithValidCredentialType_ReturnsExpectedCredential(string credentialType)
+        public void GetCredentials_WithValidCredentialType_ReturnsExpectedCredential(string? credentialType)
         {
             // Act
             var result = Credentials.GetCredentials(credentialType);
@@ -30,23 +30,7 @@ namespace Notation.Plugin.AzureKeyVault.Credential.Tests
 
             // Act & Assert
             var ex = Assert.Throws<ValidationException>(() => Credentials.GetCredentials(invalidCredentialType));
-            Assert.Equal($"Invalid credential key: {invalidCredentialType}", ex.Message);
-        }
-
-        [Fact]
-        public void GetCredentials_WithPluginConfig_ReturnsExpectedCredential()
-        {
-            // Arrange
-            var pluginConfig = new Dictionary<string, string>
-            {
-                { "credential_type", "default" }
-            };
-
-            // Act
-            var result = Credentials.GetCredentials(pluginConfig);
-
-            // Assert
-            Assert.IsAssignableFrom<TokenCredential>(result);
+            Assert.Equal($"Invalid credential type: {invalidCredentialType}", ex.Message);
         }
     }
 }
