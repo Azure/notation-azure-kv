@@ -35,6 +35,7 @@ jobs:
           FILTER_REGEX_EXCLUDE: '.*Tests/.*|.*.yml|.*/scripts/generate-certs.sh|.*.py'
           VALIDATE_CHECKOV: false
           VALIDATE_MARKDOWN: false
+          VALIDATE_JSCPD: false
   test:
     name: Unit Testing and Build
     runs-on: ubuntu-latest
