@@ -47,10 +47,25 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             Assert.Equal($"{keyVaultUrl}/keys/{name}/{version}", keyVaultClient.KeyId);
         }
 
+        [Fact]
+        public void TestConstructorWithVersionlessKey()
+        {
+            string keyVaultUrl = "https://myvault.vault.azure.net";
+            string name = "my-key";
+
+            KeyVaultClient keyVaultClient = new KeyVaultClient(keyVaultUrl, name, null, Credentials.GetCredentials(defaultCredentialType));
+            Assert.Equal(name, keyVaultClient.Name);
+            Assert.Null(keyVaultClient.Version);
+            Assert.Equal($"{keyVaultUrl}/keys/{name}", keyVaultClient.KeyId);
+
+            keyVaultClient = new KeyVaultClient($"{keyVaultUrl}/keys/{name}", Credentials.GetCredentials(defaultCredentialType));
+            Assert.Equal(name, keyVaultClient.Name);
+            Assert.Null(keyVaultClient.Version);
+            Assert.Equal($"{keyVaultUrl}/keys/{name}", keyVaultClient.KeyId);
+        }
+
         [Theory]
         [InlineData("https://myvault.vault.azure.net/invalid/my-key/123")]
-        [InlineData("https://myvault.vault.azure.net/keys/my-key")]
-        [InlineData("https://myvault.vault.azure.net/keys/my-key/")]
         [InlineData("http://myvault.vault.azure.net/keys/my-key/123")]
         public void TestConstructorWithInvalidKeyId(string invalidKeyId)
         {
@@ -61,7 +76,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         [InlineData("")]
         public void TestConstructorWithEmptyKeyId(string invalidKeyId)
         {
-            Assert.Throws<ArgumentNullException>(() => new KeyVaultClient(invalidKeyId, Credentials.GetCredentials(defaultCredentialType)));
+            Assert.Throws<ValidationException>(() => new KeyVaultClient(invalidKeyId, Credentials.GetCredentials(defaultCredentialType)));
         }
 
         private class TestableKeyVaultClient : KeyVaultClient
@@ -174,24 +189,6 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             Assert.IsType<X509Certificate2>(certificate);
             Assert.Equal("123", keyVaultCertificate.Properties.Version);
             Assert.Equal(testCertificate.RawData, certificate.RawData);
-        }
-
-        [Fact]
-        public async Task GetCertificateAsyncThrowValidationException()
-        {
-            var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
-            var signResult = CryptographyModelFactory.SignResult(
-                keyId: "https://fake.vault.azure.net/keys/fake-key/123",
-                signature: new byte[] { 1, 2, 3 },
-                algorithm: SignatureAlgorithm.RS384);
-
-            var keyVaultCertificate = CertificateModelFactory.KeyVaultCertificate(
-                properties: CertificateModelFactory.CertificateProperties(version: "1234"),
-                cer: testCertificate.RawData);
-
-            var keyVaultClient = CreateMockedKeyVaultClient(keyVaultCertificate);
-
-            await Assert.ThrowsAsync<ValidationException>(async () => await keyVaultClient.GetCertificateAsync());
         }
 
         [Fact]
