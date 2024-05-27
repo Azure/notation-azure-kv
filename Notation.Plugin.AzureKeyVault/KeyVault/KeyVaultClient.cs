@@ -169,9 +169,16 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// </summary>
         public async Task<X509Certificate2> GetCertificateAsync()
         {
-            var cert = await _certificateClient.Value.GetCertificateVersionAsync(_name, _version ?? "");
-
-            return new X509Certificate2(cert.Value.Cer);
+            KeyVaultCertificate cert;
+            if (string.IsNullOrEmpty(_version))
+            {
+                cert = (await _certificateClient.Value.GetCertificateAsync(_name)).Value;
+            }
+            else
+            {
+                cert = (await _certificateClient.Value.GetCertificateVersionAsync(_name, _version)).Value;
+            }
+            return new X509Certificate2(cert.Cer);
         }
 
         /// <summary>
@@ -179,7 +186,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// </summary>
         public async Task<X509Certificate2Collection> GetCertificateChainAsync()
         {
-            var secret = await _secretClient.Value.GetSecretAsync(_name, _version ?? "");
+            var secret = await _secretClient.Value.GetSecretAsync(_name, _version);
 
             var chain = new X509Certificate2Collection();
             var contentType = secret.Value.Properties.ContentType;
