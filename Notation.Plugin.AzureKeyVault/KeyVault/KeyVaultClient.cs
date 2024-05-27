@@ -112,14 +112,14 @@ namespace Notation.Plugin.AzureKeyVault.Client
         {
             if (string.IsNullOrEmpty(id))
             {
-                throw new ValidationException("identifier must not be null or empty");
+                throw new ValidationException("Input passed to \"--id\" must not be empty");
             }
 
             var uri = new Uri(id);
             // Validate uri
             if (uri.Segments.Length < 3 || uri.Segments.Length > 4)
             {
-                throw new ValidationException("Invalid key identifier or certificate identifier. Please visit the link for more information: https://learn.microsoft.com/azure/key-vault/general/about-keys-secrets-certificates#object-identifiers");
+                throw new ValidationException("Invalid input passed to \"--id\". Please follow this format to input the ID \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}\"");
             }
 
             var type = uri.Segments[1].TrimEnd('/');
