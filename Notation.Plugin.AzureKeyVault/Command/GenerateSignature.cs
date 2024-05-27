@@ -24,7 +24,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             var request = JsonSerializer.Deserialize(inputJson, GenerateSignatureRequestContext.Default.GenerateSignatureRequest);
             if (request == null)
             {
-                throw new ValidationException("Failed to parse the request for the plugin. Please contact the Notation developer to resolve the issue.");
+                throw new ValidationException("Failed to parse the request in JSON format. Please contact the Notation developer to resolve the issue.");
             }
             this._request = request;
             this._keyVaultClient = new KeyVaultClient(

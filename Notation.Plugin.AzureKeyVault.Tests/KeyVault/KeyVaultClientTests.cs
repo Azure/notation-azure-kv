@@ -78,6 +78,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         [Theory]
         [InlineData("", "", "")]
         [InlineData("https://myvault.vault.azure.net", "", "")]
+        [InlineData("https://myvault.vault.azure.net", "my-key", "")]
         public void TestConstructorWithInvalidArguments(string keyVaultUrl, string name, string? version)
         {
             Assert.Throws<ValidationException>(() => new KeyVaultClient(keyVaultUrl, name, version, Credentials.GetCredentials(defaultCredentialType)));

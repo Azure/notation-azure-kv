@@ -72,10 +72,15 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 throw new ValidationException("Key name must not be null or empty");
             }
 
+            if (version != null && version == string.Empty)
+            {
+                throw new ValidationException("Key version must not be empty");
+            }
+
             _name = name;
             _version = version;
             _keyId = $"{keyVaultUrl}/keys/{name}";
-            if (!string.IsNullOrEmpty(version))
+            if (version != null)
             {
                 _keyId = $"{_keyId}/{version}";
             }
@@ -119,7 +124,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             // Validate uri
             if (uri.Segments.Length < 3 || uri.Segments.Length > 4)
             {
-                throw new ValidationException("Invalid input passed to \"--id\". Please follow this format to input the ID \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}\"");
+                throw new ValidationException("Invalid input passed to \"--id\". Please follow this format to input the ID \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}\" or \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}/{certificate-version}\"");
             }
 
             var type = uri.Segments[1].TrimEnd('/');
@@ -152,6 +157,11 @@ namespace Notation.Plugin.AzureKeyVault.Client
         {
             var signResult = await _cryptoClient.Value.SignDataAsync(algorithm, payload);
 
+            if (!string.IsNullOrEmpty(_version) && signResult.KeyId != _keyId)
+            {
+                throw new PluginException($"Invalid keys identifier. The user provides {_keyId} but the response contains {signResult.KeyId} as the keys. Please ensure the keys identifier is correct.");
+            }
+
             if (signResult.Algorithm != algorithm)
             {
                 throw new PluginException($"Invalid signature algorithm. The user provides {algorithm} but the response contains {signResult.Algorithm} as the algorithm");
@@ -180,7 +190,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 // requested version, it means the version is invalid.
                 if (cert.Properties.Version != _version)
                 {
-                    throw new PluginException($"The version of the certificate retrieved from Azure Key Vault is different from the version specified in the request. The version specified in the request is {_version} but the version retrieved from Azure Key Vault is {cert.Properties.Version}");
+                    throw new PluginException($"The version specified in the request is {_version} but the version retrieved from Azure Key Vault is {cert.Properties.Version}. Please ensure the version is correct.");
                 }
             }
             return new X509Certificate2(cert.Cer);
