@@ -164,6 +164,20 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         }
 
         [Fact]
+        public async Task TestSignAsyncThrowsExceptionOnInvalidKeyId()
+        {
+            var signResult = CryptographyModelFactory.SignResult(
+                keyId: "https://fake.vault.azure.net/keys/invalid-key/123",
+                signature: new byte[] { 1, 2, 3 },
+                algorithm: SignatureAlgorithm.RS256);
+
+            TestableKeyVaultClient keyVaultClient = CreateMockedKeyVaultClient(signResult);
+            byte[] payload = new byte[] { 4, 5, 6 };
+
+            await Assert.ThrowsAsync<PluginException>(async () => await keyVaultClient.SignAsync(SignatureAlgorithm.RS256, payload));
+        }
+
+        [Fact]
         public async Task TestSignAsyncThrowsExceptionOnInvalidAlgorithm()
         {
             var signResult = CryptographyModelFactory.SignResult(
