@@ -76,6 +76,14 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         }
 
         [Theory]
+        [InlineData("", "", "")]
+        [InlineData("https://myvault.vault.azure.net", "", "")]
+        public void TestConstructorWithInvalidArguments(string keyVaultUrl, string name, string? version)
+        {
+            Assert.Throws<ValidationException>(() => new KeyVaultClient(keyVaultUrl, name, version, Credentials.GetCredentials(defaultCredentialType)));
+        }
+
+        [Theory]
         [InlineData("")]
         public void TestConstructorWithEmptyKeyId(string invalidKeyId)
         {
@@ -90,7 +98,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
                 this._cryptoClient = new Lazy<CryptographyClient>(() => cryptoClient);
             }
 
-            public TestableKeyVaultClient(string keyVaultUrl, string name, string version, CertificateClient certificateClient, TokenCredential credenital)
+            public TestableKeyVaultClient(string keyVaultUrl, string name, string? version, CertificateClient certificateClient, TokenCredential credenital)
                 : base(keyVaultUrl, name, version, credenital)
             {
                 this._certificateClient = new Lazy<CertificateClient>(() => certificateClient);
@@ -119,6 +127,15 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
                 .ReturnsAsync(Response.FromValue(certificate, new Mock<Response>().Object));
 
             return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", "123", mockCertificateClient.Object, Credentials.GetCredentials(defaultCredentialType));
+        }
+
+        private TestableKeyVaultClient CreateMockedKeyVaultClient(KeyVaultCertificateWithPolicy certWithPolicy)
+        {
+            var mockCertificateClient = new Mock<CertificateClient>(new Uri("https://fake.vault.azure.net/certificates/fake-certificate/123"), new Mock<TokenCredential>().Object);
+            mockCertificateClient.Setup(c => c.GetCertificateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Response.FromValue(certWithPolicy, new Mock<Response>().Object));
+
+            return new TestableKeyVaultClient("https://fake.vault.azure.net", "fake-certificate", null, mockCertificateClient.Object, Credentials.GetCredentials(defaultCredentialType));
         }
 
         private TestableKeyVaultClient CreateMockedKeyVaultClient(KeyVaultSecret secret)
@@ -162,11 +179,6 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         public async Task GetCertificateAsync_ReturnsCertificate()
         {
             var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
-            var signResult = CryptographyModelFactory.SignResult(
-                keyId: "https://fake.vault.azure.net/keys/fake-key/123",
-                signature: new byte[] { 1, 2, 3 },
-                algorithm: SignatureAlgorithm.RS384);
-
             var keyVaultCertificate = CertificateModelFactory.KeyVaultCertificate(
                 properties: CertificateModelFactory.CertificateProperties(version: "123"),
                 cer: testCertificate.RawData);
@@ -178,6 +190,40 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             Assert.IsType<X509Certificate2>(certificate);
             Assert.Equal("123", keyVaultCertificate.Properties.Version);
             Assert.Equal(testCertificate.RawData, certificate.RawData);
+        }
+
+        [Fact]
+        public async Task GetVersionlessCertificateAsync_ReturnCertificate()
+        {
+            var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
+            var keyVaultCertificateWithPolicy = CertificateModelFactory.KeyVaultCertificateWithPolicy(
+                properties: CertificateModelFactory.CertificateProperties(version: "123"),
+                cer: testCertificate.RawData);
+
+            var keyVaultClient = CreateMockedKeyVaultClient(keyVaultCertificateWithPolicy);
+            var certificate = await keyVaultClient.GetCertificateAsync();
+
+            Assert.NotNull(certificate);
+            Assert.IsType<X509Certificate2>(certificate);
+            Assert.Equal(testCertificate.RawData, certificate.RawData);
+        }
+
+        [Fact]
+        public async Task GetCertificateAsyncThrowValidationException()
+        {
+            var testCertificate = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", "rsa_2048.crt"));
+            var signResult = CryptographyModelFactory.SignResult(
+                keyId: "https://fake.vault.azure.net/keys/fake-key/123",
+                signature: new byte[] { 1, 2, 3 },
+                algorithm: SignatureAlgorithm.RS384);
+
+            var keyVaultCertificate = CertificateModelFactory.KeyVaultCertificate(
+                properties: CertificateModelFactory.CertificateProperties(version: "1234"),
+                cer: testCertificate.RawData);
+
+            var keyVaultClient = CreateMockedKeyVaultClient(keyVaultCertificate);
+
+            await Assert.ThrowsAsync<PluginException>(keyVaultClient.GetCertificateAsync);
         }
 
         [Fact]

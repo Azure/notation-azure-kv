@@ -168,11 +168,20 @@ namespace Notation.Plugin.AzureKeyVault.Client
             KeyVaultCertificate cert;
             if (string.IsNullOrEmpty(_version))
             {
+                // If the version is not specified, get the latest version
                 cert = (await _certificateClient.Value.GetCertificateAsync(_name)).Value;
             }
             else
             {
                 cert = (await _certificateClient.Value.GetCertificateVersionAsync(_name, _version)).Value;
+
+                // If the version is invalid, the cert will be fallback to 
+                // the latest. So if the version is not the same as the
+                // requested version, it means the version is invalid.
+                if (cert.Properties.Version != _version)
+                {
+                    throw new PluginException($"The version of the certificate retrieved from Azure Key Vault is different from the version specified in the request. The version specified in the request is {_version} but the version retrieved from Azure Key Vault is {cert.Properties.Version}");
+                }
             }
             return new X509Certificate2(cert.Cer);
         }
