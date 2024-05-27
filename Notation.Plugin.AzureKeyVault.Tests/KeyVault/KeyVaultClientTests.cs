@@ -65,8 +65,11 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         }
 
         [Theory]
+        [InlineData("")]
         [InlineData("https://myvault.vault.azure.net/invalid/my-key/123")]
         [InlineData("http://myvault.vault.azure.net/keys/my-key/123")]
+        [InlineData("https://myvault.vault.azure.net/keys")]
+        [InlineData("https://myvault.vault.azure.net/invalid/my-key/123/1234")]
         public void TestConstructorWithInvalidKeyId(string invalidKeyId)
         {
             Assert.Throws<ValidationException>(() => new KeyVaultClient(invalidKeyId, Credentials.GetCredentials(defaultCredentialType)));
@@ -140,20 +143,6 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
             byte[] signature = await keyVaultClient.SignAsync(SignatureAlgorithm.RS256, payload);
 
             Assert.Equal(signResult.Signature, signature);
-        }
-
-        [Fact]
-        public async Task TestSignAsyncThrowsExceptionOnInvalidKeyId()
-        {
-            var signResult = CryptographyModelFactory.SignResult(
-                keyId: "https://fake.vault.azure.net/keys/invalid-key/123",
-                signature: new byte[] { 1, 2, 3 },
-                algorithm: SignatureAlgorithm.RS256);
-
-            TestableKeyVaultClient keyVaultClient = CreateMockedKeyVaultClient(signResult);
-            byte[] payload = new byte[] { 4, 5, 6 };
-
-            await Assert.ThrowsAsync<PluginException>(async () => await keyVaultClient.SignAsync(SignatureAlgorithm.RS256, payload));
         }
 
         [Fact]
