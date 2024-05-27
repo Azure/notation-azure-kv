@@ -151,10 +151,6 @@ namespace Notation.Plugin.AzureKeyVault.Client
         public async Task<byte[]> SignAsync(SignatureAlgorithm algorithm, byte[] payload)
         {
             var signResult = await _cryptoClient.Value.SignDataAsync(algorithm, payload);
-            if (signResult.KeyId != _keyId)
-            {
-                throw new PluginException($"Invalid keys identifier. The user provides {_keyId} but the response contains {signResult.KeyId} as the keys");
-            }
 
             if (signResult.Algorithm != algorithm)
             {
