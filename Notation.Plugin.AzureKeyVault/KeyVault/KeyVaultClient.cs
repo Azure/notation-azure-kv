@@ -124,7 +124,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
             // Validate uri
             if (uri.Segments.Length < 3 || uri.Segments.Length > 4)
             {
-                throw new ValidationException("Invalid input passed to \"--id\". Please follow this format to input the ID \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}/[certificate-version]\"");
+                throw new ValidationException("Invalid input passed to \"--id\". Please follow this format to input the ID \"https://<vault-name>.vault.azure.net/certificates/<certificate-name>/[certificate-version]\"");
             }
 
             var type = uri.Segments[1].TrimEnd('/');
