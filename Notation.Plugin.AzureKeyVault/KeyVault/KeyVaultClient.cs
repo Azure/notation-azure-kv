@@ -159,7 +159,7 @@ namespace Notation.Plugin.AzureKeyVault.Client
 
             if (!string.IsNullOrEmpty(_version) && signResult.KeyId != _keyId)
             {
-                throw new PluginException($"Invalid keys identifier. The user provides {_keyId} but the response contains {signResult.KeyId} as the keys. Please ensure the keys identifier is correct.");
+                throw new PluginException($"Invalid key identifier. User required {_keyId} does not match {signResult.KeyId} in response. Please ensure the provided key identifier is correct.");
             }
 
             if (signResult.Algorithm != algorithm)
