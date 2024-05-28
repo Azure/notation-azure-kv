@@ -74,10 +74,8 @@
    # get the key identifier
    keyID=$(az keyvault certificate show -n $certName --vault-name $keyVault --query 'kid' -o tsv)
    ```
-
-   > [!NOTE]
-   > Versionless KeyID is also supported. For example: https://{vault-name}.vault.azure.net/certificates/{certificate-name}
-
+> [!NOTE]
+> Versionless KeyID is also supported. For example: https://{vault-name}.vault.azure.net/certificates/{certificate-name}
 5. [Create an Azure Container Registry](https://learn.microsoft.com/azure/container-registry/container-registry-get-started-portal?tabs=azure-cli). The remaining steps use the example login server `<registry-name>.azurecr.io`, but you must substitute your own login server value.
 6. Log in to container registry and push an image for signing:
    ```sh
