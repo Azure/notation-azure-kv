@@ -120,11 +120,11 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 throw new ValidationException("Input passed to \"--id\" must not be empty");
             }
 
-            var uri = new Uri(id);
+            var uri = new Uri(id.TrimEnd('/'));
             // Validate uri
             if (uri.Segments.Length < 3 || uri.Segments.Length > 4)
             {
-                throw new ValidationException("Invalid input passed to \"--id\". Please follow this format to input the ID \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}\" or \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}/{certificate-version}\"");
+                throw new ValidationException("Invalid input passed to \"--id\". Please follow this format to input the ID \"https://{vault-name}.vault.azure.net/certificates/{certificate-name}/[certificate-version]\"");
             }
 
             var type = uri.Segments[1].TrimEnd('/');
