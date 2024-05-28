@@ -31,9 +31,9 @@
       --secret-permissions get \
       --object-id "$userId"
    ```
-   > [!NOTE]
-   > The script assigns the permission to the current user, and you can also assign the permission to your [managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) or [service principal](https://learn.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals?tabs=browser).
-   > To know more about permission management, please visit [Azure Key Vualt access policy](https://learn.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal).
+> [!NOTE]
+> The script assigns the permission to the current user, and you can also assign the permission to your [managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/overview) or [service principal](https://learn.microsoft.com/azure/active-directory/develop/app-objects-and-service-principals?tabs=browser).
+> To know more about permission management, please visit [Azure Key Vualt access policy](https://learn.microsoft.com/azure/key-vault/general/assign-access-policy?tabs=azure-portal).
 4. Create a Certificate Signing Request (CSR):
 
    Generate certificate policy:
@@ -100,8 +100,8 @@
    certChainPath="${certName}-chain.crt"
    cat "$signedCertPath" ca.crt > "$certChainPath"
    ```
-   > [!NOTE]
-   > If you have merged your certificate to Azure Key Vault without certificate chain or you don't want the plugin access your certificate chain with the `Secrets Get` permission, please use [ca_certs](./plugin-config.md#ca_certs) plugin configuration argument instead.
+> [!NOTE]
+> If you have merged your certificate to Azure Key Vault without certificate chain or you don't want the plugin access your certificate chain with the `Secrets Get` permission, please use [ca_certs](./plugin-config.md#ca_certs) plugin configuration argument instead.
 
 6. After you get the leaf certificate, you can merge the certificate chain (file at `$certChainPath`) to your Azure Key Vault:
    ```sh
@@ -111,7 +111,7 @@
    ```sh
    keyID=$(az keyvault certificate show -n $certName --vault-name $keyVault --query 'kid' -o tsv)
    ```
-> [!NOTE]
+> [!TIP]
 > Versionless KeyID is also supported. For example: https://{vault-name}.vault.azure.net/certificates/{certificate-name}
 7. [Create an Azure Container Registry](https://learn.microsoft.com/azure/container-registry/container-registry-get-started-portal?tabs=azure-cli). The remaining steps use the example login server `<registry-name>.azurecr.io`, but you must substitute your own login server value.
 8. Log in to container registry and push an image for signing:
