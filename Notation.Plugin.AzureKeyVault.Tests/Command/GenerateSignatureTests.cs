@@ -169,7 +169,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         }
 
         [Fact]
-        public async void RunAsync_NoSecertsGetPermission()
+        public async Task RunAsync_NoSecertsGetPermission()
         {
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
@@ -196,7 +196,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         }
 
         [Fact]
-        public async void RunAsync_OtherRequestFailedException()
+        public async Task RunAsync_OtherRequestFailedException()
         {
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
@@ -223,7 +223,7 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
         }
 
         [Fact]
-        public async void RunAsync_SelfSignedWithCaCerts()
+        public async Task RunAsync_SelfSignedWithCaCerts()
         {
             // Arrange
             var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
