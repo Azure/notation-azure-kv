@@ -12,7 +12,6 @@ namespace Notation.Plugin.AzureKeyVault.Command
     {
         private DescribeKeyRequest _request;
         private IKeyVaultClient _keyVaultClient;
-        private const string invalidInputError = "Invalid input. The valid input format is '{\"contractVersion\":\"1.0\",\"keyId\":\"https://<vaultname>.vault.azure.net/<keys|certificate>/<name>/<version>\"}'";
 
         /// <summary>
         /// Constructor to create DescribeKey object from JSON string.
@@ -23,7 +22,7 @@ namespace Notation.Plugin.AzureKeyVault.Command
             var request = JsonSerializer.Deserialize(inputJson, DescribeKeyRequestContext.Default.DescribeKeyRequest);
             if (request == null)
             {
-                throw new ValidationException(invalidInputError);
+                throw new ValidationException("Failed to parse the request in JSON format. Please contact Notation maintainers to resolve the issue.");
             }
             this._request = request;
             this._keyVaultClient = new KeyVaultClient(
