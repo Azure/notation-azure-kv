@@ -3,28 +3,14 @@
 # containerized e2e test for azure-kv plugin
 # prerequisite: 
 #   - notation-akv:v1 image
-#   - AZURE_CREDENTIALS environment variable
 
 set -e
-
-# setup credentials
-if [ -z "$AZURE_CREDENTIALS" ]; then
-    echo "AZURE_CREDENTIALS is not set"
-    exit 1
-fi
-
-AZURE_TENANT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r .tenantId)
-AZURE_CLIENT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r .clientId)
-AZURE_CLIENT_SECRET=$(echo "$AZURE_CREDENTIALS" | jq -r .clientSecret)
 
 function testSign(){
     # print all the arguments
     echo "notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv" "$@"
     docker run \
         -v "$(pwd)"/test/:/test \
-        -e AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" \
-        -e AZURE_CLIENT_ID="$AZURE_CLIENT_ID" \
-        -e AZURE_TENANT_ID="$AZURE_TENANT_ID" \
         --network host notation-akv:v1 \
         notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv "$@"
     local result=$?
