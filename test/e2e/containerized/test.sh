@@ -1,12 +1,12 @@
 #!/bin/bash
 #
 # containerized e2e test for azure-kv plugin
-# prerequisite: 
+# prerequisite:
 #   - notation-akv:v1 image
 
 set -e
 
-function testSign(){
+function testSign() {
     # print all the arguments
     echo "notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv" "$@"
     docker run \
@@ -18,14 +18,14 @@ function testSign(){
     return $result
 }
 
-function assertSucceeded(){
+function assertSucceeded() {
     if [ $? -ne 0 ]; then
         echo "test failed"
         exit 1
     fi
 }
 
-function assertFailed(){
+function assertFailed() {
     if [ $? -eq 0 ]; then
         echo "test failed"
         exit 1
@@ -44,7 +44,7 @@ testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem-
 assertSucceeded
 testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12/20548a2bcaba42308f609df2d79682b5
 assertSucceeded
-testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12-unordered/b4fdf86062e44839b666ce8ff3f3a470 
+testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12-unordered/b4fdf86062e44839b666ce8ff3f3a470
 assertSucceeded
 testSign --id https://acrci-test-kv.vault.azure.net/keys/csr-ca-issued-pem-chain/09cd1aeaaa894e60b0ef83f062604863
 assertSucceeded
