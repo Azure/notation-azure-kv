@@ -5,12 +5,18 @@
 #   - notation-akv:v1 image
 
 set -e
+UID=$(id -u)
+GID=$(id -g)
 
 function testSign() {
     # print all the arguments
     echo "notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv" "$@"
     docker run \
         -v "$(pwd)"/test/:/test \
+        --mount type=bind,source=/usr/bin,target=/usr/bin,readonly \
+        --user $UID:$GID \
+        --volume /etc/passwd:/etc/passwd:ro \
+        --volume /etc/group:/etc/group:ro \
         --network host notation-akv:v1 \
         notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv "$@"
     local result=$?
