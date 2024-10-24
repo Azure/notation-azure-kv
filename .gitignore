@@ -13,7 +13,7 @@ coverage.txt
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+node_modules/
 
 # IDE directories
 .vscode/

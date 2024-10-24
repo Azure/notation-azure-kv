@@ -114,13 +114,16 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Write Federated Token File
-        run: az account get-access-token --query accessToken -o tsv > ./federated_token
+        run: |
+          cd ./test/e2e/containerized/get_id_token
+          npm install
+          node main.js
       - name: Run e2e
         run: bash ./test/e2e/containerized/test.sh
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_FEDERATED_TOKEN_FILE: ./federated_token
+          AZURE_FEDERATED_TOKEN_FILE: ./test/e2e/containerized/get_id_token/federated_token
   e2e-linux:
     name: E2E testing on Linux
     runs-on: ubuntu-latest
