@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import * as fs from 'fs';
 
 async function getFederatedToken() {
-    const audience = core.getInput('audience', { required: false });
+    const audience = "api://AzureADTokenExchange";
     const federatedToken = await core.getIDToken(audience);
     return federatedToken;
 }
