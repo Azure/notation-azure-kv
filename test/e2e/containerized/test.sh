@@ -5,8 +5,6 @@
 #   - notation-akv:v1 image
 
 set -e
-UID=$(id -u)
-GID=$(id -g)
 echo "which az"
 which az
 
