@@ -3,6 +3,10 @@
 # containerized e2e test for azure-kv plugin
 # prerequisite:
 #   - notation-akv:v1 image
+#   - Environment variables:
+#       - AZURE_CLIENT_ID
+#       - AZURE_TENANT_ID
+#       - AZURE_FEDERATED_TOKEN_FILE
 
 set -e
 echo "which az"

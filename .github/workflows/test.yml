@@ -41,6 +41,7 @@ jobs:
           VALIDATE_MARKDOWN: false
           VALIDATE_JSCPD: false
           VALIDATE_SHELL_SHFMT: false
+          VALIDATE_JAVASCRIPT_STANDARD: false
   test:
     name: Unit Testing and Build
     runs-on: ubuntu-latest
