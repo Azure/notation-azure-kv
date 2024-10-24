@@ -7,6 +7,8 @@
 set -e
 UID=$(id -u)
 GID=$(id -g)
+echo "which az"
+which az
 
 function testSign() {
     # print all the arguments
