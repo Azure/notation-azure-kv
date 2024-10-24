@@ -10,8 +10,8 @@ async function getFederatedToken() {
 async function main() {
     try {
         const token = await getFederatedToken();
-        fs.writeFileSync('./federated-token', token);
-        console.log(`Federated Token written to ./federated-token`);
+        fs.writeFileSync('./federated_token', token);
+        console.log(`Federated Token written to ./federated_token`);
     } catch (error) {
         core.setFailed(`Action failed with error: ${error.message}`);
     }
