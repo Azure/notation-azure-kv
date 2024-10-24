@@ -13,11 +13,11 @@ function testSign() {
     echo "notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv" "$@"
     docker run \
         -v "$(pwd)"/test/:/test \
-        --network host notation-akv:v1 \
-        --mount type=bind,source=$AZURE_FEDERATED_TOKEN_FILE,target=/root/federated-token,readonly \
-        -e AZURE_CLIENT_ID=$AZURE_CLIENT_ID \
-        -e AZURE_TENANT_ID=$AZURE_TENANT_ID \
+        -e AZURE_CLIENT_ID="$AZURE_CLIENT_ID" \
+        -e AZURE_TENANT_ID="$AZURE_TENANT_ID" \
         -e AZURE_FEDERATED_TOKEN_FILE=/root/federated-token \
+        --mount type=bind,source="$AZURE_FEDERATED_TOKEN_FILE",target=/root/federated-token,readonly \
+        --network host notation-akv:v1 \
         notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv "$@"
     local result=$?
     echo ""
