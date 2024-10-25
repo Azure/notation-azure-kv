@@ -113,6 +113,7 @@ jobs:
           script: |
             try {
               const core = require('@actions/core')
+              const fs = require('fs')
               let id_token = await core.getIDToken('api://AzureADTokenExchange')
               fs.writeFileSync("./federated_token", id_token);
               console.log(`Federated Token written to ./federated_token`);
