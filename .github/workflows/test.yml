@@ -68,7 +68,6 @@ jobs:
           # the binary will be used in E2E test
           python3 ./scripts/build.py v0.0.1 linux-x64 --enable-aot
       - name: Upload Linux artifact
-        if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: linux-amd64-binary
@@ -79,7 +78,6 @@ jobs:
           # the binary will be used in E2E test
           python3 ./scripts/build.py v0.0.1 osx-x64
       - name: Upload macOS artifact
-        if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: darwin-amd64-binary
@@ -90,7 +88,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -124,7 +121,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -165,7 +161,6 @@ jobs:
     runs-on: windows-latest
     environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -211,7 +206,6 @@ jobs:
     runs-on: macos-13
     environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
