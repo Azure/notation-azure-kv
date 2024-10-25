@@ -41,7 +41,6 @@ jobs:
           VALIDATE_MARKDOWN: false
           VALIDATE_JSCPD: false
           VALIDATE_SHELL_SHFMT: false
-          VALIDATE_JAVASCRIPT_STANDARD: false
   test:
     name: Unit Testing and Build
     runs-on: ubuntu-latest
@@ -105,17 +104,27 @@ jobs:
           docker push localhost:5000/hello-world:v1
       - name: Build notation-akv:v1 image
         run: docker build -t notation-akv:v1 -f ./test/e2e/containerized/Dockerfile.mariner .
-      - name: Write Federated Token File
-        run: |
-          cd ./test/e2e/containerized/get_id_token
-          npm install
-          node main.js
+      - name: Install OIDC Client from Core Package
+        run: npm install @actions/core@1.6.0 @actions/http-client
+      - name: Write Id Token
+        uses: actions/github-script@v6
+        id: idtoken
+        with:
+          script: |
+            try {
+              const core = require('@actions/core')
+              let id_token = await core.getIDToken('api://AzureADTokenExchange')
+              fs.writeFileSync("./federated_token", id_token);
+              console.log(`Federated Token written to ./federated_token`);
+            } catch (error) {
+              core.setFailed(`Action failed with error: ${error.message}`);
+            }
       - name: Run e2e
         run: bash ./test/e2e/containerized/test.sh
         env:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_FEDERATED_TOKEN_FILE: ./test/e2e/containerized/get_id_token/federated_token
+          AZURE_FEDERATED_TOKEN_FILE: ./federated_token
   e2e-linux:
     name: E2E testing on Linux
     runs-on: ubuntu-latest
