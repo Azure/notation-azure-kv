@@ -1,30 +1,26 @@
 #!/bin/bash
 #
 # containerized e2e test for azure-kv plugin
-# prerequisite: 
+# prerequisite:
 #   - notation-akv:v1 image
-#   - AZURE_CREDENTIALS environment variable
+#   - Environment variables:
+#       - AZURE_CLIENT_ID
+#       - AZURE_TENANT_ID
+#       - AZURE_FEDERATED_TOKEN_FILE
 
 set -e
+echo "which az"
+which az
 
-# setup credentials
-if [ -z "$AZURE_CREDENTIALS" ]; then
-    echo "AZURE_CREDENTIALS is not set"
-    exit 1
-fi
-
-AZURE_TENANT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r .tenantId)
-AZURE_CLIENT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r .clientId)
-AZURE_CLIENT_SECRET=$(echo "$AZURE_CREDENTIALS" | jq -r .clientSecret)
-
-function testSign(){
+function testSign() {
     # print all the arguments
     echo "notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv" "$@"
     docker run \
         -v "$(pwd)"/test/:/test \
-        -e AZURE_CLIENT_SECRET="$AZURE_CLIENT_SECRET" \
         -e AZURE_CLIENT_ID="$AZURE_CLIENT_ID" \
         -e AZURE_TENANT_ID="$AZURE_TENANT_ID" \
+        -e AZURE_FEDERATED_TOKEN_FILE=/root/federated-token \
+        --mount type=bind,source="$AZURE_FEDERATED_TOKEN_FILE",target=/root/federated-token,readonly \
         --network host notation-akv:v1 \
         notation sign --signature-format cose localhost:5000/hello-world:v1 --plugin azure-kv "$@"
     local result=$?
@@ -32,14 +28,14 @@ function testSign(){
     return $result
 }
 
-function assertSucceeded(){
+function assertSucceeded() {
     if [ $? -ne 0 ]; then
         echo "test failed"
         exit 1
     fi
 }
 
-function assertFailed(){
+function assertFailed() {
     if [ $? -eq 0 ]; then
         echo "test failed"
         exit 1
@@ -58,7 +54,7 @@ testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pem-
 assertSucceeded
 testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12/20548a2bcaba42308f609df2d79682b5
 assertSucceeded
-testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12-unordered/b4fdf86062e44839b666ce8ff3f3a470 
+testSign --id https://acrci-test-kv.vault.azure.net/keys/imported-ca-issued-pkcs12-unordered/b4fdf86062e44839b666ce8ff3f3a470
 assertSucceeded
 testSign --id https://acrci-test-kv.vault.azure.net/keys/csr-ca-issued-pem-chain/09cd1aeaaa894e60b0ef83f062604863
 assertSucceeded

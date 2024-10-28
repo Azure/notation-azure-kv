@@ -12,6 +12,10 @@ on:
       - main
       - release-*
 
+permissions:
+  id-token: write # Require write permission to Fetch an OIDC token.
+  contents: read
+
 jobs:
   lint:
     name: Lint Code Base
@@ -36,6 +40,7 @@ jobs:
           VALIDATE_CHECKOV: false
           VALIDATE_MARKDOWN: false
           VALIDATE_JSCPD: false
+          VALIDATE_SHELL_SHFMT: false
   test:
     name: Unit Testing and Build
     runs-on: ubuntu-latest
@@ -62,7 +67,6 @@ jobs:
           # the binary will be used in E2E test
           python3 ./scripts/build.py v0.0.1 linux-x64 --enable-aot
       - name: Upload Linux artifact
-        if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: linux-amd64-binary
@@ -73,7 +77,6 @@ jobs:
           # the binary will be used in E2E test
           python3 ./scripts/build.py v0.0.1 osx-x64
       - name: Upload macOS artifact
-        if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: darwin-amd64-binary
@@ -82,8 +85,8 @@ jobs:
   e2e-mariner-container:
     name: E2E testing for Mariner container
     runs-on: ubuntu-latest
+    environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -101,15 +104,33 @@ jobs:
           docker push localhost:5000/hello-world:v1
       - name: Build notation-akv:v1 image
         run: docker build -t notation-akv:v1 -f ./test/e2e/containerized/Dockerfile.mariner .
+      - name: Install OIDC Client from Core Package
+        run: npm install @actions/core@1.6.0 @actions/http-client
+      - name: Write Id Token
+        uses: actions/github-script@v6
+        id: idtoken
+        with:
+          script: |
+            try {
+              const core = require('@actions/core')
+              const fs = require('fs')
+              let id_token = await core.getIDToken('api://AzureADTokenExchange')
+              fs.writeFileSync("./federated_token", id_token);
+              console.log(`Federated Token written to ./federated_token`);
+            } catch (error) {
+              core.setFailed(`Action failed with error: ${error.message}`);
+            }
       - name: Run e2e
         run: bash ./test/e2e/containerized/test.sh
         env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_FEDERATED_TOKEN_FILE: ./federated_token
   e2e-linux:
     name: E2E testing on Linux
     runs-on: ubuntu-latest
+    environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -137,7 +158,9 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: E2E testing
         uses: ./test/e2e
         with:
@@ -146,8 +169,8 @@ jobs:
   e2e-windows:
     name: E2E testing on Windows
     runs-on: windows-latest
+    environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -180,7 +203,9 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: E2E testing
         uses: ./test/e2e
         with:
@@ -189,8 +214,8 @@ jobs:
   e2e-macos:
     name: E2E testing on macOS
     runs-on: macos-13
+    environment: E2E
     needs: test
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -223,7 +248,9 @@ jobs:
       - name: Azure login
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: E2E testing
         uses: ./test/e2e
         with:
