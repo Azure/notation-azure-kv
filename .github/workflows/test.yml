@@ -41,8 +41,8 @@ jobs:
           VALIDATE_MARKDOWN: false
           VALIDATE_JSCPD: false
           VALIDATE_SHELL_SHFMT: false
-  test:
-    name: Unit Testing and Build
+  test-linux:
+    name: Unit Testing and Build on Linux x64
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -82,8 +82,8 @@ jobs:
           name: darwin-amd64-binary
           path: ./bin/artifacts/notation-azure-kv_0.0.1_darwin_amd64.tar.gz
           retention-days: 1
-  test-arm:
-    name: Unit Testing and Build on ARM
+  test-linux-arm:
+    name: Unit Testing and Build on Linux ARM64
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     permissions:
@@ -99,10 +99,6 @@ jobs:
           fetch-depth: 0
       - name: Run unit tests
         run: make test
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Build Linux Binary
         run: |
           # the binary will be used in E2E test
@@ -113,11 +109,36 @@ jobs:
           name: linux-arm64-binary
           path: ./bin/artifacts/notation-azure-kv_0.0.1_linux_arm64.tar.gz
           retention-days: 1
+  test-windows:
+    name: Unit Testing and Build on windows x64
+    runs-on: windows-2022
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check out code into the project directory
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run unit tests
+        run: make test
+      - name: Build Windows Binary
+        run: python3 ./scripts/build.py v0.0.1 win-x64 --enable-aot
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-amd64-binary
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_windows-amd64.tar.gz
+          retention-days: 1
   e2e-mariner-container:
     name: E2E testing for Mariner container
     runs-on: ubuntu-latest
     environment: E2E
-    needs: test
+    needs: test-linux
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -172,7 +193,7 @@ jobs:
           - os: ubuntu-22.04-arm
             arch: arm64
     environment: E2E
-    needs: [test, test-arm]
+    needs: [test-linux, test-linux-arm]
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -215,18 +236,16 @@ jobs:
       matrix:
         os: [windows-2022, windows-2025]
     environment: E2E
-    needs: test
+    needs: test-windows
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/download-artifact@v4
         with:
-          dotnet-version: '8.0.x'
-      - name: Build Windows Binary
-        run: python3 ./scripts/build.py v0.0.1 win-x64 --enable-aot
+          name: windows-amd64-binary
+          path: ./bin/artifacts
       - name: Run download server locally
         run: |
           # wsl bash
@@ -260,7 +279,7 @@ jobs:
     name: E2E testing on macOS
     runs-on: macos-13
     environment: E2E
-    needs: test
+    needs: test-linux
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
