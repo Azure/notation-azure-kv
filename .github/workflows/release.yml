@@ -17,19 +17,19 @@ jobs:
         config:
           - runtime: osx-x64
             build_args: ""
-            os: ubuntu-latest
+            os: ubuntu-24.04
           - runtime: osx-arm64
             build_args: ""
-            os: ubuntu-latest
+            os: ubuntu-24.04
           - runtime: linux-x64
             build_args: --enable-aot
-            os: ubuntu-latest
+            os: ubuntu-24.04
           - runtime: linux-arm64
             build_args: --enable-aot
-            os: ubuntu-22.04
+            os: ubuntu-24.04
           - runtime: win-x64
             build_args: --enable-aot
-            os: windows-latest
+            os: windows-2022
     name: Build
     runs-on: ${{ matrix.config.os }}
     steps:
@@ -91,7 +91,7 @@ jobs:
           retention-days: 1
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: macos_codesign
     steps:
       - name: Checkout

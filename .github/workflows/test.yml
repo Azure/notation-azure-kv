@@ -43,7 +43,7 @@ jobs:
           VALIDATE_SHELL_SHFMT: false
   test:
     name: Unit Testing and Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -126,51 +126,12 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           AZURE_FEDERATED_TOKEN_FILE: ./federated_token
-  e2e-ubuntu-2404:
+  e2e-linux:
     name: E2E testing on Linux
-    runs-on: ubuntu-24.04
-    environment: E2E
-    needs: test
-    steps:
-      - name: Check out code into the project directory
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/download-artifact@v4
-        with:
-          name: linux-amd64-binary
-          path: ./bin/artifacts
-      - name: Run download server locally
-        run: |
-          nohup python3 -m http.server --directory ./bin/artifacts/ &
-
-          # prepare the environment variables for E2E
-          artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
-          checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
-          echo "pluginChecksum=$checksum" >> "$GITHUB_ENV"
-          echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> "$GITHUB_ENV"
-      - name: Prepare container registry
-        run: |
-          docker run --name registry --rm -d -p 5000:5000 registry:2
-          docker pull hello-world:latest
-          docker tag hello-world:latest localhost:5000/hello-world:v1
-          docker push localhost:5000/hello-world:v1
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: E2E testing
-        uses: ./test/e2e
-        with:
-          pluginDownloadURL: ${{ env.pluginDownloadURL }}
-          pluginChecksum: ${{ env.pluginChecksum }}
-  e2e-ubuntu-2204:
-    name: E2E testing on Linux
-    runs-on: ubuntu-22.04
-    environment: E2E
-    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -208,7 +169,10 @@ jobs:
           pluginChecksum: ${{ env.pluginChecksum }}
   e2e-windows:
     name: E2E testing on Windows
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-2019, windows-2022, windows-2025]
     environment: E2E
     needs: test
     steps:
