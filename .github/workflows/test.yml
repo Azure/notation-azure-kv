@@ -132,7 +132,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-amd64-binary
-          path: ./bin/artifacts/notation-azure-kv_0.0.1_windows-amd64.tar.gz
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_windows-amd64.zip
           retention-days: 1
   e2e-mariner-container:
     name: E2E testing for Mariner container
