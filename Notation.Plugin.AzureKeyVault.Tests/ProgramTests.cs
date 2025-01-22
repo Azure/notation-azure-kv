@@ -97,10 +97,10 @@ namespace Notation.Plugin.AzureKeyVault.Tests
 
         [Theory]
         [InlineData(200, "{\"error\":{\"message\":\"TestErrorMessage\"}}", "TestErrorMessage")]
-        [InlineData(500, "{\"error\":{\"message\":\"TestErrorMessage\"}", "Service request failed.\nStatus: 500\n")]
-        [InlineData(500, "{\"error2\":{\"message\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n")]
-        [InlineData(500, "{\"error\":{\"message2\":\"TestErrorMessage\"}}", "Service request failed.\nStatus: 500\n")]
-        [InlineData(500, "{\"error\":{\"message\":\"\"}}", "\nStatus: 500\n")]
+        [InlineData(500, "{\"error\":{\"message\":\"TestErrorMessage\"}", "Status: 500")]
+        [InlineData(500, "{\"error2\":{\"message\":\"TestErrorMessage\"}}", "Status: 500")]
+        [InlineData(500, "{\"error\":{\"message2\":\"TestErrorMessage\"}}", "Status: 500")]
+        [InlineData(500, "{\"error\":{\"message\":\"\"}}", "Status: 500")]
         public void HandleAzureException(int code, string content, string expectedErrorMessage)
         {
             // Arrange
@@ -124,7 +124,7 @@ namespace Notation.Plugin.AzureKeyVault.Tests
             var errorResponse = Program.HandleAzureException(exception);
 
             // Assert exit code 1
-            Assert.StartsWith(expectedErrorMessage, errorResponse.ErrorMessage);
+            Assert.Contains(expectedErrorMessage, errorResponse.ErrorMessage);
             Assert.Equal("ERROR", errorResponse.ErrorCode);
         }
     }

@@ -83,7 +83,7 @@ jobs:
           path: ./bin/artifacts/notation-azure-kv_0.0.1_darwin_amd64.tar.gz
           retention-days: 1
   test-linux-arm:
-    name: Unit Testing and Build on Linux ARM64
+    name: Unit Testing and Build on Linux arm64
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     permissions:
