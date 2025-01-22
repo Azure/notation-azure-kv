@@ -41,9 +41,9 @@ jobs:
           VALIDATE_MARKDOWN: false
           VALIDATE_JSCPD: false
           VALIDATE_SHELL_SHFMT: false
-  test:
-    name: Unit Testing and Build
-    runs-on: ubuntu-latest
+  test-linux:
+    name: Unit Testing and Build on Linux x64
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -82,11 +82,63 @@ jobs:
           name: darwin-amd64-binary
           path: ./bin/artifacts/notation-azure-kv_0.0.1_darwin_amd64.tar.gz
           retention-days: 1
+  test-linux-arm:
+    name: Unit Testing and Build on Linux arm64
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check out code into the project directory
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run unit tests
+        run: make test
+      - name: Build Linux Binary
+        run: |
+          # the binary will be used in E2E test
+          python3 ./scripts/build.py v0.0.1 linux-arm64 --enable-aot
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64-binary
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_linux_arm64.tar.gz
+          retention-days: 1
+  test-windows:
+    name: Unit Testing and Build on windows x64
+    runs-on: windows-2022
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Check out code into the project directory
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run unit tests
+        run: make test
+      - name: Build Windows Binary
+        run: python3 ./scripts/build.py v0.0.1 win-x64 --enable-aot
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-amd64-binary
+          path: ./bin/artifacts/notation-azure-kv_0.0.1_windows_amd64.zip
+          retention-days: 1
   e2e-mariner-container:
     name: E2E testing for Mariner container
     runs-on: ubuntu-latest
     environment: E2E
-    needs: test
+    needs: test-linux
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -128,9 +180,20 @@ jobs:
           AZURE_FEDERATED_TOKEN_FILE: ./federated_token
   e2e-linux:
     name: E2E testing on Linux
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-24.04
+            arch: amd64
+          - os: ubuntu-22.04
+            arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+          - os: ubuntu-22.04-arm
+            arch: arm64
     environment: E2E
-    needs: test
+    needs: [test-linux, test-linux-arm]
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
@@ -138,14 +201,14 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
-          name: linux-amd64-binary
+          name: linux-${{ matrix.config.arch }}-binary
           path: ./bin/artifacts
       - name: Run download server locally
         run: |
           nohup python3 -m http.server --directory ./bin/artifacts/ &
 
           # prepare the environment variables for E2E
-          artifactName=notation-azure-kv_0.0.1_linux_amd64.tar.gz
+          artifactName=notation-azure-kv_0.0.1_linux_${{ matrix.config.arch }}.tar.gz
           checksum=$(shasum -a 256 "./bin/artifacts/$artifactName" | awk '{print $1}')
           echo "pluginChecksum=$checksum" >> "$GITHUB_ENV"
           echo "pluginDownloadURL=http://localhost:8000/$artifactName" >> "$GITHUB_ENV"
@@ -168,20 +231,21 @@ jobs:
           pluginChecksum: ${{ env.pluginChecksum }}
   e2e-windows:
     name: E2E testing on Windows
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-2022, windows-2025]
     environment: E2E
-    needs: test
+    needs: test-windows
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/download-artifact@v4
         with:
-          dotnet-version: '8.0.x'
-      - name: Build Windows Binary
-        run: python3 ./scripts/build.py v0.0.1 win-x64 --enable-aot
+          name: windows-amd64-binary
+          path: ./bin/artifacts
       - name: Run download server locally
         run: |
           # wsl bash
@@ -215,7 +279,7 @@ jobs:
     name: E2E testing on macOS
     runs-on: macos-13
     environment: E2E
-    needs: test
+    needs: test-linux
     steps:
       - name: Check out code into the project directory
         uses: actions/checkout@v4
