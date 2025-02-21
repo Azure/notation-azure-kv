@@ -42,7 +42,7 @@ jobs:
           VALIDATE_JSCPD: false
           VALIDATE_SHELL_SHFMT: false
   test-linux:
-    name: Unit Testing and Build on Linux x64
+    name: Unit Testing and Build on Linux x64 and macOS x64
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -128,7 +128,7 @@ jobs:
         run: make test
       - name: Build Windows Binary
         run: python3 ./scripts/build.py v0.0.1 win-x64 --enable-aot
-      - name: Upload Linux artifact
+      - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-amd64-binary
