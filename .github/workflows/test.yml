@@ -26,7 +26,7 @@ jobs:
       statuses: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Lint Code Base
@@ -53,7 +53,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Run unit tests
@@ -94,7 +94,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Run unit tests
@@ -121,7 +121,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Run unit tests
@@ -141,7 +141,7 @@ jobs:
     needs: test-linux
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
@@ -196,7 +196,7 @@ jobs:
     needs: [test-linux, test-linux-arm]
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
@@ -239,7 +239,7 @@ jobs:
     needs: test-windows
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
@@ -282,7 +282,7 @@ jobs:
     needs: test-linux
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
