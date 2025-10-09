@@ -15,6 +15,7 @@ on:
 permissions:
   id-token: write # Require write permission to Fetch an OIDC token.
   contents: read
+  statuses: write
 
 jobs:
   lint:
