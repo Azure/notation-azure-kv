@@ -1,26 +1,16 @@
-FROM busybox:1.36 as base
+FROM busybox:latest as base
 
-RUN wget https://github.com/notaryproject/notation/releases/download/v1.3.2/notation_1.3.2_linux_amd64.tar.gz
-RUN tar -xzf notation_1.3.2_linux_amd64.tar.gz
+RUN wget https://github.com/notaryproject/notation/releases/download/v1.0.1/notation_1.0.1_linux_amd64.tar.gz 
+RUN tar -xzf notation_1.0.1_linux_amd64.tar.gz 
 COPY ./bin/artifacts/notation-azure-kv_0.0.1_linux_amd64.tar.gz .
 RUN tar -xzf notation-azure-kv_0.0.1_linux_amd64.tar.gz
 
 FROM mcr.microsoft.com/cbl-mariner/base/core:2.0
 
 RUN mkdir -p $HOME/.config/notation/plugins/azure-kv
-RUN yum install ca-certificates -y && yum clean all
+RUN yum install ca-certificates -y
 
 COPY --from=base ./notation /usr/local/bin
-
-# Create non-root user
-RUN useradd -m -u 1000 notation && \
-    mkdir -p /home/notation/.config/notation/plugins/azure-kv
-
-COPY --from=base --chown=notation:notation ./notation-azure-kv /home/notation/.config/notation/plugins/azure-kv
-
-USER notation
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD notation version || exit 1
+COPY --from=base ./notation-azure-kv /root/.config/notation/plugins/azure-kv
 
 CMD ["notation"]
