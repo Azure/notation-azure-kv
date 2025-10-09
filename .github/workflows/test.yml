@@ -15,6 +15,7 @@ on:
 permissions:
   id-token: write # Require write permission to Fetch an OIDC token.
   contents: read
+  statuses: write
 
 jobs:
   lint:
@@ -26,17 +27,17 @@ jobs:
       statuses: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Lint Code Base
-        uses: super-linter/super-linter@v7
+        uses: super-linter/super-linter@v8
         env:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
           DEFAULT_WORKSPACE: ./Notation.Plugin.AzureKeyVault
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_EXCLUDE: '.*Tests/.*|.*.yml|.*/scripts/generate-certs.sh|.*.py'
+          FILTER_REGEX_EXCLUDE: '.*Tests/.*|test/.*|.*.yml|.*/scripts/generate-certs.sh|.*.py'
           VALIDATE_CHECKOV: false
           VALIDATE_MARKDOWN: false
           VALIDATE_JSCPD: false
@@ -49,11 +50,11 @@ jobs:
       contents: read
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Run unit tests
@@ -90,11 +91,11 @@ jobs:
       contents: read
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Run unit tests
@@ -117,11 +118,11 @@ jobs:
       contents: read
     steps:
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.x'
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Run unit tests
@@ -141,10 +142,10 @@ jobs:
     needs: test-linux
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: linux-amd64-binary
           path: ./bin/artifacts
@@ -159,7 +160,7 @@ jobs:
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       - name: Write Id Token
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         id: idtoken
         with:
           script: |
@@ -196,10 +197,10 @@ jobs:
     needs: [test-linux, test-linux-arm]
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: linux-${{ matrix.config.arch }}-binary
           path: ./bin/artifacts
@@ -239,10 +240,10 @@ jobs:
     needs: test-windows
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: windows-amd64-binary
           path: ./bin/artifacts
@@ -282,10 +283,10 @@ jobs:
     needs: test-linux
     steps:
       - name: Check out code into the project directory
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: darwin-amd64-binary
           path: ./bin/artifacts
