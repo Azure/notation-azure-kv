@@ -40,5 +40,33 @@ namespace Notation.Plugin.Protocol.Tests
             Assert.Throws<ArgumentException>(() => keySpec.EncodeKeySpec());
             Assert.Throws<ArgumentException>(() => keySpec.ToSigningAlgorithm());
         }
+
+        [Theory]
+        [InlineData(KeyType.RSA, 2048, null, "RSASSA-PSS-SHA-256")]                     // Default: PSS
+        [InlineData(KeyType.RSA, 2048, "rsassa-pkcs1-v1_5", "RSASSA-PKCS1-v1_5-SHA-256")] // PKCS1 routing
+        [InlineData(KeyType.EC, 256, "rsassa-pkcs1-v1_5", "ECDSA-SHA-256")]              // EC unaffected
+        public void KeySpec_ToSigningAlgorithmWithScheme_ReturnsCorrectValues(KeyType keyType, int size, string? scheme, string expectedSigningAlgorithm)
+        {
+            // Arrange
+            KeySpec keySpec = new KeySpec(keyType, size);
+
+            // Act
+            string signingAlgorithm = keySpec.ToSigningAlgorithm(scheme);
+
+            // Assert
+            Assert.Equal(expectedSigningAlgorithm, signingAlgorithm);
+        }
+
+        [Fact]
+        public void KeySpec_ToSigningAlgorithmWithInvalidScheme_ThrowsArgumentException()
+        {
+            // Arrange
+            KeySpec keySpec = new KeySpec(KeyType.RSA, 2048);
+
+            // Act & Assert
+            var ex = Assert.Throws<ArgumentException>(() => keySpec.ToSigningAlgorithm("invalid-scheme"));
+            Assert.Contains("rsassa-pss", ex.Message);
+            Assert.Contains("rsassa-pkcs1-v1_5", ex.Message);
+        }
     }
 }

@@ -12,6 +12,12 @@ namespace Notation.Plugin.AzureKeyVault.Command
     /// </summary>
     public class GenerateSignature : IPluginCommand
     {
+        /// <summary>
+        /// Plugin config key for specifying the signing scheme.
+        /// Supported values: "rsassa-pss" (default), "rsassa-pkcs1-v1_5"
+        /// </summary>
+        public const string SigningSchemeConfigKey = "signing_scheme";
+
         private GenerateSignatureRequest _request;
         private IKeyVaultClient _keyVaultClient;
 
@@ -104,13 +110,25 @@ namespace Notation.Plugin.AzureKeyVault.Command
             // Extract KeySpec from the certificate
             var keySpec = leafCert.KeySpec();
 
-            // Sign
-            var signature = await _keyVaultClient.SignAsync(keySpec.ToKeyVaultSignatureAlgorithm(), _request.Payload);
+            // Get the signing scheme from plugin config (default: rsassa-pss)
+            // Supported values:
+            //   - "rsassa-pss" (default): RSASSA-PSS padding for JWS/COSE signatures
+            //   - "rsassa-pkcs1-v1_5": RSASSA-PKCS1-v1_5 padding for PKCS#7/dm-verity signatures
+            string? signingScheme = _request.PluginConfig?.GetValueOrDefault(SigningSchemeConfigKey);
+
+            // Determine the Azure Key Vault signature algorithm based on scheme
+            var akvAlgorithm = keySpec.ToKeyVaultSignatureAlgorithm(signingScheme);
+
+            // Sign using the selected algorithm
+            var signature = await _keyVaultClient.SignAsync(akvAlgorithm, _request.Payload);
+
+            // Determine the notation signing algorithm string based on scheme
+            var signingAlgorithm = keySpec.ToSigningAlgorithm(signingScheme);
 
             return new GenerateSignatureResponse(
                 keyId: _request.KeyId,
                 signature: signature,
-                signingAlgorithm: keySpec.ToSigningAlgorithm(),
+                signingAlgorithm: signingAlgorithm,
                 certificateChain: certChain.Select(x => x.RawData).ToList());
         }
     }

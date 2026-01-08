@@ -24,12 +24,38 @@ namespace Notation.Plugin.Protocol
     /// </summary>
     public static class SigningAlgorithms
     {
+        // RSASSA-PSS (default for JWS/COSE)
         public const string RSASSA_PSS_SHA_256 = "RSASSA-PSS-SHA-256";
         public const string RSASSA_PSS_SHA_384 = "RSASSA-PSS-SHA-384";
         public const string RSASSA_PSS_SHA_512 = "RSASSA-PSS-SHA-512";
+        
+        // RSASSA-PKCS1-v1_5 (required for PKCS#7/dm-verity)
+        public const string RSASSA_PKCS1_V1_5_SHA_256 = "RSASSA-PKCS1-v1_5-SHA-256";
+        public const string RSASSA_PKCS1_V1_5_SHA_384 = "RSASSA-PKCS1-v1_5-SHA-384";
+        public const string RSASSA_PKCS1_V1_5_SHA_512 = "RSASSA-PKCS1-v1_5-SHA-512";
+        
+        // ECDSA
         public const string ECDSA_SHA_256 = "ECDSA-SHA-256";
         public const string ECDSA_SHA_384 = "ECDSA-SHA-384";
         public const string ECDSA_SHA_512 = "ECDSA-SHA-512";
+    }
+
+    /// <summary>
+    /// Defines the supported signing schemes (padding modes for RSA).
+    /// </summary>
+    public static class SigningScheme
+    {
+        /// <summary>
+        /// RSASSA-PSS padding (default for JWS/COSE notation signatures).
+        /// </summary>
+        public const string RSASSA_PSS = "rsassa-pss";
+        
+        /// <summary>
+        /// RSASSA-PKCS1-v1_5 padding (required for PKCS#7/dm-verity signatures).
+        /// This scheme is needed for Linux kernel dm-verity verification which
+        /// only supports PKCS#1 v1.5 signatures.
+        /// </summary>
+        public const string RSASSA_PKCS1_V1_5 = "rsassa-pkcs1-v1_5";
     }
 
     /// <summary>
@@ -87,7 +113,7 @@ namespace Notation.Plugin.Protocol
         };
 
         /// <summary>
-        /// Convert KeySpec to be SigningAlgorithm string.
+        /// Convert KeySpec to be SigningAlgorithm string (RSASSA-PSS for RSA, default).
         /// Supported key types are RSA with key size 2048, 3072, 4096
         /// and ECDSA with key size 256, 384, 521.
         /// </summary>
@@ -108,6 +134,45 @@ namespace Notation.Plugin.Protocol
                 _ => throw new ArgumentException($"Invalid EC KeySpec size {Size}")
             },
             _ => throw new ArgumentException($"Invalid KeySpec Type: {Type}")
+        };
+
+        /// <summary>
+        /// Convert KeySpec to be SigningAlgorithm string using RSASSA-PKCS1-v1_5.
+        /// This is required for PKCS#7 signatures used in dm-verity.
+        /// For EC keys, this returns the standard ECDSA algorithm (no padding change).
+        /// </summary>
+        public string ToSigningAlgorithmPKCS1() => Type switch
+        {
+            KeyType.RSA => Size switch
+            {
+                2048 => SigningAlgorithms.RSASSA_PKCS1_V1_5_SHA_256,
+                3072 => SigningAlgorithms.RSASSA_PKCS1_V1_5_SHA_384,
+                4096 => SigningAlgorithms.RSASSA_PKCS1_V1_5_SHA_512,
+                _ => throw new ArgumentException($"Invalid RSA KeySpec size {Size}")
+            },
+            KeyType.EC => Size switch
+            {
+                // ECDSA doesn't have padding variants - use the same algorithm
+                256 => SigningAlgorithms.ECDSA_SHA_256,
+                384 => SigningAlgorithms.ECDSA_SHA_384,
+                521 => SigningAlgorithms.ECDSA_SHA_512,
+                _ => throw new ArgumentException($"Invalid EC KeySpec size {Size}")
+            },
+            _ => throw new ArgumentException($"Invalid KeySpec Type: {Type}")
+        };
+
+        /// <summary>
+        /// Convert KeySpec to SigningAlgorithm string based on the specified signing scheme.
+        /// </summary>
+        /// <param name="scheme">The signing scheme to use (rsassa-pss or rsassa-pkcs1-v1_5)</param>
+        /// <returns>The appropriate signing algorithm string</returns>
+        public string ToSigningAlgorithm(string? scheme) => scheme?.ToLowerInvariant() switch
+        {
+            SigningScheme.RSASSA_PKCS1_V1_5 => ToSigningAlgorithmPKCS1(),
+            SigningScheme.RSASSA_PSS => ToSigningAlgorithm(),
+            null => ToSigningAlgorithm(),
+            "" => ToSigningAlgorithm(),
+            _ => throw new ArgumentException($"Invalid signing scheme: {scheme}. Supported values are '{SigningScheme.RSASSA_PSS}' and '{SigningScheme.RSASSA_PKCS1_V1_5}'")
         };
     }
 }
