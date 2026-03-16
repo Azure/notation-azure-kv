@@ -28,12 +28,12 @@ namespace Notation.Plugin.Protocol
         public const string RSASSA_PSS_SHA_256 = "RSASSA-PSS-SHA-256";
         public const string RSASSA_PSS_SHA_384 = "RSASSA-PSS-SHA-384";
         public const string RSASSA_PSS_SHA_512 = "RSASSA-PSS-SHA-512";
-        
+
         // RSASSA-PKCS1-v1_5 (required for PKCS#7/dm-verity)
         public const string RSASSA_PKCS1_V1_5_SHA_256 = "RSASSA-PKCS1-v1_5-SHA-256";
         public const string RSASSA_PKCS1_V1_5_SHA_384 = "RSASSA-PKCS1-v1_5-SHA-384";
         public const string RSASSA_PKCS1_V1_5_SHA_512 = "RSASSA-PKCS1-v1_5-SHA-512";
-        
+
         // ECDSA
         public const string ECDSA_SHA_256 = "ECDSA-SHA-256";
         public const string ECDSA_SHA_384 = "ECDSA-SHA-384";
@@ -49,7 +49,7 @@ namespace Notation.Plugin.Protocol
         /// RSASSA-PSS padding (default for JWS/COSE notation signatures).
         /// </summary>
         public const string RSASSA_PSS = "rsassa-pss";
-        
+
         /// <summary>
         /// RSASSA-PKCS1-v1_5 padding (required for PKCS#7/dm-verity signatures).
         /// This scheme is needed for Linux kernel dm-verity verification which
