@@ -32,14 +32,10 @@ namespace Notation.Plugin.AzureKeyVault.Client
         };
 
         /// <summary>
-        /// Get SignatureAlgorithm from KeySpec for Azure Key Vault signing using RSASSA-PKCS1-v1_5.
-        /// Uses RS256/RS384/RS512 for RSA keys (required for PKCS#7/dm-verity).
-        /// For EC keys, returns the standard ECDSA algorithm (no padding change). The
-        /// scheme-aware <see cref="ToKeyVaultSignatureAlgorithm(KeySpec, string?)"/>
-        /// is the only call site; this helper is internal so callers cannot rely on the
-        /// EC fallback as a public contract. The fail-fast in
-        /// <c>GenerateSignature.RunAsync</c> rejects EC keys when the
-        /// <c>rsassa-pkcs1-v1_5</c> scheme is requested.
+        /// Get the SignatureAlgorithm for RSASSA-PKCS1-v1_5 signing.
+        /// Uses RS256/RS384/RS512 for RSA-2048/3072/4096 (required for PKCS#7/dm-verity).
+        /// EC keys fall back to ES256/ES384/ES512 so the helper stays consistent with the
+        /// default RSASSA-PSS overload.
         /// </summary>
         internal static SignatureAlgorithm ToKeyVaultSignatureAlgorithmPKCS1(this KeySpec keySpec) => keySpec.Type switch
         {
@@ -67,12 +63,13 @@ namespace Notation.Plugin.AzureKeyVault.Client
         /// <param name="keySpec">The key specification</param>
         /// <param name="scheme">The signing scheme (rsassa-pss or rsassa-pkcs1-v1_5). Default is rsassa-pss.</param>
         /// <returns>The Azure Key Vault SignatureAlgorithm</returns>
+        // NOTE: keep in lock-step with KeySpec.ToSigningAlgorithm(string?).
         public static SignatureAlgorithm ToKeyVaultSignatureAlgorithm(this KeySpec keySpec, string? scheme) => scheme?.ToLowerInvariant() switch
         {
-            SigningScheme.RSASSA_PKCS1_V1_5 => keySpec.ToKeyVaultSignatureAlgorithmPKCS1(),
-            SigningScheme.RSASSA_PSS => keySpec.ToKeyVaultSignatureAlgorithm(),
+            SigningSchemes.RSASSA_PKCS1_V1_5 => keySpec.ToKeyVaultSignatureAlgorithmPKCS1(),
+            SigningSchemes.RSASSA_PSS => keySpec.ToKeyVaultSignatureAlgorithm(),
             null or "" => keySpec.ToKeyVaultSignatureAlgorithm(),
-            _ => throw new ArgumentException($"Invalid signing scheme: {scheme}. Supported values are '{SigningScheme.RSASSA_PSS}' and '{SigningScheme.RSASSA_PKCS1_V1_5}'")
+            _ => throw new ArgumentException($"Invalid signing scheme: {scheme}. Supported values are '{SigningSchemes.RSASSA_PSS}' and '{SigningSchemes.RSASSA_PKCS1_V1_5}'")
         };
     }
 }

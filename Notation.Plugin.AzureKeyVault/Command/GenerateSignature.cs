@@ -111,19 +111,29 @@ namespace Notation.Plugin.AzureKeyVault.Command
             // Extract KeySpec from the certificate
             var keySpec = leafCert.KeySpec();
 
-            // Get the signing scheme from plugin config (default: rsassa-pss)
-            // Supported values:
-            //   - "rsassa-pss" (default): RSASSA-PSS padding for JWS/COSE signatures
-            //   - "rsassa-pkcs1-v1_5": RSASSA-PKCS1-v1_5 padding for PKCS#7/dm-verity signatures
+            // Read the RSA signing scheme from the plugin config (defaults to
+            // rsassa-pss when absent or empty). The scheme-aware helpers handle
+            // case-insensitivity and reject unknown values.
             string? signingScheme = _request.PluginConfig?.GetValueOrDefault(SigningSchemeConfigKey);
 
-            // For RSASSA-PKCS1-v1_5 + EC, fail fast: PKCS#7-based verifiers
-            // cannot consume ECDSA signatures.
-            if (string.Equals(signingScheme, SigningScheme.RSASSA_PKCS1_V1_5, StringComparison.OrdinalIgnoreCase)
+            // Reject unknown scheme strings here so the failure is reported
+            // with the plugin's error code
+            if (!string.IsNullOrEmpty(signingScheme)
+                && !string.Equals(signingScheme, SigningSchemes.RSASSA_PSS, StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(signingScheme, SigningSchemes.RSASSA_PKCS1_V1_5, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ValidationException(
+                    $"Invalid signing scheme: {signingScheme}. Supported values are '{SigningSchemes.RSASSA_PSS}' and '{SigningSchemes.RSASSA_PKCS1_V1_5}'");
+            }
+
+            // rsassa-pkcs1-v1_5 is an RSA-padding scheme and cannot be
+            // satisfied by an EC key. Reject before the AKV sign call so the
+            // failure is local to the plugin.
+            if (string.Equals(signingScheme, SigningSchemes.RSASSA_PKCS1_V1_5, StringComparison.OrdinalIgnoreCase)
                 && keySpec.Type == KeyType.EC)
             {
                 throw new ValidationException(
-                    $"Signing scheme '{SigningScheme.RSASSA_PKCS1_V1_5}' requires an RSA key; got EC.");
+                    $"Signing scheme '{SigningSchemes.RSASSA_PKCS1_V1_5}' requires an RSA key; got EC.");
             }
 
             // Determine the Azure Key Vault signature algorithm based on scheme

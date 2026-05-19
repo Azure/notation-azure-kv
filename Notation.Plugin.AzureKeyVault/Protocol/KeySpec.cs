@@ -43,7 +43,7 @@ namespace Notation.Plugin.Protocol
     /// <summary>
     /// Defines the supported signing schemes (padding modes for RSA).
     /// </summary>
-    public static class SigningScheme
+    public static class SigningSchemes
     {
         /// <summary>
         /// RSASSA-PSS padding (default for JWS/COSE notation signatures).
@@ -137,9 +137,10 @@ namespace Notation.Plugin.Protocol
         };
 
         /// <summary>
-        /// Convert KeySpec to be SigningAlgorithm string using RSASSA-PKCS1-v1_5.
-        /// This is required for PKCS#7 signatures. For EC keys, this returns the 
-        /// standard ECDSA algorithm (no padding change).
+        /// Get the SigningAlgorithm string for RSASSA-PKCS1-v1_5 signing.
+        /// Uses RSASSA-PKCS1-v1_5-SHA-256/384/512 for RSA-2048/3072/4096 (required for
+        /// PKCS#7/dm-verity). EC keys fall back to ECDSA-SHA-256/384/512 so the helper
+        /// stays consistent with the default RSASSA-PSS overload.
         /// </summary>
         internal string ToSigningAlgorithmPKCS1() => Type switch
         {
@@ -166,12 +167,13 @@ namespace Notation.Plugin.Protocol
         /// </summary>
         /// <param name="scheme">The signing scheme to use (rsassa-pss or rsassa-pkcs1-v1_5)</param>
         /// <returns>The appropriate signing algorithm string</returns>
+        // NOTE: keep in lock-step with KeySpecExtension.ToKeyVaultSignatureAlgorithm(string?).
         public string ToSigningAlgorithm(string? scheme) => scheme?.ToLowerInvariant() switch
         {
-            SigningScheme.RSASSA_PKCS1_V1_5 => ToSigningAlgorithmPKCS1(),
-            SigningScheme.RSASSA_PSS => ToSigningAlgorithm(),
+            SigningSchemes.RSASSA_PKCS1_V1_5 => ToSigningAlgorithmPKCS1(),
+            SigningSchemes.RSASSA_PSS => ToSigningAlgorithm(),
             null or "" => ToSigningAlgorithm(),
-            _ => throw new ArgumentException($"Invalid signing scheme: {scheme}. Supported values are '{SigningScheme.RSASSA_PSS}' and '{SigningScheme.RSASSA_PKCS1_V1_5}'")
+            _ => throw new ArgumentException($"Invalid signing scheme: {scheme}. Supported values are '{SigningSchemes.RSASSA_PSS}' and '{SigningSchemes.RSASSA_PKCS1_V1_5}'")
         };
     }
 }
