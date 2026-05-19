@@ -138,10 +138,10 @@ namespace Notation.Plugin.Protocol
 
         /// <summary>
         /// Convert KeySpec to be SigningAlgorithm string using RSASSA-PKCS1-v1_5.
-        /// This is required for PKCS#7 signatures used in dm-verity.
-        /// For EC keys, this returns the standard ECDSA algorithm (no padding change).
+        /// This is required for PKCS#7 signatures. For EC keys, this returns the 
+        /// standard ECDSA algorithm (no padding change).
         /// </summary>
-        public string ToSigningAlgorithmPKCS1() => Type switch
+        internal string ToSigningAlgorithmPKCS1() => Type switch
         {
             KeyType.RSA => Size switch
             {
@@ -170,8 +170,7 @@ namespace Notation.Plugin.Protocol
         {
             SigningScheme.RSASSA_PKCS1_V1_5 => ToSigningAlgorithmPKCS1(),
             SigningScheme.RSASSA_PSS => ToSigningAlgorithm(),
-            null => ToSigningAlgorithm(),
-            "" => ToSigningAlgorithm(),
+            null or "" => ToSigningAlgorithm(),
             _ => throw new ArgumentException($"Invalid signing scheme: {scheme}. Supported values are '{SigningScheme.RSASSA_PSS}' and '{SigningScheme.RSASSA_PKCS1_V1_5}'")
         };
     }

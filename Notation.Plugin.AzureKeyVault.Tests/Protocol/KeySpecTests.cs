@@ -102,6 +102,7 @@ namespace Notation.Plugin.Protocol.Tests
 
             // Act & Assert
             var ex = Assert.Throws<ArgumentException>(() => keySpec.ToSigningAlgorithm("invalid-scheme"));
+            Assert.Contains("invalid-scheme", ex.Message);
             Assert.Contains("rsassa-pss", ex.Message);
             Assert.Contains("rsassa-pkcs1-v1_5", ex.Message);
         }

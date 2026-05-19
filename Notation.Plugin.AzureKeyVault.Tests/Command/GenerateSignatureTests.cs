@@ -248,5 +248,41 @@ namespace Notation.Plugin.AzureKeyVault.Command.Tests
 
             await Assert.ThrowsAsync<PluginException>(async () => await generateSignatureCommand.RunAsync());
         }
+
+        [Theory]
+        [InlineData("ec_256.crt")]
+        [InlineData("ec_384.crt")]
+        [InlineData("ec_521.crt")]
+        public async Task RunAsync_PKCS1SchemeWithECKey_ThrowsValidationException(string ecCertFile)
+        {
+            // Arrange
+            var keyId = "https://testvault.vault.azure.net/keys/testkey/123";
+            var ecCert = new X509Certificate2(Path.Combine(Directory.GetCurrentDirectory(), "TestData", ecCertFile));
+            var mockKeyVaultClient = new Mock<IKeyVaultClient>();
+            mockKeyVaultClient.Setup(client => client.GetCertificateAsync())
+                              .ReturnsAsync(ecCert);
+
+            var request = new GenerateSignatureRequest(
+                contractVersion: "1.0",
+                keyId: keyId,
+                pluginConfig: new Dictionary<string, string>()
+                {
+                    ["self_signed"] = "true",
+                    [GenerateSignature.SigningSchemeConfigKey] = SigningScheme.RSASSA_PKCS1_V1_5
+                },
+                keySpec: "EC-256",
+                hashAlgorithm: "SHA-256",
+                payload: Encoding.UTF8.GetBytes("Cg=="));
+
+            var generateSignatureCommand = new GenerateSignature(request, mockKeyVaultClient.Object);
+
+            // Act & Assert: must reject before any AKV SignAsync call.
+            var ex = await Assert.ThrowsAsync<ValidationException>(
+                async () => await generateSignatureCommand.RunAsync());
+            Assert.Contains(SigningScheme.RSASSA_PKCS1_V1_5, ex.Message);
+            mockKeyVaultClient.Verify(
+                c => c.SignAsync(It.IsAny<SignatureAlgorithm>(), It.IsAny<byte[]>()),
+                Times.Never);
+        }
     }
 }

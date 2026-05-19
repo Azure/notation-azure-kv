@@ -13,8 +13,9 @@ namespace Notation.Plugin.AzureKeyVault.Command
     public class GenerateSignature : IPluginCommand
     {
         /// <summary>
-        /// Plugin config key for specifying the signing scheme.
-        /// Supported values: "rsassa-pss" (default), "rsassa-pkcs1-v1_5"
+        /// Plugin config key for specifying the RSA signing scheme.
+        /// Supported values: "rsassa-pss" (default, for JWS/COSE) and
+        /// "rsassa-pkcs1-v1_5" (for PKCS#7/dm-verity).
         /// </summary>
         public const string SigningSchemeConfigKey = "signing_scheme";
 
@@ -115,6 +116,15 @@ namespace Notation.Plugin.AzureKeyVault.Command
             //   - "rsassa-pss" (default): RSASSA-PSS padding for JWS/COSE signatures
             //   - "rsassa-pkcs1-v1_5": RSASSA-PKCS1-v1_5 padding for PKCS#7/dm-verity signatures
             string? signingScheme = _request.PluginConfig?.GetValueOrDefault(SigningSchemeConfigKey);
+
+            // For RSASSA-PKCS1-v1_5 + EC, fail fast: PKCS#7-based verifiers
+            // cannot consume ECDSA signatures.
+            if (string.Equals(signingScheme, SigningScheme.RSASSA_PKCS1_V1_5, StringComparison.OrdinalIgnoreCase)
+                && keySpec.Type == KeyType.EC)
+            {
+                throw new ValidationException(
+                    $"Signing scheme '{SigningScheme.RSASSA_PKCS1_V1_5}' requires an RSA key; got EC.");
+            }
 
             // Determine the Azure Key Vault signature algorithm based on scheme
             var akvAlgorithm = keySpec.ToKeyVaultSignatureAlgorithm(signingScheme);

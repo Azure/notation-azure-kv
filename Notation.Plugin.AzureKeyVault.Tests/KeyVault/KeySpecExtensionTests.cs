@@ -77,7 +77,7 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         [InlineData(KeyType.EC, 256, "rsassa-pkcs1-v1_5", "ES256")]           // EC unaffected
         [InlineData(KeyType.EC, 384, "rsassa-pkcs1-v1_5", "ES384")]           // EC 384
         [InlineData(KeyType.EC, 521, "rsassa-pkcs1-v1_5", "ES512")]           // EC 521
-        public void ToSignatureAlgorithm_WithScheme_ReturnsCorrectAlgorithm(KeyType keyType, int keySize, string? scheme, string expectedAlgorithm)
+        public void ToKeyVaultSignatureAlgorithm_WithScheme_ReturnsCorrectAlgorithm(KeyType keyType, int keySize, string? scheme, string expectedAlgorithm)
         {
             // Arrange
             var keySpec = new KeySpec(keyType, keySize);
@@ -90,13 +90,14 @@ namespace Notation.Plugin.AzureKeyVault.Client.Tests
         }
 
         [Fact]
-        public void ToSignatureAlgorithm_WithInvalidScheme_ThrowsArgumentException()
+        public void ToKeyVaultSignatureAlgorithm_WithInvalidScheme_ThrowsArgumentException()
         {
             // Arrange
             var keySpec = new KeySpec(KeyType.RSA, 2048);
 
             // Act & Assert
             var ex = Assert.Throws<ArgumentException>(() => keySpec.ToKeyVaultSignatureAlgorithm("invalid-scheme"));
+            Assert.Contains("invalid-scheme", ex.Message);
             Assert.Contains("rsassa-pss", ex.Message);
             Assert.Contains("rsassa-pkcs1-v1_5", ex.Message);
         }
