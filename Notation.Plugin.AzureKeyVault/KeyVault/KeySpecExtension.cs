@@ -8,9 +8,9 @@ namespace Notation.Plugin.AzureKeyVault.Client
     /// </summary>
     public static class KeySpecExtension
     {
-
         /// <summary>
         /// Get SignatureAlgorithm from KeySpec for Azure Key Vault signing.
+        /// Uses RSASSA-PSS (PS256/PS384/PS512) for RSA keys (default for JWS/COSE).
         /// </summary>
         public static SignatureAlgorithm ToKeyVaultSignatureAlgorithm(this KeySpec keySpec) => keySpec.Type switch
         {
@@ -29,6 +29,47 @@ namespace Notation.Plugin.AzureKeyVault.Client
                 _ => throw new ArgumentException($"Invalid KeySpec for EC with size {keySpec.Size}")
             },
             _ => throw new ArgumentException($"Invalid KeySpec with type {keySpec.Type}")
+        };
+
+        /// <summary>
+        /// Get the SignatureAlgorithm for RSASSA-PKCS1-v1_5 signing.
+        /// Uses RS256/RS384/RS512 for RSA-2048/3072/4096 (required for PKCS#7/dm-verity).
+        /// EC keys fall back to ES256/ES384/ES512 so the helper stays consistent with the
+        /// default RSASSA-PSS overload.
+        /// </summary>
+        internal static SignatureAlgorithm ToKeyVaultSignatureAlgorithmPKCS1(this KeySpec keySpec) => keySpec.Type switch
+        {
+            KeyType.RSA => keySpec.Size switch
+            {
+                2048 => SignatureAlgorithm.RS256,
+                3072 => SignatureAlgorithm.RS384,
+                4096 => SignatureAlgorithm.RS512,
+                _ => throw new ArgumentException($"Invalid KeySpec for RSA with size {keySpec.Size}")
+            },
+            KeyType.EC => keySpec.Size switch
+            {
+                // ECDSA doesn't have padding variants - use the same algorithm
+                256 => SignatureAlgorithm.ES256,
+                384 => SignatureAlgorithm.ES384,
+                521 => SignatureAlgorithm.ES512,
+                _ => throw new ArgumentException($"Invalid KeySpec for EC with size {keySpec.Size}")
+            },
+            _ => throw new ArgumentException($"Invalid KeySpec with type {keySpec.Type}")
+        };
+
+        /// <summary>
+        /// Get SignatureAlgorithm from KeySpec for Azure Key Vault signing based on the specified signing scheme.
+        /// </summary>
+        /// <param name="keySpec">The key specification</param>
+        /// <param name="scheme">The signing scheme (rsassa-pss or rsassa-pkcs1-v1_5). Default is rsassa-pss.</param>
+        /// <returns>The Azure Key Vault SignatureAlgorithm</returns>
+        // NOTE: keep in lock-step with KeySpec.ToSigningAlgorithm(string?).
+        public static SignatureAlgorithm ToKeyVaultSignatureAlgorithm(this KeySpec keySpec, string? scheme) => scheme?.ToLowerInvariant() switch
+        {
+            SigningSchemes.RSASSA_PKCS1_V1_5 => keySpec.ToKeyVaultSignatureAlgorithmPKCS1(),
+            SigningSchemes.RSASSA_PSS => keySpec.ToKeyVaultSignatureAlgorithm(),
+            null or "" => keySpec.ToKeyVaultSignatureAlgorithm(),
+            _ => throw new ArgumentException($"Invalid signing scheme: {scheme}. Supported values are '{SigningSchemes.RSASSA_PSS}' and '{SigningSchemes.RSASSA_PKCS1_V1_5}'")
         };
     }
 }
